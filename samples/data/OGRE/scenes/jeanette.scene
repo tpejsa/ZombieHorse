@@ -1,0 +1,28 @@
+<scene formatVersion="1.0" upAxis="y" unitsPerMeter="39.3701" minOgreVersion="1.7" ogreMaxVersion="2.3.1" author="OgreMax Scene Exporter (www.ogremax.com)" application="3DS Max">
+    <environment>
+        <colourAmbient r="0.333333" g="0.333333" b="0.333333" />
+        <colourBackground r="0" g="0" b="0" />
+        <clipping near="0" far="100000" />
+    </environment>
+    <nodes>
+        <node name="body">
+            <position x="0" y="0" z="0" />
+            <scale x="1" y="1" z="1" />
+            <rotation qx="0" qy="0" qz="0" qw="1" />
+            <entity name="body" castShadows="true" receiveShadows="true" meshFile="body.mesh">
+                <subentities>
+                    <subentity index="0" materialName="jeanette_bodyjacket" />
+                    <subentity index="1" materialName="jeanette_collar" />
+                    <subentity index="2" materialName="jeanette_hair" />
+                    <subentity index="3" materialName="jeanette_leye" />
+                    <subentity index="4" materialName="jeanette_reye" />
+                    <subentity index="5" materialName="jeanette_face" />
+                    <subentity index="6" materialName="jeanette_sock" />
+                    <subentity index="7" materialName="jeanette_lteeth" />
+                    <subentity index="8" materialName="jeanette_uteeth" />
+                    <subentity index="9" materialName="jeanette_tongue" />
+                </subentities>
+            </entity>
+        </node>
+    </nodes>
+</scene>

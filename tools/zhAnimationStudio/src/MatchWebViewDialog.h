@@ -1,0 +1,70 @@
+/******************************************************************************
+Copyright (C) 2013 Tomislav Pejsa
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+******************************************************************************/
+
+#ifndef __MatchWebViewDialog_h__
+#define __MatchWebViewDialog_h__
+
+#include "AnimationStudio.h"
+#include "wxImagePanel.h"
+
+enum
+{
+	ID_chkDistGrid,
+	ID_chkLocalMinima,
+	ID_chkBlendRegion,
+	ID_wndMatchWebScroll,
+	ID_imgMatchWeb
+};
+
+class MatchWebViewDialog : public wxDialog
+{
+
+public:
+
+	MatchWebViewDialog( MatchWeb* matchWeb,	wxWindow* parent, wxWindowID id );
+
+	/**
+	* Gets the match web.
+	*/
+	MatchWeb* getMatchWeb() const { return mMatchWeb; }
+
+	/**
+	* Repaints the match web image.
+	*/
+	void redraw();
+
+	void OnCheckBox_DistGrid( wxCommandEvent& evt );
+	void OnCheckBox_LocalMinima( wxCommandEvent& evt );
+	void OnCheckBox_BlendRegion( wxCommandEvent& evt );
+
+	DECLARE_EVENT_TABLE()
+
+private:
+
+	wxCheckBox *mChkDistGrid, *mChkLocalMinima, *mChkBlendRegion;
+	MatchWeb* mMatchWeb;
+	wxScrolledWindow* mWndMatchWebScroll;
+	wxImagePanel* mImgMatchWeb;
+
+};
+
+#endif // __MatchWebViewDialog_h__

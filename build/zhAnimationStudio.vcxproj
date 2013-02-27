@@ -1,0 +1,216 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimAnnotGrid.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimationBlenderPropGrid.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimationMixerPropGrid.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimationNodePropGrid.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimationSamplerPropGrid.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimationStudio.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimationStudioApp.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimationStudioFrame.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimationTransitionBlenderPropGrid.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimTreeConnexSpace.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimTreeWindow.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\BoneControllerPropGrid.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\BoneIKControllerPropGrid.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\BoneTransformControllerPropGrid.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\BuildAnimSpaceDialog.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\BuildIndexDialog.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\BuildMotionGraphDialog.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\Connex.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\ConnexNode.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\ConnexSpace.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\DefineAnimParamDialog.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\DotSceneLoader.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\FaceControllerPropGrid.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\MatchGraphView.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\MatchGraphViewDialog.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\MatchWebViewDialog.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\MotionGraphView.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\MotionGraphViewDialog.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\NewResourceDialog.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\OgreWindow.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\PlaySlider.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\ProjectViewWindow.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\PropertiesWindow.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\resource.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\TimelineWindow.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\wxImagePanel.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\zhOgreModelController.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\tools\zhAnimationStudio\src\AnimAnnotGrid.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\AnimationBlenderPropGrid.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\AnimationMixerPropGrid.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\AnimationNodePropGrid.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\AnimationSamplerPropGrid.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\AnimationStudioApp.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\AnimationStudioFrame.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\AnimationTransitionBlenderPropGrid.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\AnimTreeConnexSpace.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\AnimTreeWindow.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\BoneControllerPropGrid.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\BoneIKControllerPropGrid.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\BoneTransformControllerPropGrid.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\BuildAnimSpaceDialog.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\BuildIndexDialog.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\BuildMotionGraphDialog.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\Connex.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\ConnexNode.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\ConnexSpace.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\DefineAnimParamDialog.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\DotSceneLoader.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\FaceControllerPropGrid.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\MatchGraphView.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\MatchGraphViewDialog.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\MatchWebViewDialog.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\MotionGraphView.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\MotionGraphViewDialog.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\NewResourceDialog.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\OgreWindow.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\PlaySlider.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\ProjectViewWindow.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\PropertiesWindow.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\TimelineWindow.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\wxImagePanel.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\zhOgreModelController.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\tools\zhAnimationStudio\res\AnimationStudio.ico" />
+    <None Include="..\tools\zhAnimationStudio\res\AnnotEnd.bmp" />
+    <None Include="..\tools\zhAnimationStudio\res\AnnotStart.bmp" />
+    <None Include="..\tools\zhAnimationStudio\res\AnnotStartDisabled.bmp" />
+    <None Include="..\tools\zhAnimationStudio\res\ClearAnnots.bmp" />
+    <None Include="..\tools\zhAnimationStudio\res\ClearAnnotsDisabled.bmp" />
+    <None Include="..\tools\zhAnimationStudio\res\Deselect.bmp" />
+    <None Include="..\tools\zhAnimationStudio\res\DeselectDisabled.bmp" />
+    <None Include="..\tools\zhAnimationStudio\res\DoTransition.bmp" />
+    <None Include="..\tools\zhAnimationStudio\res\DoTransitionDisabled.bmp" />
+    <None Include="..\tools\zhAnimationStudio\res\Pause.bmp" />
+    <None Include="..\tools\zhAnimationStudio\res\Play.bmp" />
+    <None Include="..\tools\zhAnimationStudio\res\PlayDisabled.bmp" />
+    <None Include="..\tools\zhAnimationStudio\res\Select.bmp" />
+    <None Include="..\tools\zhAnimationStudio\res\SelectDisabled.bmp" />
+    <None Include="..\tools\zhAnimationStudio\res\Stop.bmp" />
+    <None Include="..\tools\zhAnimationStudio\res\StopDisabled.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\tools\zhAnimationStudio\res\AnimationStudio.rc" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>zhAnimationStudio</ProjectName>
+    <ProjectGuid>{6416BAE3-0A15-496E-9833-AE3B052399A2}</ProjectGuid>
+    <RootNamespace>AnimationStudio</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>NotSet</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <BuildLog>
+      <Path>.\Debug\BuildLog.htm</Path>
+    </BuildLog>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\tools\zhAnimationStudio\src;..\include;$(BOOST_HOME);$(WXWIDGETS_HOME)\include;$(WXWIDGETS_HOME)\lib\mswd;$(WXWIDGETS_HOME)\lib\vc_lib\mswd\wx;$(OGRE_HOME)\include\Ogre;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;__WXMSW__;__WXDEBUG__;_WINDOWS;NOPCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;__WXMSW__;__WXDEBUG__;_WINDOWS;NOPCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>..\tools\zhAnimationStudio\res;..\tools\zhAnimationStudio\src;$(WXWIDGETS_HOME)\lib\mswd;$(WXWIDGETS_HOME)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>zh_d.lib;OgreMain_d.lib;OgreTerrain_d.lib;wxmsw28d_aui.lib;wxmsw28d_html.lib;wxmsw28d_adv.lib;wxmsw28d_core.lib;wxbase28d_xml.lib;wxbase28d.lib;wxtiffd.lib;wxjpegd.lib;wxpngd.lib;wxzlibd.lib;wxregexd.lib;wxexpatd.lib;wxcode_msw28d_propgrid.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;winspool.lib;winmm.lib;shell32.lib;comctl32.lib;ole32.lib;oleaut32.lib;uuid.lib;rpcrt4.lib;advapi32.lib;wsock32.lib;odbc32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>..\bin\debug\zhAnimationStudio_d.exe</OutputFile>
+      <AdditionalLibraryDirectories>..\lib\debug;$(WXWIDGETS_HOME)\lib;$(BOOST_HOME)\lib;$(OGRE_HOME)\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\Debug\AnimationStudio.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <ProfileGuidedDatabase>
+      </ProfileGuidedDatabase>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <BuildLog>
+      <Path>.\Release\BuildLog.htm</Path>
+    </BuildLog>
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\tools\zhAnimationStudio\src;..\include;$(BOOST_HOME);$(WXWIDGETS_HOME)\include;$(WXWIDGETS_HOME)\lib\msw;$(WXWIDGETS_HOME)\lib\vc_lib\msw\wx;$(OGRE_HOME)\include\Ogre;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;__WXMSW__;_WINDOWS;NOPCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;NDEBUG;__WXMSW__;_WINDOWS;NOPCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>..\tools\zhAnimationStudio\res;..\tools\zhAnimationStudio\src;$(WXWIDGETS_HOME)\lib\msw;$(WXWIDGETS_HOME)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>zh.lib;OgreMain.lib;OgreTerrain.lib;wxmsw28_aui.lib;wxmsw28_html.lib;wxmsw28_adv.lib;wxmsw28_core.lib;wxbase28_xml.lib;wxbase28.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregex.lib;wxexpat.lib;wxcode_msw28_propgrid.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;winspool.lib;winmm.lib;shell32.lib;comctl32.lib;ole32.lib;oleaut32.lib;uuid.lib;rpcrt4.lib;advapi32.lib;wsock32.lib;odbc32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>..\bin\release\zhAnimationStudio.exe</OutputFile>
+      <AdditionalLibraryDirectories>..\lib\release;$(WXWIDGETS_HOME)\lib;$(BOOST_HOME)\lib;$(OGRE_HOME)\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <ProfileGuidedDatabase>
+      </ProfileGuidedDatabase>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,204 @@
+
+material jeanette_face
+{
+	technique
+	{
+		pass
+		{
+			specular 0 0 0 50 0
+
+			texture_unit
+			{
+				texture jeanett3.tga
+			}
+		}
+
+	}
+
+}
+
+
+
+material jeanette_tongue
+{
+	technique
+	{
+		pass
+		{
+			specular 0 0 0 50 0
+
+			texture_unit
+			{
+				texture jeanett7.tga
+			}
+		}
+
+	}
+
+}
+
+
+
+material jeanette_uteeth
+{
+	technique
+	{
+		pass
+		{
+			specular 0 0 0 50 0
+
+			texture_unit
+			{
+				texture jeanett6.tga
+			}
+		}
+
+	}
+
+}
+
+
+
+material jeanette_lteeth
+{
+	technique
+	{
+		pass
+		{
+			specular 0 0 0 50 0
+
+			texture_unit
+			{
+				texture jeanett5.tga
+			}
+		}
+
+	}
+
+}
+
+
+
+material jeanette_sock
+{
+	technique
+	{
+		pass
+		{
+			specular 0 0 0 50 0
+
+			texture_unit
+			{
+				texture jeanett4.tga
+			}
+		}
+
+	}
+
+}
+
+
+
+material jeanette_reye
+{
+	technique
+	{
+		pass
+		{
+			specular 0 0 0 50 0
+
+			texture_unit
+			{
+				texture jeanett2.tga
+			}
+		}
+
+	}
+
+}
+
+
+
+material jeanette_leye
+{
+	technique
+	{
+		pass
+		{
+			specular 0 0 0 50 0
+
+			texture_unit
+			{
+				texture jeanett1.tga
+			}
+		}
+
+	}
+
+}
+
+
+
+material jeanette_hair
+{
+	technique
+	{
+		pass
+		{
+			specular 0 0 0 50 0
+
+			texture_unit
+			{
+				texture jeanette.tga
+			}
+		}
+
+	}
+
+}
+
+
+
+material jeanette_bodyjacket
+{
+	technique
+	{
+		pass
+		{
+			ambient 0.68 0.68 0.68 1
+			diffuse 0.68 0.68 0.68 1
+			specular 0 0 0 85 0
+
+			texture_unit
+			{
+				texture jeanette_bodyjacket_color.tga
+			}
+		}
+
+	}
+
+}
+
+
+
+material jeanette_collar
+{
+	technique
+	{
+		pass
+		{
+			ambient 0.68 0.68 0.68 1
+			diffuse 0.68 0.68 0.68 1
+			specular 0.16 0.16 0.16 85 0
+
+			texture_unit
+			{
+				texture jeanette_collar.tga
+			}
+		}
+
+	}
+
+}
+
+

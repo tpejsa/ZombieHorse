@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zh", "build\zh.vcxproj", "{5CCBB77C-BACF-47C2-B901-A9C89181B0D0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zhAnimationStudio", "build\zhAnimationStudio.vcxproj", "{6416BAE3-0A15-496E-9833-AE3B052399A2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5CCBB77C-BACF-47C2-B901-A9C89181B0D0} = {5CCBB77C-BACF-47C2-B901-A9C89181B0D0}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5CCBB77C-BACF-47C2-B901-A9C89181B0D0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5CCBB77C-BACF-47C2-B901-A9C89181B0D0}.Debug|Win32.Build.0 = Debug|Win32
+		{5CCBB77C-BACF-47C2-B901-A9C89181B0D0}.Release|Win32.ActiveCfg = Release|Win32
+		{5CCBB77C-BACF-47C2-B901-A9C89181B0D0}.Release|Win32.Build.0 = Release|Win32
+		{6416BAE3-0A15-496E-9833-AE3B052399A2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6416BAE3-0A15-496E-9833-AE3B052399A2}.Debug|Win32.Build.0 = Debug|Win32
+		{6416BAE3-0A15-496E-9833-AE3B052399A2}.Release|Win32.ActiveCfg = Release|Win32
+		{6416BAE3-0A15-496E-9833-AE3B052399A2}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

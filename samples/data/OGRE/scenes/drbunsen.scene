@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene formatVersion="1.0">
+	<nodes>
+		<node name="DrBunsen" id="1">
+			<entity name="DrBunsen" meshFile="drbunsen.mesh" static="false" />
+		</node>
+	</nodes>
+</scene>
