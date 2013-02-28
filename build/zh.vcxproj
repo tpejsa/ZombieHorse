@@ -1,0 +1,267 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>zh</ProjectName>
+    <ProjectGuid>{5CCBB77C-BACF-47C2-B901-A9C89181B0D0}</ProjectGuid>
+    <RootNamespace>zhCore</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>..\include;$(BOOST_HOME);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;zhNonClientBuild;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4251;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>libboost_date_time-vc100-mt-gd-1_46_1.lib;libboost_thread-vc100-mt-gd-1_46_1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>..\bin\debug\zh_d.dll</OutputFile>
+      <AdditionalLibraryDirectories>$(BOOST_HOME)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\Debug\zh_d.pdb</ProgramDatabaseFile>
+      <LinkTimeCodeGeneration>
+      </LinkTimeCodeGeneration>
+      <ProfileGuidedDatabase>
+      </ProfileGuidedDatabase>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>..\lib\debug\zh_d.lib</ImportLibrary>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>..\include;$(BOOST_HOME);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;zhNonClientBuild;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <DisableSpecificWarnings>4251;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>libboost_date_time-vc100-mt-1_46_1.lib;libboost_thread-vc100-mt-1_46_1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>..\bin\release\zh.dll</OutputFile>
+      <AdditionalLibraryDirectories>$(BOOST_HOME)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <ProfileGuidedDatabase>
+      </ProfileGuidedDatabase>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>..\lib\release\zh.lib</ImportLibrary>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\rapidxml.hpp" />
+    <ClInclude Include="..\include\rapidxml_print.hpp" />
+    <ClInclude Include="..\include\zh.h" />
+    <ClInclude Include="..\include\zhAllocObj.h" />
+    <ClInclude Include="..\include\zhAnimation.h" />
+    <ClInclude Include="..\include\zhAnimationAnnotation.h" />
+    <ClInclude Include="..\include\zhAnimationBlender.h" />
+    <ClInclude Include="..\include\zhAnimationController.h" />
+    <ClInclude Include="..\include\zhAnimationDistanceGrid.h" />
+    <ClInclude Include="..\include\zhAnimationIndex.h" />
+    <ClInclude Include="..\include\zhAnimationIndexManager.h" />
+    <ClInclude Include="..\include\zhAnimationManager.h" />
+    <ClInclude Include="..\include\zhAnimationNode.h" />
+    <ClInclude Include="..\include\zhAnimationNodeEvents.h" />
+    <ClInclude Include="..\include\zhAnimationParametrization.h" />
+    <ClInclude Include="..\include\zhAnimationSampler.h" />
+    <ClInclude Include="..\include\zhAnimationSearchEvents.h" />
+    <ClInclude Include="..\include\zhAnimationSearchSystem.h" />
+    <ClInclude Include="..\include\zhAnimationSegment.h" />
+    <ClInclude Include="..\include\zhAnimationSet.h" />
+    <ClInclude Include="..\include\zhAnimationSpace.h" />
+    <ClInclude Include="..\include\zhAnimationSpaceBuilder.h" />
+    <ClInclude Include="..\include\zhAnimationTrack.h" />
+    <ClInclude Include="..\include\zhAnimationTransitionBlender.h" />
+    <ClInclude Include="..\include\zhAnimationTransitionBlenderEvents.h" />
+    <ClInclude Include="..\include\zhAnimationTransitionBuilder.h" />
+    <ClInclude Include="..\include\zhAnimationTree.h" />
+    <ClInclude Include="..\include\zhAnimationTreeManager.h" />
+    <ClInclude Include="..\include\zhAnnotationMatchMaker.h" />
+    <ClInclude Include="..\include\zhBone.h" />
+    <ClInclude Include="..\include\zhBoneAnimationTrack.h" />
+    <ClInclude Include="..\include\zhBoneController.h" />
+    <ClInclude Include="..\include\zhBoneIKController.h" />
+    <ClInclude Include="..\include\zhBoneTransformController.h" />
+    <ClInclude Include="..\include\zhBVHLoader.h" />
+    <ClInclude Include="..\include\zhCatmullRomSpline.h" />
+    <ClInclude Include="..\include\zhCCDSolver.h" />
+    <ClInclude Include="..\include\zhCharacter.h" />
+    <ClInclude Include="..\include\zhCharacterController.h" />
+    <ClInclude Include="..\include\zhDenseSamplingParamBuilder.h" />
+    <ClInclude Include="..\include\zhError.h" />
+    <ClInclude Include="..\include\zhEvent.h" />
+    <ClInclude Include="..\include\zhFaceController.h" />
+    <ClInclude Include="..\include\zhFileSystem.h" />
+    <ClInclude Include="..\include\zhFunctor.h" />
+    <ClInclude Include="..\include\zhIKSolver.h" />
+    <ClInclude Include="..\include\zhIterators.h" />
+    <ClInclude Include="..\include\zhLogger.h" />
+    <ClInclude Include="..\include\zhMatchGraph.h" />
+    <ClInclude Include="..\include\zhMatchWeb.h" />
+    <ClInclude Include="..\include\zhMath.h" />
+    <ClInclude Include="..\include\zhMathMacros.h" />
+    <ClInclude Include="..\include\zhMatrix.h" />
+    <ClInclude Include="..\include\zhMatrix4.h" />
+    <ClInclude Include="..\include\zhMemoryManager.h" />
+    <ClInclude Include="..\include\zhMemoryPool.h" />
+    <ClInclude Include="..\include\zhMesh.h" />
+    <ClInclude Include="..\include\zhMeshAnimationTrack.h" />
+    <ClInclude Include="..\include\zhModel.h" />
+    <ClInclude Include="..\include\zhModelController.h" />
+    <ClInclude Include="..\include\zhObjectFactory.h" />
+    <ClInclude Include="..\include\zhParamAnimationBuilder.h" />
+    <ClInclude Include="..\include\zhPlantConstrDetector.h" />
+    <ClInclude Include="..\include\zhAnimationSystem.h" />
+    <ClInclude Include="..\include\zhPrereq.h" />
+    <ClInclude Include="..\include\zhQBSpline.h" />
+    <ClInclude Include="..\include\zhQuat.h" />
+    <ClInclude Include="..\include\zhResourceManager.h" />
+    <ClInclude Include="..\include\zhSingleton.h" />
+    <ClInclude Include="..\include\zhSkeleton.h" />
+    <ClInclude Include="..\include\zhSmartPtr.h" />
+    <ClInclude Include="..\include\zhString.h" />
+    <ClInclude Include="..\include\zhTimer.h" />
+    <ClInclude Include="..\include\zhToolkit.h" />
+    <ClInclude Include="..\include\zhValueSmoother.h" />
+    <ClInclude Include="..\include\zhVector.h" />
+    <ClInclude Include="..\include\zhVector2.h" />
+    <ClInclude Include="..\include\zhVector3.h" />
+    <ClInclude Include="..\include\zhZHALoader.h" />
+    <ClInclude Include="..\include\zhZHASerializer.h" />
+    <ClInclude Include="..\include\zhZHILoader.h" />
+    <ClInclude Include="..\include\zhZHISerializer.h" />
+    <ClInclude Include="..\include\zhZHTLoader.h" />
+    <ClInclude Include="..\include\zhZHTTSerializer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\zhAnimation.cpp" />
+    <ClCompile Include="..\src\zhAnimationAnnotation.cpp" />
+    <ClCompile Include="..\src\zhAnimationBlender.cpp" />
+    <ClCompile Include="..\src\zhAnimationController.cpp" />
+    <ClCompile Include="..\src\zhAnimationDistanceGrid.cpp" />
+    <ClCompile Include="..\src\zhAnimationIndex.cpp" />
+    <ClCompile Include="..\src\zhAnimationIndexManager.cpp" />
+    <ClCompile Include="..\src\zhAnimationManager.cpp" />
+    <ClCompile Include="..\src\zhAnimationMixer.cpp" />
+    <ClCompile Include="..\src\zhAnimationNode.cpp" />
+    <ClCompile Include="..\src\zhAnimationParametrization.cpp" />
+    <ClCompile Include="..\src\zhAnimationSampler.cpp" />
+    <ClCompile Include="..\src\zhAnimationSearchEvents.cpp" />
+    <ClCompile Include="..\src\zhAnimationSearchSystem.cpp" />
+    <ClCompile Include="..\src\zhAnimationSegment.cpp" />
+    <ClCompile Include="..\src\zhAnimationSet.cpp" />
+    <ClCompile Include="..\src\zhAnimationSpace.cpp" />
+    <ClCompile Include="..\src\zhAnimationSpaceBuilder.cpp" />
+    <ClCompile Include="..\src\zhAnimationTrack.cpp" />
+    <ClCompile Include="..\src\zhAnimationTransitionBlender.cpp" />
+    <ClCompile Include="..\src\zhAnimationTransitionBlenderEvents.cpp" />
+    <ClCompile Include="..\src\zhAnimationTransitionBuilder.cpp" />
+    <ClCompile Include="..\src\zhAnimationTree.cpp" />
+    <ClCompile Include="..\src\zhAnimationTreeManager.cpp" />
+    <ClCompile Include="..\src\zhAnnotationMatchMaker.cpp" />
+    <ClCompile Include="..\src\zhBone.cpp" />
+    <ClCompile Include="..\src\zhBoneAnimationTrack.cpp" />
+    <ClCompile Include="..\src\zhBoneController.cpp" />
+    <ClCompile Include="..\src\zhBoneIKController.cpp" />
+    <ClCompile Include="..\src\zhBoneTransformController.cpp" />
+    <ClCompile Include="..\src\zhCCDSolver.cpp" />
+    <ClCompile Include="..\src\zhCharacter.cpp" />
+    <ClCompile Include="..\src\zhCharacterController.cpp" />
+    <ClCompile Include="..\src\zhDenseSamplingParamBuilder.cpp" />
+    <ClCompile Include="..\src\zhFaceController.cpp" />
+    <ClCompile Include="..\src\zhIKSolver.cpp" />
+    <ClCompile Include="..\src\zhLogger.cpp" />
+    <ClCompile Include="..\src\zhMatchGraph.cpp" />
+    <ClCompile Include="..\src\zhMatchWeb.cpp" />
+    <ClCompile Include="..\src\zhMatrix.cpp" />
+    <ClCompile Include="..\src\zhMatrix4.cpp" />
+    <ClCompile Include="..\src\zhMemoryPool.cpp" />
+    <ClCompile Include="..\src\zhMesh.cpp" />
+    <ClCompile Include="..\src\zhMeshAnimationTrack.cpp" />
+    <ClCompile Include="..\src\zhModel.cpp" />
+    <ClCompile Include="..\src\zhModelController.cpp" />
+    <ClCompile Include="..\src\zhParamAnimationBuilder.cpp" />
+    <ClCompile Include="..\src\zhPlantConstrDetector.cpp" />
+    <ClCompile Include="..\src\zhAnimationSystem.cpp" />
+    <ClCompile Include="..\src\zhQuat.cpp" />
+    <ClCompile Include="..\src\zhResourceManager.cpp" />
+    <ClCompile Include="..\src\zhSkeleton.cpp" />
+    <ClCompile Include="..\src\zhTimer.cpp" />
+    <ClCompile Include="..\src\zhVector.cpp" />
+    <ClCompile Include="..\src\zhVector2.cpp" />
+    <ClCompile Include="..\src\zhVector3.cpp" />
+    <ClCompile Include="..\src\zhZHALoader.cpp" />
+    <ClCompile Include="..\src\zhZHASerializer.cpp" />
+    <ClCompile Include="..\src\zhZHILoader.cpp" />
+    <ClCompile Include="..\src\zhZHISerializer.cpp" />
+    <ClCompile Include="..\src\zhZHTLoader.cpp" />
+    <ClCompile Include="..\src\zhZHTSerializer.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
