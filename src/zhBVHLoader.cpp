@@ -20,58 +20,40 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __zhBVHLoader_h__
-#define __zhBVHLoader_h__
+#include "zhBVHLoader.h"
+#include "zhBoneAnimationTrack.h"
+#include "zhString.h"
+#include "zhFileSystem.h"
 
-#include "zhPrereq.h"
-#include "zhLogger.h"
-#include "zhMath.h"
-#include "zhResourceManager.h"
-#include "zhAnimationManager.h"
-#include "zhAnimation.h"
+#include <sstream>
 
 namespace zh
 {
 
-/**
-* @brief BVH animation file loader class.
-*/
-class zhDeclSpec BVHLoader : public ResourceLoader
+bool BVHLoader::tryLoad( ResourcePtr res, const std::string& path )
 {
+	zhAssert( res != NULL );
+	zhAssert( res->getClassId() == Resource_AnimationSet );
 
-public:
+	std::string dir, filename, prefix, ext;
+	parsePathStr( path, dir, filename, prefix, ext );
 
-	zhDeclare_ResourceLoader( BVHLoader, zhBVHLoader_ClassId, zhBVHLoader_ClassName )
+	if( ext != "bvh" )
+		return false;
 
-	/**
-	* Checks if the loader can load the specified resource
-	* (i.e. if it is supported file type).
-	* This pure virtual function needs to be implemented in
-	* a derived resource IO class.
-	*
-	* @param resource Pointer to the resource that should be initialized
-	* from the file.
-	* @param path Resource file path.
-	* @return true if resource can be loaded, otherwise false.
-	*/
-	bool tryLoad( ResourcePtr res, const std::string& path );
-
-	/**
-	* Loads the resource from a file.
-	*
-	* @param res Pointer to the resource that should be initialized
-	* from the file.
-	* @param path Resource file path.
-	* @return true if resource has been successfully loaded, otherwise false.
-	*/
-	bool load( ResourcePtr res, const std::string& path );
-
-	AnimationSetPtr mAnimSet;
-	Animation* mAnim;
-	std::string mPath;
-
-};
-
+	return true;
 }
 
-#endif // __zhBVHLoader_h__
+bool BVHLoader::load( ResourcePtr res, const std::string& path )
+{
+	zhAssert( res != NULL );
+	zhAssert( res->getClassId() == Resource_AnimationSet );
+
+	mAnimSet = AnimationSetPtr::DynamicCast<Resource>(res);
+	mAnim = NULL;
+	mPath = path;
+
+	return false;
+}
+
+}
