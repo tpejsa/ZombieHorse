@@ -138,7 +138,7 @@ void MatchWeb::Path::setNext( unsigned int pathIndex, unsigned int ptIndex )
 }
 
 MatchWeb::MatchWeb( Index index, AnimationIndex* animIndex, unsigned int sampleRate )
-: mInd(index), mAnimIndex(animIndex), mMdl(NULL), mSampleRate(sampleRate), mDistGrid(NULL)
+: mInd(index), mAnimIndex(animIndex), mSkel(NULL), mSampleRate(sampleRate), mDistGrid(NULL)
 {
 	zhAssert( animIndex != NULL && index.getSegIndex1() < animIndex->getNumAnimationSegments() &&
 		index.getSegIndex2() < animIndex->getNumAnimationSegments() );
@@ -166,14 +166,14 @@ AnimationIndex* MatchWeb::getAnimationIndex() const
 	return mAnimIndex;
 }
 
-Model* MatchWeb::getModel() const
+Skeleton* MatchWeb::getSkeleton() const
 {
-	return mMdl;
+	return mSkel;
 }
 
-void MatchWeb::setModel( Model* mdl )
+void MatchWeb::setSkeleton( Skeleton* skel )
 {
-	mMdl = mdl;
+	mSkel = skel;
 }
 
 const AnimationSegment& MatchWeb::getAnimation1() const
@@ -244,7 +244,7 @@ unsigned int MatchWeb::getSampleRate() const
 void MatchWeb::build( unsigned int resampleFactor, float wndLength, float minDist, float maxDistDiff,
 					 float minChainLength, float maxBridgeLength )
 {
-	zhAssert( mMdl != NULL );
+	zhAssert( mSkel != NULL );
 	zhAssert( resampleFactor > 0 );
 
 	zhLog( "MatchWeb", "build", "Building match web for animation segments %u and %u.",
@@ -295,7 +295,7 @@ void MatchWeb::build( unsigned int resampleFactor, float wndLength, float minDis
 
 	//unsigned int sample_rate = mSampleRate/resampleFactor;
 	unsigned int sample_rate = mSampleRate;
-	AnimationDistanceGrid* grid = new AnimationDistanceGrid( mMdl, seg1, seg2, sample_rate );
+	AnimationDistanceGrid* grid = new AnimationDistanceGrid( mSkel, seg1, seg2, sample_rate );
 	grid->build(wndLength);
 	grid->findLocalMinima( minDist, false, true, maxDistDiff );
 
@@ -343,7 +343,7 @@ void MatchWeb::build( unsigned int resampleFactor, float wndLength, float minDis
 			deg_ct1 = 1, deg_ct2 = 1;
 		while(true)
 		{
-			AnimationDistanceGrid::Point pt( AnimationDistanceGrid::Index( 0, 0 ), 0, Model::Situation() );;
+			AnimationDistanceGrid::Point pt( AnimationDistanceGrid::Index( 0, 0 ), 0, Skeleton::Situation() );;
 
 			prev_mini1 = mini1;
 			prev_mini2 = mini2;

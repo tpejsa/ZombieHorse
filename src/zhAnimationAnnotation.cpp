@@ -103,12 +103,12 @@ void TransitionAnnotation::setTargetTime( float targetTime )
 	mTargetTime = targetTime;
 }
 
-const Model::Situation& TransitionAnnotation::getAlignTransf() const
+const Skeleton::Situation& TransitionAnnotation::getAlignTransf() const
 {
 	return mAlignTransf;
 }
 
-void TransitionAnnotation::setAlignTransf( const Model::Situation& transf )
+void TransitionAnnotation::setAlignTransf( const Skeleton::Situation& transf )
 {
 	mAlignTransf = transf;
 }
@@ -184,12 +184,12 @@ void ParamTransitionAnnotation::setTargetTime( float time )
 	mTargetTime = time;
 }
 
-const Model::Situation& ParamTransitionAnnotation::getAlignTransf() const
+const Skeleton::Situation& ParamTransitionAnnotation::getAlignTransf() const
 {
 	return mAlignTransf;
 }
 
-void ParamTransitionAnnotation::setAlignTransf( const Model::Situation& transf )
+void ParamTransitionAnnotation::setAlignTransf( const Skeleton::Situation& transf )
 {
 	mAlignTransf = transf;
 }
@@ -273,34 +273,6 @@ void SimEventAnnotation::_clone( AnimationAnnotation* clonePtr ) const
 
 	cl->mEvtCId = mEvtCId;
 	cl->mEvtId = mEvtId;
-}
-
-GesturePhaseAnnotation::GesturePhaseAnnotation( float startTime, float endTime )
-: AnimationAnnotation( startTime, endTime ), mGesturePhase(GesturePhase_Start)
-{
-}
-
-GesturePhaseAnnotation::~GesturePhaseAnnotation()
-{
-}
-
-AnimationGesturePhase GesturePhaseAnnotation::getGesturePhase() const
-{
-	return mGesturePhase;
-}
-
-void GesturePhaseAnnotation::setGesturePhase( AnimationGesturePhase gesturePhase )
-{
-	mGesturePhase = gesturePhase;
-}
-
-void GesturePhaseAnnotation::_clone( AnimationAnnotation* clonePtr ) const
-{
-	AnimationAnnotation::_clone(clonePtr);
-
-	GesturePhaseAnnotation* cl = static_cast<GesturePhaseAnnotation*>(clonePtr);
-
-	cl->mGesturePhase = mGesturePhase;
 }
 
 AnimationAnnotationContainer::AnimationAnnotationContainer()
@@ -479,11 +451,6 @@ AnimationAnnotation* PlantConstraintAnnotationContainer::_createAnnotation( floa
 AnimationAnnotation* SimEventAnnotationContainer::_createAnnotation( float startTime, float endTime )
 {
 	return new SimEventAnnotation( startTime, endTime );
-}
-
-AnimationAnnotation* GesturePhaseAnnotationContainer::_createAnnotation( float startTime, float endTime )
-{
-	return new GesturePhaseAnnotation( startTime, endTime );
 }
 
 }

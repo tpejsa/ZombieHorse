@@ -48,7 +48,6 @@ void AnnotationMatchMaker::makeMatches()
 	makeMatches(AnimAnnot_ParamTransition);
 	makeMatches(AnimAnnot_PlantConstraint);
 	makeMatches(AnimAnnot_SimEvent);
-	makeMatches(AnimAnnot_GesturePhase);
 }
 
 void AnnotationMatchMaker::makeMatches( AnimationAnnotationClass annotClass )
@@ -80,15 +79,10 @@ void AnnotationMatchMaker::makeMatches( AnimationAnnotationClass annotClass )
 			base_annots[banim_i] = new PlantConstraintAnnotationContainer();
 			annots = banim->getPlantConstraintAnnotations();
 		}
-		else if( annotClass == AnimAnnot_SimEvent )
+		else // if( annotClass == AnimAnnot_SimEvent )
 		{
 			base_annots[banim_i] = new SimEventAnnotationContainer();
 			annots = banim->getSimEventAnnotations();
-		}
-		else // if( annotClass == AnimAnnot_GesturePhase )
-		{
-			base_annots[banim_i] = new GesturePhaseAnnotationContainer();
-			annots = banim->getGesturePhaseAnnotations();
 		}
 
 		annots->_clone( base_annots[banim_i] );
@@ -100,10 +94,8 @@ void AnnotationMatchMaker::makeMatches( AnimationAnnotationClass annotClass )
 			banim->getParamTransitionAnnotations()->deleteAllAnnotations();
 		else if( annotClass == AnimAnnot_PlantConstraint )
 			banim->getPlantConstraintAnnotations()->deleteAllAnnotations();
-		else if( annotClass == AnimAnnot_SimEvent )
+		else // if( annotClass == AnimAnnot_SimEvent )
 			banim->getSimEventAnnotations()->deleteAllAnnotations();
-		else // if( annotClass == AnimAnnot_GesturePhase )
-			banim->getGesturePhaseAnnotations()->deleteAllAnnotations();
 	}
 
 	// identify annotation groups (annotations of same class that refer to the same thing, e.g. constraints on the same end-effector)
@@ -211,10 +203,8 @@ void AnnotationMatchMaker::_makeMatches( const std::vector<AnimationAnnotationCo
 			target_annots[anim_i] = anim->getParamTransitionAnnotations();
 		else if( annot_class == AnimAnnot_PlantConstraint )
 			target_annots[anim_i] = anim->getPlantConstraintAnnotations();
-		else if( annot_class == AnimAnnot_SimEvent )
+		else // if( annot_class == AnimAnnot_SimEvent )
 			target_annots[anim_i] = anim->getSimEventAnnotations();
-		else // if( annot_class == AnimAnnot_GesturePhase )
-			target_annots[anim_i] = anim->getGesturePhaseAnnotations();
 	}
 
 	// get first unprocessed annot for each anim
@@ -442,17 +432,11 @@ bool AnnotationMatchMaker::_areMatchable( AnimationAnnotation* annot1, Animation
 		static_cast<PlantConstraintAnnotation*>(annot1),
 		static_cast<PlantConstraintAnnotation*>(annot2) );
 	}
-	else if( annot_class == AnimAnnot_SimEvent )
+	else // if( annot_class == AnimAnnot_SimEvent )
 	{
 		return matchAnnotations<SimEventAnnotation>(
 		static_cast<SimEventAnnotation*>(annot1),
 		static_cast<SimEventAnnotation*>(annot2) );
-	}
-	else // if( annot_class == AnimAnnot_GesturePhase )
-	{
-		return matchAnnotations<GesturePhaseAnnotation>(
-		static_cast<GesturePhaseAnnotation*>(annot1),
-		static_cast<GesturePhaseAnnotation*>(annot2) );
 	}
 
 	return false;

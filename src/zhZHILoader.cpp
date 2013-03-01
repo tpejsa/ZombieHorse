@@ -37,7 +37,7 @@ bool ZHILoader::tryLoad( ResourcePtr res, const std::string& path )
 	std::string dir, filename, prefix, ext;
 	parsePathStr( path, dir, filename, prefix, ext );
 
-	if( ext != "vai" )
+	if( ext != "zhi" )
 		return false;
 
 	return true;
@@ -451,7 +451,7 @@ bool ZHILoader::parsePoint( rapidxml::xml_node<>* node, MatchWeb::Path& path )
 
 	unsigned int fr1, fr2;
 	float dist;
-	Model::Situation transf;
+	Skeleton::Situation transf;
 	std::string transf_str;
 
 	// parse node attributes:
@@ -509,7 +509,7 @@ bool ZHILoader::parsePoint( rapidxml::xml_node<>* node, MatchWeb::Path& path )
 	return true;
 }
 
-bool ZHILoader::parseSituation( const std::string& sitStr, Model::Situation& sit )
+bool ZHILoader::parseSituation( const std::string& sitStr, Skeleton::Situation& sit )
 {
 	float x, z, ay;
 
@@ -524,7 +524,7 @@ bool ZHILoader::parseSituation( const std::string& sitStr, Model::Situation& sit
 		return false;
 	iss >> ay;
 
-	sit = Model::Situation( x, z, ay );
+	sit = Skeleton::Situation( x, z, ay );
 
 	return true;
 }

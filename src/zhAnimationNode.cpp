@@ -36,7 +36,6 @@ mPlaying(true), mPaused(false), mPlayRate(1), mAnnotsEnabled(true)
 	mParamTransAnnots = new ParamTransitionAnnotationContainer();
 	mPlantConstrAnnots = new PlantConstraintAnnotationContainer();
 	mSimEventAnnots = new SimEventAnnotationContainer();
-	mGestPhaseAnnots = new GesturePhaseAnnotationContainer();
 }
 
 AnimationNode::~AnimationNode()
@@ -45,7 +44,6 @@ AnimationNode::~AnimationNode()
 	delete mParamTransAnnots;
 	delete mPlantConstrAnnots;
 	delete mSimEventAnnots;
-	delete mGestPhaseAnnots;
 }
 
 const std::string& AnimationNode::getName() const
@@ -392,21 +390,16 @@ SimEventAnnotationContainer* AnimationNode::getSimEventAnnotations() const
 	return mSimEventAnnots;
 }
 
-GesturePhaseAnnotationContainer* AnimationNode::getGesturePhaseAnnotations() const
-{
-	return mGestPhaseAnnots;
-}
-
-const Model::Situation& AnimationNode::getOrigin() const
+const Skeleton::Situation& AnimationNode::getOrigin() const
 {
 	AnimationNode* cn = getMainChild();
 	if( cn == NULL )
-		return Model::Situation::Identity;
+		return Skeleton::Situation::Identity;
 
 	return cn->getOrigin();
 }
 
-void AnimationNode::setOrigin( const Model::Situation& origin )
+void AnimationNode::setOrigin( const Skeleton::Situation& origin )
 {
 	AnimationNode* cn = getMainChild();
 	if( cn == NULL )
@@ -518,28 +511,27 @@ void AnimationNode::_clone( AnimationNode* clonePtr, bool shareData ) const
 	mParamTransAnnots->_clone( clonePtr->mParamTransAnnots );
 	mPlantConstrAnnots->_clone( clonePtr->mPlantConstrAnnots );
 	mSimEventAnnots->_clone( clonePtr->mSimEventAnnots );
-	mGestPhaseAnnots->_clone( clonePtr->mGestPhaseAnnots );
 }
 
-Model::Situation AnimationNode::_sampleMover() const
+Skeleton::Situation AnimationNode::_sampleMover() const
 {
 	AnimationNode* cn = getMainChild();
 	if( cn == NULL )
-		return Model::Situation::Identity;
+		return Skeleton::Situation::Identity;
 
 	return cn->_sampleMover();
 }
 
-Model::Situation AnimationNode::_getRealignedOrigin( const Model::Situation& sit ) const
+Skeleton::Situation AnimationNode::_getRealignedOrigin( const Skeleton::Situation& sit ) const
 {
-	Model::Situation mv = _sampleMover(); // get current mover
+	Skeleton::Situation mv = _sampleMover(); // get current mover
 
 	// compute realigning transf.
 	Quat rot = mv.getOrientation().getInverse() * sit.getOrientation();
 	Vector3 trans = -mv.getPosition() + sit.getPosition();
 
 	// apply realigning transf.
-	Model::Situation orig = getOrigin();
+	Skeleton::Situation orig = getOrigin();
 	Vector3 r_origpos = orig.getPosition() + ( mv.getPosition() - orig.getPosition() ).rotate(rot);
 	orig.setOrientation( orig.getOrientation() * rot );
 	orig.setPosition( orig.getPosition() + trans - ( r_origpos - mv.getPosition() ) );
@@ -574,7 +566,7 @@ void AnimationNode::_applyAnnotations() const
 		prev_time = _getPrevTime();
 	std::vector<AnimationAnnotation*> annots;
 
-	// find active annotations
+	// Find active annotations
 	getTransitionAnnotations()->getActiveAnnotations( prev_time, time, annots );
 	for( unsigned int annot_i = 0; annot_i < annots.size(); ++annot_i )
 	{
@@ -585,7 +577,7 @@ void AnimationNode::_applyAnnotations() const
 		annot_evt.emit();
 	}
 
-	// find finished annotations
+	// Find finished annotations
 	annots.clear();
 	getTransitionAnnotations()->getFinishedAnnotations( prev_time, time, annots );
 	for( unsigned int annot_i = 0; annot_i < annots.size(); ++annot_i )
@@ -597,7 +589,7 @@ void AnimationNode::_applyAnnotations() const
 		annot_evt.emit();
 	}
 
-	// find active annotations
+	// Find active annotations
 	getParamTransitionAnnotations()->getActiveAnnotations( prev_time, time, annots );
 	for( unsigned int annot_i = 0; annot_i < annots.size(); ++annot_i )
 	{
@@ -608,7 +600,7 @@ void AnimationNode::_applyAnnotations() const
 		annot_evt.emit();
 	}
 
-	// find finished annotations
+	// Find finished annotations
 	annots.clear();
 	getParamTransitionAnnotations()->getFinishedAnnotations( prev_time, time, annots );
 	for( unsigned int annot_i = 0; annot_i < annots.size(); ++annot_i )
@@ -620,7 +612,7 @@ void AnimationNode::_applyAnnotations() const
 		annot_evt.emit();
 	}
 
-	// find active annotations
+	// Find active annotations
 	getPlantConstraintAnnotations()->getActiveAnnotations( prev_time, time, annots );
 	for( unsigned int annot_i = 0; annot_i < annots.size(); ++annot_i )
 	{
@@ -631,7 +623,7 @@ void AnimationNode::_applyAnnotations() const
 		annot_evt.emit();
 	}
 
-	// find finished annotations
+	// Find finished annotations
 	annots.clear();
 	getPlantConstraintAnnotations()->getFinishedAnnotations( prev_time, time, annots );
 	for( unsigned int annot_i = 0; annot_i < annots.size(); ++annot_i )
@@ -643,7 +635,7 @@ void AnimationNode::_applyAnnotations() const
 		annot_evt.emit();
 	}
 
-	// find active annotations
+	// Find active annotations
 	getSimEventAnnotations()->getActiveAnnotations( prev_time, time, annots );
 	for( unsigned int annot_i = 0; annot_i < annots.size(); ++annot_i )
 	{
@@ -654,7 +646,7 @@ void AnimationNode::_applyAnnotations() const
 		annot_evt.emit();
 	}
 
-	// find finished annotations
+	// Find finished annotations
 	annots.clear();
 	getSimEventAnnotations()->getFinishedAnnotations( prev_time, time, annots );
 	for( unsigned int annot_i = 0; annot_i < annots.size(); ++annot_i )
@@ -663,29 +655,6 @@ void AnimationNode::_applyAnnotations() const
 
 		// emit event
 		SimEventAnnotEvent annot_evt( const_cast<AnimationNode*>(this), annot, true );
-		annot_evt.emit();
-	}
-
-	// find active annotations
-	getGesturePhaseAnnotations()->getActiveAnnotations( prev_time, time, annots );
-	for( unsigned int annot_i = 0; annot_i < annots.size(); ++annot_i )
-	{
-		GesturePhaseAnnotation* annot = static_cast<GesturePhaseAnnotation*>( annots[annot_i] );
-
-		// emit event
-		GesturePhaseAnnotEvent annot_evt( const_cast<AnimationNode*>(this), annot );
-		annot_evt.emit();
-	}
-
-	// find finished annotations
-	annots.clear();
-	getGesturePhaseAnnotations()->getFinishedAnnotations( prev_time, time, annots );
-	for( unsigned int annot_i = 0; annot_i < annots.size(); ++annot_i )
-	{
-		GesturePhaseAnnotation* annot = static_cast<GesturePhaseAnnotation*>( annots[annot_i] );
-
-		// emit event
-		GesturePhaseAnnotEvent annot_evt( const_cast<AnimationNode*>(this), annot, true );
 		annot_evt.emit();
 	}
 }

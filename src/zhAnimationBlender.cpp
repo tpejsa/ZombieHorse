@@ -23,11 +23,10 @@ SOFTWARE.
 #include "zhAnimationBlender.h"
 #include "zhString.h"
 #include "zhMath.h"
-#include "zhModel.h"
+#include "zhSkeleton.h"
 #include "zhAnimation.h"
 #include "zhAnimationNode.h"
 #include "zhAnimationSampler.h"
-#include "zhBoneIKController.h"
 
 namespace zh
 {
@@ -54,13 +53,8 @@ void AnimationBlender::setPlaying( bool playing )
 	{
 		mTWCurveTime = 0;
 
-		// disable all constraint enforcement
-		PlantConstrControllerConstIterator bci = getPlantConstrControllerConstIterator();
-		while( bci.hasMore() )
-		{
-			BoneController* bc = bci.next();
-			bc->setEnabled(false);
-		}
+		// Disable all constraint enforcement
+		// TODO
 	}
 }
 
@@ -127,12 +121,12 @@ float AnimationBlender::getPlayLength() const
 	return play_length;
 }
 
-const Model::Situation& AnimationBlender::getOrigin() const
+const Skeleton::Situation& AnimationBlender::getOrigin() const
 {
 	return mOrigin;
 }
 
-void AnimationBlender::setOrigin( const Model::Situation& origin )
+void AnimationBlender::setOrigin( const Skeleton::Situation& origin )
 {
 	AnimationSpace* anim_space = getAnimationSpace();
 
@@ -173,8 +167,8 @@ void AnimationBlender::setOrigin( const Model::Situation& origin )
 			unsigned int banim_i = mChildrenToBaseAnims[child_id];
 
 			// compute origin
-			Model::Situation child_orig = mOrigin;
-			/*Model::Situation child_orig( child_align[3*banim_i], child_align[3*banim_i+1], child_align[3*banim_i+2] );
+			Skeleton::Situation child_orig = mOrigin;
+			/*Skeleton::Situation child_orig( child_align[3*banim_i], child_align[3*banim_i+1], child_align[3*banim_i+2] );
 			child_orig.transform(origin);*/
 
 			child->setOrigin(child_orig);
@@ -398,46 +392,11 @@ void AnimationBlender::setUseBlendCurves( bool useBlendCurves )
 	mUseBlendCurves = useBlendCurves;
 }
 
-bool AnimationBlender::hasPlantContrController( unsigned short boneId ) const
-{
-	return mPlantConstrControllers.count(boneId) > 0;
-}
-
-BoneIKController* AnimationBlender::getPlantConstrController( unsigned short boneId ) const
-{
-	std::map<unsigned short, BoneIKController*>::const_iterator pci =
-		mPlantConstrControllers.find(boneId);
-
-	if( pci == mPlantConstrControllers.end() )
-		return NULL;
-
-	return pci->second;
-}
-
-void AnimationBlender::setPlantConstrController( unsigned short boneId, BoneIKController* ctrl )
-{
-	zhAssert( ctrl != NULL );
-
-	mPlantConstrControllers[boneId] = ctrl;
-	ctrl->setBoneId(boneId);
-	ctrl->setEnabled(false);
-}
-
-AnimationBlender::PlantConstrControllerIterator AnimationBlender::getPlantConstrControllerIterator()
-{
-	return PlantConstrControllerIterator( mPlantConstrControllers );
-}
-
-AnimationBlender::PlantConstrControllerConstIterator AnimationBlender::getPlantConstrControllerConstIterator() const
-{
-	return PlantConstrControllerConstIterator( mPlantConstrControllers );
-}
-
-Model::Situation AnimationBlender::_sampleMover() const
+Skeleton::Situation AnimationBlender::_sampleMover() const
 {
 	// TODO: this is reasonably accurate only when not using blend curves, but whatever
 
-	Model::Situation mv;
+	Skeleton::Situation mv;
 
 	float total_weight = 0;
 
@@ -453,8 +412,8 @@ Model::Situation AnimationBlender::_sampleMover() const
 		if( zhEqualf( mWeights[banim_i], 0 ) )
 			continue;
 
-		Model::Situation child_mv = child->_sampleMover();
-		mv = Model::Situation(
+		Skeleton::Situation child_mv = child->_sampleMover();
+		mv = Skeleton::Situation(
 			mv.getPosition() + child_mv.getPosition() * weight,
 			mv.getOrientation().slerp( child_mv.getOrientation(), weight/( weight + total_weight ) )
 			);
@@ -498,16 +457,6 @@ void AnimationBlender::_clone( AnimationNode* clonePtr, bool shareData ) const
 		clone->setWeights(mWeights);
 
 	clone->mUseBlendCurves = mUseBlendCurves;
-
-	PlantConstrControllerConstIterator pci = getPlantConstrControllerConstIterator();
-	while( !pci.end() )
-	{
-		unsigned short bone_id = pci.key();
-		BoneIKController* ctrl = pci.next();
-		clone->setPlantConstrController( bone_id,
-			static_cast<BoneIKController*>( clone->getAnimationTree()->getBoneController( ctrl->getId() ) )
-			);
-	}
 }
 
 void AnimationBlender::_update( float dt )
@@ -581,10 +530,8 @@ void AnimationBlender::_update( float dt )
 
 void AnimationBlender::_applyNode( float weight, const std::set<unsigned short>& boneMask ) const
 {
-	Model* mdl = mOwner->getModel();
-	Skeleton* skel = mdl->getSkeleton();
 
-	// apply child nodes		
+	// Apply child nodes		
 	ChildConstIterator child_i = getChildConstIterator();
 	while( !child_i.end() )
 	{
@@ -599,12 +546,13 @@ void AnimationBlender::_applyNode( float weight, const std::set<unsigned short>&
 		child_node->apply( weight*child_weight, boneMask );
 	}
 
-	// find active plant constraints
-	std::vector<AnimationAnnotation*> annots;
+	// Find active plant constraints
+	/*std::vector<AnimationAnnotation*> annots;
 	float t = getPlayTime();
 	getPlantConstraintAnnotations()->getActiveAnnotations( t, annots );
 
-	// get planted bones
+	// Get planted bones
+	Skeleton* skel = mOwner->getSkeleton();
 	std::set<Bone*> pbones;
 	for( unsigned int annot_i = 0; annot_i < annots.size(); ++annot_i )
 	{
@@ -612,32 +560,14 @@ void AnimationBlender::_applyNode( float weight, const std::set<unsigned short>&
 		Bone* pbone = skel->getBone( pcannot->getBoneId() );
 
 		if( pbone == NULL )
-			// anim. annotated with non-existent bone constr., ignore
+			// Anim. annotated with non-existent bone constr., ignore
 			continue;
 
 		pbones.insert(pbone);
 	}
 
-	// enforce constraints on planted bones
-	PlantConstrControllerConstIterator bci = getPlantConstrControllerConstIterator();
-	while( bci.hasMore() )
-	{
-		BoneIKController* bc = bci.next();
-		Bone* pbone = skel->getBone( bc->getBoneId() );
-
-		if( pbones.count(pbone) > 0 )
-		{
-			if( !bc->getEnabled() )
-			{
-				bc->setEnabled(true);
-				bc->setTargetPosition( pbone->getWorldPosition() );
-			}
-		}
-		else
-		{
-			bc->setEnabled(false);
-		}
-	}
+	// Enforce constraints on planted bones
+	// TODO*/
 }
 
 void AnimationBlender::_initAnnotations()
@@ -650,14 +580,12 @@ void AnimationBlender::_initAnnotations()
 	ParamTransitionAnnotationContainer* bptannots = getParamTransitionAnnotations();
 	PlantConstraintAnnotationContainer* bpcannots = getPlantConstraintAnnotations();
 	SimEventAnnotationContainer* bseannots = getSimEventAnnotations();
-	GesturePhaseAnnotationContainer* bgpannots = getGesturePhaseAnnotations();
 
 	// clear existing blended annotations
 	btannots->deleteAllAnnotations();
 	bptannots->deleteAllAnnotations();
 	bpcannots->deleteAllAnnotations();
 	bseannots->deleteAllAnnotations();
-	bgpannots->deleteAllAnnotations();
 
 	// create blended transition annots
 	TransitionAnnotationContainer* tannots0 = banim0->getTransitionAnnotations();
@@ -795,40 +723,6 @@ void AnimationBlender::_initAnnotations()
 		*bseannot = *seannot0;
 	}
 
-	// create blended gesture phase annots
-	GesturePhaseAnnotationContainer* gpannots0 = banim0->getGesturePhaseAnnotations();
-	for( unsigned int gpannot_i = 0; gpannot_i < gpannots0->getNumAnnotations(); ++gpannot_i )
-	{
-		GesturePhaseAnnotation* gpannot0 = static_cast<GesturePhaseAnnotation*>( gpannots0->getAnnotation(gpannot_i) );
-		bool has_matches = true;
-
-		// make sure there are matches in other base anims
-		for( unsigned int banim_i = 1; banim_i < anim_space->getNumBaseAnimations(); ++banim_i )
-		{
-			GesturePhaseAnnotationContainer* gpannots = anim_space->getBaseAnimation(banim_i)->getGesturePhaseAnnotations();
-			GesturePhaseAnnotation* gpannot = static_cast<GesturePhaseAnnotation*>( gpannots->getAnnotation(gpannot_i) );
-
-			if( gpannot_i >= gpannots->getNumAnnotations() || !matchAnnotations<GesturePhaseAnnotation>( gpannot0, gpannot ) )
-			{
-				// we've encountered one or more annots without a match in other base animations
-				has_matches = false;
-				break;
-			}
-		}
-
-		if(!has_matches)
-		{
-			// no matches means we can't blend annotations
-			bgpannots->deleteAllAnnotations();
-			break;
-		}
-		
-		// create a blended annotation
-		GesturePhaseAnnotation* bgpannot = static_cast<GesturePhaseAnnotation*>(
-			bgpannots->createAnnotation( gpannot0->getStartTime(), gpannot0->getEndTime() ) );
-		*bgpannot = *gpannot0;
-	}
-
 	// blend annotations with current weights
 	_blendAnnotations();
 }
@@ -843,7 +737,6 @@ void AnimationBlender::_blendAnnotations()
 	ParamTransitionAnnotationContainer* bptannots = getParamTransitionAnnotations();
 	PlantConstraintAnnotationContainer* bpcannots = getPlantConstraintAnnotations();
 	SimEventAnnotationContainer* bseannots = getSimEventAnnotations();
-	GesturePhaseAnnotationContainer* bgpannots = getGesturePhaseAnnotations();
 
 	// compute blended transition annotations
 	for( unsigned int tannot_i = 0; tannot_i < btannots->getNumAnnotations(); ++tannot_i )
@@ -914,24 +807,6 @@ void AnimationBlender::_blendAnnotations()
 
 			SimEventAnnotation* seannot = static_cast<SimEventAnnotation*>( seannots->getAnnotation(seannot_i) );
 			blendAnnotations<SimEventAnnotation>( bseannot, seannot, mWeights[banim_i] );
-		}
-	}
-
-	// compute blended gest. phase annotations
-	for( unsigned int gpannot_i = 0; gpannot_i < bgpannots->getNumAnnotations(); ++gpannot_i )
-	{
-		GesturePhaseAnnotation* bgpannot = static_cast<GesturePhaseAnnotation*>( bgpannots->getAnnotation(gpannot_i) );
-
-		// reset blend
-		resetAnnotation<GesturePhaseAnnotation>(bgpannot);
-
-		// compute new blend
-		for( unsigned int banim_i = 0; banim_i < anim_space->getNumBaseAnimations(); ++banim_i )
-		{
-			GesturePhaseAnnotationContainer* gpannots = anim_space->getBaseAnimation(banim_i)->getGesturePhaseAnnotations();
-
-			GesturePhaseAnnotation* gpannot = static_cast<GesturePhaseAnnotation*>( gpannots->getAnnotation(gpannot_i) );
-			blendAnnotations<GesturePhaseAnnotation>( bgpannot, gpannot, mWeights[banim_i] );
 		}
 	}
 }

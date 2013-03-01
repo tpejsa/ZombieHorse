@@ -25,6 +25,122 @@ SOFTWARE.
 namespace zh
 {
 
+const Skeleton::Situation Skeleton::Situation::Identity = Skeleton::Situation();
+
+Skeleton::Situation::Situation()
+{
+}
+
+Skeleton::Situation::Situation( float posX, float posZ, float orientY )
+{
+	mPos = Vector3( posX, 0, posZ );
+	mOrient = Quat( Vector3::YAxis, orientY );
+}
+
+Skeleton::Situation::Situation( const Vector3& pos, const Quat& orient )
+: mPos(pos), mOrient(orient)
+{
+}
+
+Vector3 Skeleton::Situation::getPosition() const
+{
+	return mPos;
+}
+
+void Skeleton::Situation::setPosition( const Vector3& pos )
+{
+	mPos = pos;
+}
+
+Quat Skeleton::Situation::getOrientation() const
+{
+	return mOrient;
+}
+
+void Skeleton::Situation::setOrientation( const Quat& orient )
+{
+	mOrient = orient;
+}
+
+float Skeleton::Situation::getPosX() const
+{
+	return mPos.x;
+}
+
+float Skeleton::Situation::getPosZ() const
+{
+	return mPos.z;
+}
+
+float Skeleton::Situation::getOrientY() const
+{
+	float ax, ay, az;
+	mOrient.getEuler( ax, ay, az );
+	
+	return ay;
+}
+
+Skeleton::Situation& Skeleton::Situation::invert()
+{
+	mPos = -mPos;
+	mOrient.invert();
+
+	return *this;
+}
+
+Skeleton::Situation Skeleton::Situation::getInverse() const
+{
+	Situation sit = *this;
+	sit.invert();
+
+	return sit;
+}
+
+Skeleton::Situation& Skeleton::Situation::transform( const Situation& transf )
+{
+	mPos += transf.mPos.getRotated(mOrient);
+	mOrient *= transf.mOrient;
+
+	return *this;
+}
+
+Skeleton::Situation Skeleton::Situation::getTransformed( const Situation& transf ) const
+{
+	Situation sit = *this;
+	sit.transform(transf);
+
+	return sit;
+}
+
+Skeleton::Situation Skeleton::Situation::getTransformTo( const Situation& sit ) const
+{
+	Quat inv_orient = mOrient.getInverse();
+	Situation transf;
+	transf.mOrient = inv_orient * sit.mOrient;
+	transf.mPos = sit.mPos - mPos;
+	transf.mPos.rotate(inv_orient);
+
+	return transf;
+}
+
+const Skeleton::Situation& Skeleton::Situation::projectToGround()
+{
+	mPos.y = 0;
+	float ax, ay, az;
+	mOrient.getEuler( ax, ay, az );
+	mOrient = Quat( 0, ay, 0 );
+
+	return *this;
+}
+
+Skeleton::Situation Skeleton::Situation::getProjToGround() const
+{
+	Situation sit = *this;
+	sit.projectToGround();
+
+	return sit;
+}
+
 Skeleton::Skeleton() : mRoot(NULL)
 {
 }
@@ -32,6 +148,23 @@ Skeleton::Skeleton() : mRoot(NULL)
 Skeleton::~Skeleton()
 {
 	deleteAllBones();
+}
+
+Skeleton::Situation Skeleton::getSituation() const
+{
+	if( mRoot == NULL )
+		return Skeleton::Situation();
+
+	return Skeleton::Situation( mRoot->getPosition(), mRoot->getOrientation() )/*.getProjToGround()*/;
+}
+
+void Skeleton::setSituation( const Situation& sit )
+{
+	if( mRoot != NULL )
+	{
+		mRoot->setPosition( sit.getPosition() );
+		mRoot->setOrientation( sit.getOrientation() );
+	}
 }
 
 Bone* Skeleton::getRoot() const

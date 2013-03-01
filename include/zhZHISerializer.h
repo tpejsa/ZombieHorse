@@ -76,7 +76,7 @@ protected:
 	bool writePath( rapidxml::xml_node<>* node, const MatchWeb::Path& path );
 	bool writePoints( rapidxml::xml_node<>* node, const MatchWeb::Path& path );
 	bool writePoint( rapidxml::xml_node<>* node, const AnimationDistanceGrid::Point& point );
-	std::string writeSituation( const Model::Situation& sit );
+	std::string writeSituation( const Skeleton::Situation& sit );
 	bool writeBranches( rapidxml::xml_node<>* node, const MatchWeb::Path& path );
 	bool writeBranch( rapidxml::xml_node<>* node, unsigned int point, unsigned int branch );
 

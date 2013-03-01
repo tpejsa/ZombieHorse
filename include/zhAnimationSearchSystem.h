@@ -83,7 +83,7 @@ public:
 	* - AnimSearchSystemError_None - no errors
 	* - AnimSearchSystemError_FileNotFound - config. file not found or invalid
 	*/
-	bool init( const std::string& cfgPath = "animsearch_system.config.xml" );
+	bool init( const std::string& cfgPath = "config.xml" );
 
 	/**
 	* Gets a pointer to the animation index manager instance.
@@ -172,13 +172,13 @@ public:
 	*
 	* @param id Animation index ID.
 	* @param name Animation index name.
-	* @param mdl Pointer to the character model.
+	* @param skel Pointer to the character skeleton.
 	* @param labelFilter Comma- or semicolon-separated list of labels.
 	* Animation index will be built only over animations that have
 	* one of these labels in their names.
 	* @return Pointer to the animation index.
 	*/
-	AnimationIndexPtr buildIndex( unsigned long id, const std::string& name, Model* mdl,
+	AnimationIndexPtr buildIndex( unsigned long id, const std::string& name, Skeleton* skel,
 		const std::string& labelFilter = "" );
 
 	/**
@@ -187,14 +187,14 @@ public:
 	*
 	* @param id Animation index ID.
 	* @param name Animation index name.
-	* @param mdl Pointer to the character model.
+	* @param skel Pointer to the character skeleton.
 	* @param rawAnims Raw animation sets.
 	* @param labelFilter Comma- or semicolon-separated list of labels.
 	* Animation index will be built only over animations that have
 	* one of these labels in their names.
 	* @return Pointer to the animation index.
 	*/
-	AnimationIndexPtr buildIndex( unsigned long id, const std::string& name, Model* mdl,
+	AnimationIndexPtr buildIndex( unsigned long id, const std::string& name, Skeleton* skel,
 		std::vector<AnimationSetPtr> rawAnims, const std::string& labelFilter = "" );
 
 	/**
@@ -336,7 +336,7 @@ public:
 	*
 	* @param id Animation space ID.
 	* @param name Animation space name.
-	* @param mdl Pointer to the character model.
+	* @param skel Pointer to the character skeleton.
 	* @param animSet Animation set to which the animation space
 	* should be added.
 	* @param matches Match graph specifying a set of matching
@@ -347,7 +347,7 @@ public:
 	* @return Pointer to the animation space.
 	*/
 	AnimationSpace* buildAnimationSpace( unsigned short id, const std::string& name,
-		Model* mdl, AnimationSetPtr animSet,
+		Skeleton* skel, AnimationSetPtr animSet,
 		MatchGraph* matches, unsigned short refNodeHandle = 0 ) const;
 
 	/**
@@ -360,12 +360,12 @@ public:
 	/**
 	* Builds a parametrization over the animation space.
 	*
-	* @param mdl Character model.
+	* @param skel Character skeleton.
 	* @param animSpace Animation space.
 	* @param paramSpecs Vector containing specifications of all parameters.
 	* @param paramClass Parametrization class ID.
 	*/
-	void parametrizeAnimSpace( Model* mdl, AnimationSpace* animSpace, const std::vector<AnimationParamSpec>& paramSpecs,
+	void parametrizeAnimSpace( Skeleton* skel, AnimationSpace* animSpace, const std::vector<AnimationParamSpec>& paramSpecs,
 		AnimationParamClass paramClass = AnimationParam_DenseSampling );
 
 	/**
@@ -393,64 +393,64 @@ public:
 	/**
 	* Builds transitions between animations in the specified dataset.
 	*
-	* @param mdl Character model.
+	* @param skel Character skeleton.
 	* @param labelFilter Comma- or semicolon-separated list of labels.
 	* Animation index will be built only over animations that have
 	* one of these labels in their names.
 	*/
-	void buildTransitions( Model* mdl, const std::string& labelFilter = "" );
+	void buildTransitions( Skeleton* skel, const std::string& labelFilter = "" );
 
 	/**
 	* Builds transitions between animations in the specified dataset.
 	*
-	* @param mdl Character model.
+	* @param skel Character skeleton.
 	* @param rawAnims Raw animations sets.
 	* @param labelFilter Comma- or semicolon-separated list of labels.
 	* Animation index will be built only over animations that have
 	* one of these labels in their names.
 	*/
-	void buildTransitions( Model* mdl, std::vector<AnimationSetPtr> rawAnims,
+	void buildTransitions( Skeleton* skel, std::vector<AnimationSetPtr> rawAnims,
 		const std::string& labelFilter = "" );
 
 	/**
 	* Builds a transition between two animations.
 	*
-	* @param mdl Character model.
+	* @param skel Character skeleton.
 	* @param srcAnim Source parametrized animation.
 	* @param trgAnim Target parametrized animation.
 	* @return Number of transitions that have been built.
 	*/
-	unsigned int buildTransitions( Model* mdl, AnimationSpace* srcAnim, AnimationSpace* trgAnim );
+	unsigned int buildTransitions( Skeleton* skel, AnimationSpace* srcAnim, AnimationSpace* trgAnim );
 
 	/**
 	* Builds a transition between two animations.
 	*
-	* @param mdl Character model.
+	* @param skel Character skeleton.
 	* @param srcAnim Source parametrized animation.
 	* @param trgAnim Target animation.
 	* @return Number of transitions that have been built.
 	*/
-	unsigned int buildTransitions( Model* mdl, AnimationSpace* srcAnim, Animation* trgAnim );
+	unsigned int buildTransitions( Skeleton* skel, AnimationSpace* srcAnim, Animation* trgAnim );
 
 	/**
 	* Builds a transition between two animations.
 	*
-	* @param mdl Character model.
+	* @param skel Character skeleton.
 	* @param srcAnim Source animation.
 	* @param trgAnim Target parametrized animation.
 	* @return Number of transitions that have been built.
 	*/
-	unsigned int buildTransitions( Model* mdl, Animation* srcAnim, AnimationSpace* trgAnim );
+	unsigned int buildTransitions( Skeleton* skel, Animation* srcAnim, AnimationSpace* trgAnim );
 
 	/**
 	* Builds a transition between two animations.
 	*
-	* @param mdl Character model.
+	* @param skel Character skeleton.
 	* @param srcAnim Source animation.
 	* @param trgAnim Target animation.
 	* @return Number of transitions that have been built.
 	*/
-	unsigned int buildTransitions( Model* mdl, Animation* srcAnim, Animation* trgAnim );
+	unsigned int buildTransitions( Skeleton* skel, Animation* srcAnim, Animation* trgAnim );
 
 private:
 

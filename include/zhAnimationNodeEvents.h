@@ -86,19 +86,16 @@ typedef AnnotationEvent<TransitionAnnotation> TransitionAnnotEvent;
 typedef AnnotationEvent<ParamTransitionAnnotation> ParamTransitionAnnotEvent;
 typedef AnnotationEvent<PlantConstraintAnnotation> PlantConstraintAnnotEvent;
 typedef AnnotationEvent<SimEventAnnotation> SimEventAnnotEvent;
-typedef AnnotationEvent<GesturePhaseAnnotation> GesturePhaseAnnotEvent;
 
 typedef EventEmitter<TransitionAnnotEvent> TransitionAnnotEmitter;
 typedef EventEmitter<ParamTransitionAnnotEvent> ParamTransitionAnnotEmitter;
 typedef EventEmitter<PlantConstraintAnnotEvent> PlantConstraintAnnotEmitter;
 typedef EventEmitter<SimEventAnnotEvent> SimEventAnnotEmitter;
-typedef EventEmitter<GesturePhaseAnnotEvent> GesturePhaseAnnotEmitter;
 
 typedef EventListener<TransitionAnnotEvent> TransitionAnnotListener;
 typedef EventListener<ParamTransitionAnnotEvent> ParamTransitionAnnotListener;
 typedef EventListener<PlantConstraintAnnotEvent> PlantConstraintAnnotListener;
 typedef EventListener<SimEventAnnotEvent> SimEventAnnotListener;
-typedef EventListener<GesturePhaseAnnotEvent> GesturePhaseAnnotListener;
 
 }
 

@@ -20,8 +20,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __Visage_h__
-#define __Visage_h__
+#ifndef __zh_h__
+#define __zh_h__
 
 #include "zhPrereq.h"
 #include "zhIterators.h"
@@ -39,32 +39,20 @@ SOFTWARE.
 #include "zhResourceManager.h"
 #include "zhMath.h"
 #include "zhAnimationSystem.h"
-#include "zhCharacter.h"
-#include "zhCharacterController.h"
-#include "zhModelController.h"
-#include "zhModel.h"
 #include "zhAnimationManager.h"
 #include "zhAnimationSet.h"
 #include "zhAnimation.h"
+#include "zhAnimationSpace.h"
 #include "zhAnimationTrack.h"
 #include "zhBoneAnimationTrack.h"
-#include "zhMeshAnimationTrack.h"
 #include "zhAnimationSpace.h"
 #include "zhZHALoader.h"
 #include "zhZHASerializer.h"
-#include "zhAnimationController.h"
-#include "zhAnimationTreeManager.h"
 #include "zhAnimationTree.h"
 #include "zhAnimationNode.h"
 #include "zhAnimationSampler.h"
-#include "zhFaceController.h"
 #include "zhAnimationBlender.h"
-#include "zhAnimationMixer.h"
 #include "zhAnimationTransitionBlender.h"
-#include "zhBoneTransformController.h"
-#include "zhBoneIKController.h"
-#include "zhZHTLoader.h"
-#include "zhZHTSerializer.h"
 #include "zhAnimationDistanceGrid.h"
 #include "zhMatchGraph.h"
 #include "zhMatchWeb.h"
@@ -79,4 +67,4 @@ SOFTWARE.
 #include "rapidxml.hpp"
 #include "rapidxml_print.hpp"
 
-#endif // __Visage_h__
+#endif // __zh_h__

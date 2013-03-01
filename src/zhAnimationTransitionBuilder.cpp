@@ -22,17 +22,17 @@ SOFTWARE.
 
 #include "zhAnimationTransitionBuilder.h"
 #include "zhString.h"
-#include "zhModel.h"
+#include "zhSkeleton.h"
 #include "zhAnimationSpace.h"
 #include "zhAnimationDistanceGrid.h"
 
 namespace zh
 {
 
-AnimationTransitionBuilder::AnimationTransitionBuilder( Model* mdl )
-: mMdl(mdl)
+AnimationTransitionBuilder::AnimationTransitionBuilder( Skeleton* skel )
+: mSkel(skel)
 {
-	zhAssert( mdl != NULL );
+	zhAssert( skel != NULL );
 }
 
 AnimationTransitionBuilder::~AnimationTransitionBuilder()
@@ -206,7 +206,7 @@ unsigned int AnimationTransitionBuilder::buildTransitions( Animation* srcAnim, A
 	// compute anim. distance grid for these two animations
 	AnimationSegment src_anim( srcAnim, 0, srcAnim->getLength() );
 	AnimationSegment trg_anim( trgAnim->getBaseAnimation(0), 0, trgAnim->getBaseAnimation(0)->getLength() );
-	AnimationDistanceGrid* grid = new AnimationDistanceGrid( mMdl, src_anim, trg_anim, zhAnimation_SampleRate );
+	AnimationDistanceGrid* grid = new AnimationDistanceGrid( mSkel, src_anim, trg_anim, zhAnimation_SampleRate );
 	grid->build(transLength);
 
 	// find transition points
@@ -322,7 +322,7 @@ unsigned int AnimationTransitionBuilder::buildTransitions( Animation* srcAnim, A
 	// compute anim. distance grid for these two animations
 	AnimationSegment src_anim( srcAnim, 0, srcAnim->getLength() );
 	AnimationSegment trg_anim( trgAnim, 0, trgAnim->getLength() );
-	AnimationDistanceGrid* grid = new AnimationDistanceGrid( mMdl, src_anim, trg_anim, zhAnimation_SampleRate );
+	AnimationDistanceGrid* grid = new AnimationDistanceGrid( mSkel, src_anim, trg_anim, zhAnimation_SampleRate );
 	grid->build(transLength);
 
 	// find transition points
@@ -408,7 +408,7 @@ unsigned int AnimationTransitionBuilder::buildTransitions( Animation* srcAnim, A
 				annot->setTargetSetId( srcAnim->getAnimationSet()->getId() );
 				annot->setTargetId( srcAnim->getId() );
 				annot->setTargetTime(st);
-				annot->setAlignTransf( Model::Situation(
+				annot->setAlignTransf( Skeleton::Situation(
 					-tpt.getAlignTransf().getPosition(),
 					tpt.getAlignTransf().getOrientation().getInverse() ) );
 			}

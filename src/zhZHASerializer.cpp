@@ -22,7 +22,6 @@ SOFTWARE.
 
 #include "zhZHASerializer.h"
 #include "zhBoneAnimationTrack.h"
-#include "zhMeshAnimationTrack.h"
 #include "zhString.h"
 #include "zhFileSystem.h"
 #include "rapidxml_print.hpp"
@@ -39,7 +38,7 @@ bool ZHASerializer::trySerialize( ResourcePtr res, const std::string& path )
 	std::string dir, filename, prefix, ext;
 	parsePathStr( path, dir, filename, prefix, ext );
 
-	if( ext != "va" )
+	if( ext != "zh" )
 		return false;
 
 	return true;
@@ -220,19 +219,6 @@ bool ZHASerializer::writeTracks( rapidxml::xml_node<>* node )
 		}
 	}
 
-	Animation::MeshTrackConstIterator mti = mAnim->getMeshTrackConstIterator();
-	while( !mti.end() )
-	{
-		node_name = mDoc.allocate_string( "MeshTrack" );
-		child = mDoc.allocate_node( rapidxml::node_element, node_name );
-		node->append_node(child);
-
-		if( !writeMeshTrack( child, mti.next() ) )
-		{
-			return false;
-		}
-	}
-
 	return true;
 }
 
@@ -337,82 +323,6 @@ std::string ZHASerializer::writeQuat( const Quat& q )
 		toString<float>(angle);
 }
 
-bool ZHASerializer::writeMeshTrack( rapidxml::xml_node<>* node, MeshAnimationTrack* track )
-{
-	rapidxml::xml_attribute<>* attrib;
-	rapidxml::xml_node<>* child;
-
-	char* node_name;
-	char* attrib_name;
-	char* attrib_value;
-
-	// write attributes:
-
-	attrib_name = mDoc.allocate_string( "meshId" );
-	attrib_value = mDoc.allocate_string( toString<unsigned short>( track->getMeshId() ).c_str()  );
-	attrib = mDoc.allocate_attribute( attrib_name, attrib_value );
-	node->append_attribute(attrib);
-
-	// write children:
-
-	node_name = mDoc.allocate_string( "MorphKeyFrames" );
-	child = mDoc.allocate_node( rapidxml::node_element, node_name );
-	node->append_node(child);
-	
-	if( !writeMorphKeyFrames( child, track ) )
-		return false;
-
-	return true;
-}
-
-bool ZHASerializer::writeMorphKeyFrames( rapidxml::xml_node<>* node, MeshAnimationTrack* track )
-{
-	rapidxml::xml_node<>* child;
-
-	char* node_name;
-
-	// write attributes:
-
-	// write children:
-
-	MeshAnimationTrack::KeyFrameConstIterator kfi = track->getKeyFrameConstIterator();
-	while( !kfi.end() )
-	{
-		node_name = mDoc.allocate_string( "MorphKeyFrame" );
-		child = mDoc.allocate_node( rapidxml::node_element, node_name );
-		node->append_node(child);
-
-		if( !writeMorphKeyFrame( child, static_cast<MorphKeyFrame*>( kfi.next() ) ) )
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-bool ZHASerializer::writeMorphKeyFrame( rapidxml::xml_node<>* node, MorphKeyFrame* kf )
-{
-	rapidxml::xml_attribute<>* attrib;
-
-	char* attrib_name;
-	char* attrib_value;
-
-	// write attributes:
-	
-	attrib_name = mDoc.allocate_string( "time" );
-	attrib_value = mDoc.allocate_string( toString<float>( kf->getTime() ).c_str() );
-	attrib = mDoc.allocate_attribute( attrib_name, attrib_value );
-	node->append_attribute(attrib);
-
-	attrib_name = mDoc.allocate_string( "MTWeights" );
-	attrib_value = mDoc.allocate_string( writeVector( kf->getMorphTargetWeights() ).c_str() );
-	attrib = mDoc.allocate_attribute( attrib_name, attrib_value );
-	node->append_attribute(attrib);
-
-	return true;
-}
-
 std::string ZHASerializer::writeVector( const Vector& v )
 {
 	std::string zhtr;
@@ -437,7 +347,6 @@ bool ZHASerializer::writeAnnotations( rapidxml::xml_node<>* node )
 	ParamTransitionAnnotationContainer* ptannots = mAnim->getParamTransitionAnnotations();
 	PlantConstraintAnnotationContainer* pcannots = mAnim->getPlantConstraintAnnotations();
 	SimEventAnnotationContainer* seannots = mAnim->getSimEventAnnotations();
-	GesturePhaseAnnotationContainer* gpannots = mAnim->getGesturePhaseAnnotations();
 
 	// write attributes:
 
@@ -490,19 +399,6 @@ bool ZHASerializer::writeAnnotations( rapidxml::xml_node<>* node )
 		node->append_node(child);
 
 		if( !writeAnnotation( child, seani.next() ) )
-		{
-			return false;
-		}
-	}
-
-	GesturePhaseAnnotationContainer::AnnotationConstIterator gpani = gpannots->getAnnotationConstIterator();
-	while( !gpani.end() )
-	{
-		node_name = mDoc.allocate_string( "Annotation" );
-		child = mDoc.allocate_node( rapidxml::node_element, node_name );
-		node->append_node(child);
-
-		if( !writeAnnotation( child, gpani.next() ) )
 		{
 			return false;
 		}
@@ -566,22 +462,13 @@ bool ZHASerializer::writeAnnotation( rapidxml::xml_node<>* node, AnimationAnnota
 		if( !writePlantConstraintAnnotation( child, static_cast<PlantConstraintAnnotation*>(annot) ) )
 			return false;
 	}
-	else if( annot->getClassId() == AnimAnnot_SimEvent )
+	else // if( annot->getClassId() == AnimAnnot_SimEvent )
 	{
 		node_name = mDoc.allocate_string( "SimEventAnnotation" );
 		child = mDoc.allocate_node( rapidxml::node_element, node_name );
 		node->append_node(child);
 
 		if( !writeSimEventAnnotation( child, static_cast<SimEventAnnotation*>(annot) ) )
-			return false;
-	}
-	else // if( annot->getClassId() == AnimAnnot_GesturePhase )
-	{
-		node_name = mDoc.allocate_string( "GesturePhaseAnnotation" );
-		child = mDoc.allocate_node( rapidxml::node_element, node_name );
-		node->append_node(child);
-
-		if( !writeGesturePhaseAnnotation( child, static_cast<GesturePhaseAnnotation*>(annot) ) )
 			return false;
 	}
 
@@ -596,10 +483,8 @@ std::string ZHASerializer::writeAnnotationClass( AnimationAnnotationClass annotC
 		return "ParamTransition";
 	else if( annotClass == AnimAnnot_PlantConstraint )
 		return "PlantConstraint";
-	else if( annotClass == AnimAnnot_SimEvent )
+	else // if( annotClass == AnimAnnot_SimEvent )
 		return "SimEvent";
-	else // if( annotClass == AnimAnnot_GesturePhase )
-		return "GesturePhase";
 }
 
 bool ZHASerializer::writeTransitionAnnotation( rapidxml::xml_node<>* node, TransitionAnnotation* annot )
@@ -639,7 +524,7 @@ bool ZHASerializer::writeTransitionAnnotation( rapidxml::xml_node<>* node, Trans
 	return true;
 }
 
-std::string ZHASerializer::writeSituation( const Model::Situation& sit )
+std::string ZHASerializer::writeSituation( const Skeleton::Situation& sit )
 {
 	return toString<float>( sit.getPosX() ) + " " + toString<float>( sit.getPosZ() ) + " " + toString<float>( sit.getOrientY() );
 }
@@ -735,43 +620,6 @@ bool ZHASerializer::writeSimEventAnnotation( rapidxml::xml_node<>* node, SimEven
 	// write children:
 
 	return true;
-}
-
-bool ZHASerializer::writeGesturePhaseAnnotation( rapidxml::xml_node<>* node, GesturePhaseAnnotation* annot )
-{
-	rapidxml::xml_attribute<>* attrib;
-
-	char* attrib_name;
-	char* attrib_value;
-
-	// write attributes:
-	
-	attrib_name = mDoc.allocate_string( "gesturePhase" );
-	attrib_value = mDoc.allocate_string( writeAnimationGesturePhase( annot->getGesturePhase() ).c_str() );
-	attrib = mDoc.allocate_attribute( attrib_name, attrib_value );
-	node->append_attribute(attrib);
-
-	// write children:
-
-	return true;
-}
-
-std::string ZHASerializer::writeAnimationGesturePhase( AnimationGesturePhase gestPhase )
-{
-	if( gestPhase == GesturePhase_Start )
-		return "Start";
-	else if( gestPhase == GesturePhase_Ready )
-		return "Ready";
-	else if( gestPhase == GesturePhase_StrokeStart )
-		return "StrokeStart";
-	else if( gestPhase == GesturePhase_Stroke )
-		return "Stroke";
-	else if( gestPhase == GesturePhase_StrokeEnd )
-		return "StrokeEnd";
-	else if( gestPhase == GesturePhase_Relax )
-		return "Relax";
-	else // if( gestPhase == GesturePhase_End )
-		return "End";
 }
 
 bool ZHASerializer::writeAnimationSpaces( rapidxml::xml_node<>* node )

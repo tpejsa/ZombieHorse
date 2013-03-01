@@ -28,12 +28,11 @@ SOFTWARE.
 #include "zhAnimationSet.h"
 #include "zhAnimationAnnotation.h"
 #include "zhBoneAnimationTrack.h"
-#include "zhMeshAnimationTrack.h"
 
 namespace zh
 {
 
-class Model;
+class Skeleton;
 
 enum KFInterpolationMethod
 {
@@ -51,8 +50,6 @@ public:
 
 	typedef MapIterator< std::map<unsigned short, BoneAnimationTrack*> > BoneTrackIterator;
 	typedef MapConstIterator< std::map<unsigned short, BoneAnimationTrack*> > BoneTrackConstIterator;
-	typedef MapIterator< std::map<unsigned short, MeshAnimationTrack*> > MeshTrackIterator;
-	typedef MapConstIterator< std::map<unsigned short, MeshAnimationTrack*> > MeshTrackConstIterator;
 
 	static const std::set<unsigned short> EmptyBoneMask;
 
@@ -136,56 +133,6 @@ public:
 	BoneTrackConstIterator getBoneTrackConstIterator() const;
 
 	/**
-	* Creates an animation track for the mesh with the specified ID.
-	*
-	* @param meshId Mesh ID.
-	* @return Pointer to the animation track.
-	*/
-	MeshAnimationTrack* createMeshTrack( unsigned short meshId );
-
-	/**
-	* Deletes the specified mesh animation track.
-	*
-	* @param meshId Mesh ID.
-	*/
-	void deleteMeshTrack( unsigned short meshId );
-
-	/**
-	* Deletes all mesh animation tracks in this animation.
-	*/
-	void deleteAllMeshTracks();
-
-	/**
-	* Returns true if the specified mesh animation track exists,
-	* otherwise false.
-	*/
-	bool hasMeshTrack( unsigned short meshId ) const;
-
-	/**
-	* Gets the specified mesh animation track.
-	*
-	* @param meshId Mesh ID.
-	* @return Pointer to the animation track or
-	* NULL if the track doesn't exist.
-	*/
-	MeshAnimationTrack* getMeshTrack( unsigned short meshId ) const;
-
-	/**
-	* Gets the number of mesh animation tracks in this animation.
-	*/
-	unsigned int getNumMeshTracks() const;
-
-	/**
-	* Gets an iterator over the map of mesh animation tracks.
-	*/
-	MeshTrackIterator getMeshTrackIterator();
-
-	/**
-	* Gets a const iterator over the map of mesh animation tracks.
-	*/
-	MeshTrackConstIterator getMeshTrackConstIterator() const;
-
-	/**
 	* Gets the interpolation method used for key-frame values.
 	*/
 	KFInterpolationMethod getKFInterpolationMethod() const;
@@ -201,16 +148,16 @@ public:
 	float getLength() const;
 
 	/**
-	* Applies the animation to the specified model.
+	* Applies the animation to the specified skeleton.
 	* 
-	* @param model Pointer to the Model which should be updated
+	* @param skel Pointer to the Skeleton which should be updated
 	* by this animation.
 	* @param time Time at which this animation should be applied.
 	* @param weight Blend weight with which this animation should be applied.
 	* @param scale Scaling factor applied to this animation.
 	* @param boneMask Bone mask. Animation is not applied to masked bones.
 	*/
-	void apply( Model* model, float time, float weight = 1.f, float scale = 1.f,
+	void apply( Skeleton* skel, float time, float weight = 1.f, float scale = 1.f,
 		const std::set<unsigned short> boneMask = EmptyBoneMask ) const;
 
 	/**
@@ -234,11 +181,6 @@ public:
 	SimEventAnnotationContainer* getSimEventAnnotations() const;
 
 	/**
-	* Gets the container of gesture phase annotations.
-	*/
-	GesturePhaseAnnotationContainer* getGesturePhaseAnnotations() const;
-
-	/**
 	* Calculates the resource memory usage.
 	*/
 	size_t _calcMemoryUsage() const;
@@ -258,14 +200,12 @@ private:
 	AnimationSetPtr mAnimSet;
 
 	std::map<unsigned short, BoneAnimationTrack*> mBoneTracks;
-	std::map<unsigned short, MeshAnimationTrack*> mMeshTracks;
 	KFInterpolationMethod mInterpMethod;
 
 	TransitionAnnotationContainer* mTransAnnots;
 	ParamTransitionAnnotationContainer* mParamTransAnnots;
 	PlantConstraintAnnotationContainer* mPlantConstrAnnots;
 	SimEventAnnotationContainer* mSimEventAnnots;
-	GesturePhaseAnnotationContainer* mGestPhaseAnnots;
 
 };
 

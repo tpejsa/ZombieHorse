@@ -32,7 +32,7 @@ SOFTWARE.
 namespace zh
 {
 
-class Model;
+class Skeleton;
 class MatchGraph;
 
 /**
@@ -48,10 +48,10 @@ public:
 	/**
 	* Constructor.
 	*
-	* @param mdl Pointer to the character model.
+	* @param skel Pointer to the character skeleton.
 	* @param animSpace Pointer to the animation space.
 	*/
-	AnimationSpaceBuilder( Model* mdl, AnimationSpace* animSpace );
+	AnimationSpaceBuilder( Skeleton* skel, AnimationSpace* animSpace );
 
 	/**
 	* Destructor.
@@ -59,11 +59,11 @@ public:
 	virtual ~AnimationSpaceBuilder();
 
 	/**
-	* Gets the character model.
+	* Gets the character skeleton.
 	*
-	* @return Pointer to the model.
+	* @return Pointer to the skeleton.
 	*/
-	Model* getModel() const { return mMdl; }
+	Skeleton* getSkeleton() const { return mSkel; }
 
 	/**
 	* Gets the animation space.
@@ -179,7 +179,7 @@ protected:
 	virtual void _copyAnnotsToBaseAnim( const AnimationSegment& animSeg, AnimationAnnotationContainer* srcAnnots,
 		AnimationAnnotationContainer* trgAnnots );
 
-	Model* mMdl;
+	Skeleton* mSkel;
 	AnimationSpace* mAnimSpace;
 
 	bool mBuildBlendCurves;

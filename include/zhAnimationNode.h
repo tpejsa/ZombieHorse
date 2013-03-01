@@ -26,8 +26,7 @@ SOFTWARE.
 #include "zhPrereq.h"
 #include "zhIterators.h"
 #include "zhObjectFactory.h"
-#include "zhAnimationTreeManager.h"
-#include "zhModel.h"
+#include "zhSkeleton.h"
 #include "zhAnimation.h"
 #include "zhAnimationNodeEvents.h"
 
@@ -35,18 +34,13 @@ SOFTWARE.
 #define zhAnimationSampler_ClassName "AnimationSampler"
 #define zhAnimationBlender_ClassId 2
 #define zhAnimationBlender_ClassName "AnimationBlender"
-#define zhAnimationMixer_ClassId 3
-#define zhAnimationMixer_ClassName "AnimationMixer"
-#define zhAnimationTransitionBlender_ClassId 4
+#define zhAnimationTransitionBlender_ClassId 3
 #define zhAnimationTransitionBlender_ClassName "AnimationTransitionBlender"
-#define zhFaceController_ClassId 5
-#define zhFaceController_ClassName "FaceController"
 
 namespace zh
 {
 
-class Model;
-class AnimationTreeInstance;
+class AnimationTree;
 
 /**
 * @brief Base class for animation tree nodes.
@@ -54,8 +48,7 @@ class AnimationTreeInstance;
 class zhDeclSpec AnimationNode : public TransitionAnnotEmitter,
 	public ParamTransitionAnnotEmitter,
 	public PlantConstraintAnnotEmitter,
-	public SimEventAnnotEmitter,
-	public GesturePhaseAnnotEmitter
+	public SimEventAnnotEmitter
 {
 
 	friend class AnimationTree;
@@ -328,22 +321,17 @@ public:
 	virtual SimEventAnnotationContainer* getSimEventAnnotations() const;
 
 	/**
-	* Gets the container of gesture phase annotations.
-	*/
-	virtual GesturePhaseAnnotationContainer* getGesturePhaseAnnotations() const;
-
-	/**
 	* Gets this animation's origin in space.
 	*
 	* @remark This property enables the animation to be
 	* translated and rotated in space.
 	*/
-	virtual const Model::Situation& getOrigin() const;
+	virtual const Skeleton::Situation& getOrigin() const;
 
 	/**
 	* Sets this animation's origin in space.
 	*/
-	virtual void setOrigin( const Model::Situation& origin );
+	virtual void setOrigin( const Skeleton::Situation& origin );
 
 	/**
 	* Masks the specified bone, setting its blend weight to 0.
@@ -374,8 +362,6 @@ public:
 	* Updates this animation node with elapsed time.
 	*
 	* @param dt Elapsed time.
-	* @param alignTransf 2D aligning transformation that will be applied
-	* to the animation's mover channel.
 	*/
 	virtual void update( float dt );
 
@@ -388,14 +374,14 @@ public:
 	virtual void apply( float weight = 1.f, const std::set<unsigned short>& boneMask = Animation::EmptyBoneMask ) const;
 
 	/**
-	* Samples this animation's mover at the current time.
+	* Samples this animation's mover channel at the current time.
 	*
 	* @return Mover value (with origin transformation applied)
 	* @remark This is a helper method used for alignment of consecutive animations.
 	* Any node that represents an animation with a mover channel
 	* should override this method, otherwise alignment won't work correctly.
 	*/
-	virtual Model::Situation _sampleMover() const;
+	virtual Skeleton::Situation _sampleMover() const;
 
 	/**
 	* Computes the origin that realigns this animation to the specified character situation.
@@ -403,7 +389,7 @@ public:
 	* @return Mover value (with origin transformation applied).
 	* @remark This is a helper function used for alignment of consecutive animations.
 	*/
-	virtual Model::Situation _getRealignedOrigin( const Model::Situation& sit ) const;
+	virtual Skeleton::Situation _getRealignedOrigin( const Skeleton::Situation& sit ) const;
 
 	/**
 	* Calculates the AnimationNode memory usage.
@@ -475,7 +461,6 @@ protected:
 	ParamTransitionAnnotationContainer* mParamTransAnnots;
 	PlantConstraintAnnotationContainer* mPlantConstrAnnots;
 	SimEventAnnotationContainer* mSimEventAnnots;
-	GesturePhaseAnnotationContainer* mGestPhaseAnnots;
 
 	std::set<unsigned short> mBoneMask;
 

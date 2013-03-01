@@ -43,9 +43,6 @@ class zhDeclSpec AnimationBlender : public AnimationNode
 
 public:
 
-	typedef MapIterator< std::map<unsigned short, BoneIKController*> > PlantConstrControllerIterator;
-	typedef MapConstIterator< std::map<unsigned short, BoneIKController*> > PlantConstrControllerConstIterator;
-
 	zhDeclare_AnimationNode( AnimationBlender, zhAnimationBlender_ClassId, zhAnimationBlender_ClassName )
 	
 	/**
@@ -107,12 +104,12 @@ public:
 	* @remark This property enables the animation to be
 	* translated and rotated in space.
 	*/
-	const Model::Situation& getOrigin() const;
+	const Skeleton::Situation& getOrigin() const;
 
 	/**
 	* Sets this animation's origin in space.
 	*/
-	void setOrigin( const Model::Situation& origin );
+	void setOrigin( const Skeleton::Situation& origin );
 
 	/**
 	* Gets the blend weight of the specified child node.
@@ -279,14 +276,14 @@ public:
 	virtual PlantConstrControllerConstIterator getPlantConstrControllerConstIterator() const;
 
 	/**
-	* Samples this animation's mover at the current time.
+	* Samples this animation's mover channel at the current time.
 	*
 	* @return Mover value (with origin transformation applied)
 	* @remark This is a helper method used for alignment of consecutive animations.
 	* Any node that represents an animation with a mover channel
 	* should override this method, otherwise alignment won't work correctly.
 	*/
-	Model::Situation _sampleMover() const;
+	Skeleton::Situation _sampleMover() const;
 
 	/**
 	* Calculates the AnimationNode memory usage.
@@ -345,7 +342,7 @@ protected:
 	void _getTWCurvePosition( float u, unsigned int& cpi, float& t ) const; ///< Compute position on the timewarp curve.
 
 	float mTWCurveTime; ///< Current time on the timewarp curve.
-	Model::Situation mOrigin;
+	Skeleton::Situation mOrigin;
 
 	AnimationSetPtr mAnimSet;
 	unsigned short mAnimSpaceId;
@@ -356,7 +353,6 @@ protected:
 	bool mParamEnabled;
 
 	bool mUseBlendCurves;
-	std::map<unsigned short, BoneIKController*> mPlantConstrControllers;
 
 };
 
@@ -397,13 +393,6 @@ inline bool matchAnnotations<SimEventAnnotation>(
 		annot1->getEventId() == annot2->getEventId();
 }
 
-template <>
-inline bool matchAnnotations<GesturePhaseAnnotation>(
-	GesturePhaseAnnotation* annot1, GesturePhaseAnnotation* annot2 )
-{
-	return annot1->getGesturePhase() == annot2->getGesturePhase();
-}
-
 template <class AT>
 void resetAnnotation( AT* annot )
 {
@@ -418,7 +407,7 @@ inline void resetAnnotation<TransitionAnnotation>( TransitionAnnotation* annot )
 	annot->setEndTime(0);
 
 	annot->setTargetTime(0);
-	annot->setAlignTransf( Model::Situation() );
+	annot->setAlignTransf( Skeleton::Situation() );
 }
 
 template <>
@@ -430,7 +419,7 @@ inline void resetAnnotation<ParamTransitionAnnotation>( ParamTransitionAnnotatio
 	annot->setLowerBound( Vector( annot->getLowerBound() ).null() );
 	annot->setUpperBound( Vector( annot->getUpperBound() ).null() );
 	annot->setTargetTime(0);
-	annot->setAlignTransf( Model::Situation() );
+	annot->setAlignTransf( Skeleton::Situation() );
 }
 
 template <class AT>
@@ -449,7 +438,7 @@ inline void blendAnnotations<TransitionAnnotation>( TransitionAnnotation* annot1
 	annot1->setTargetTime( annot1->getTargetTime() + annot2->getTargetTime() * weight );
 	Vector3 pos = annot1->getAlignTransf().getPosition() + annot2->getAlignTransf().getPosition() * weight;
 	Quat orient = annot1->getAlignTransf().getOrientation() * Quat().slerp( annot2->getAlignTransf().getOrientation(), weight );
-	annot1->setAlignTransf( Model::Situation( pos, orient ) );
+	annot1->setAlignTransf( Skeleton::Situation( pos, orient ) );
 }
 
 template <>
@@ -463,7 +452,7 @@ inline void blendAnnotations<ParamTransitionAnnotation>( ParamTransitionAnnotati
 	annot1->setTargetTime( annot1->getTargetTime() + annot2->getTargetTime() * weight );
 	Vector3 pos = annot1->getAlignTransf().getPosition() + annot2->getAlignTransf().getPosition() * weight;
 	Quat orient = annot1->getAlignTransf().getOrientation() * Quat().slerp( annot2->getAlignTransf().getOrientation(), weight );
-	annot1->setAlignTransf( Model::Situation( pos, orient ) );
+	annot1->setAlignTransf( Skeleton::Situation( pos, orient ) );
 }
 
 }

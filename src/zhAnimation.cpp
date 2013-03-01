@@ -21,7 +21,7 @@ SOFTWARE.
 ******************************************************************************/
 
 #include "zhAnimation.h"
-#include "zhModel.h"
+#include "zhSkeleton.h"
 
 namespace zh
 {
@@ -37,19 +37,16 @@ Animation::Animation( unsigned short id, const std::string& name, AnimationSetPt
 	mParamTransAnnots = new ParamTransitionAnnotationContainer();
 	mPlantConstrAnnots = new PlantConstraintAnnotationContainer();
 	mSimEventAnnots = new SimEventAnnotationContainer();
-	mGestPhaseAnnots = new GesturePhaseAnnotationContainer();
 }
 
 Animation::~Animation()
 {
 	deleteAllBoneTracks();
-	deleteAllMeshTracks();
 
 	delete mTransAnnots;
 	delete mParamTransAnnots;
 	delete mPlantConstrAnnots;
 	delete mSimEventAnnots;
-	delete mGestPhaseAnnots;
 }
 
 unsigned short Animation::getId() const
@@ -127,66 +124,6 @@ Animation::BoneTrackConstIterator Animation::getBoneTrackConstIterator() const
 	return BoneTrackConstIterator(mBoneTracks);
 }
 
-MeshAnimationTrack* Animation::createMeshTrack( unsigned short meshId )
-{
-	zhAssert( !hasMeshTrack(meshId) );
-
-	MeshAnimationTrack* mat = new MeshAnimationTrack( meshId, this );
-	mMeshTracks.insert( make_pair( mat->getMeshId(), mat ) );
-
-	return mat;
-}
-
-void Animation::deleteMeshTrack( unsigned short meshId )
-{
-	std::map<unsigned short, MeshAnimationTrack*>::iterator mti = mMeshTracks.find(meshId);
-
-	if( mti != mMeshTracks.end() )
-	{
-		delete mti->second;
-		mMeshTracks.erase(mti);
-	}
-}
-
-void Animation::deleteAllMeshTracks()
-{
-	for( std::map<unsigned short, MeshAnimationTrack*>::iterator mti = mMeshTracks.begin();
-		mti != mMeshTracks.end(); ++mti )
-		delete mti->second;
-
-	mMeshTracks.clear();
-}
-
-bool Animation::hasMeshTrack( unsigned short meshId ) const
-{
-	return mMeshTracks.count(meshId) > 0;
-}
-
-MeshAnimationTrack* Animation::getMeshTrack( unsigned short meshId ) const
-{
-	std::map<unsigned short, MeshAnimationTrack*>::const_iterator mti = mMeshTracks.find(meshId);
-
-	if( mti != mMeshTracks.end() )
-		return mti->second;
-
-	return NULL;
-}
-
-unsigned int Animation::getNumMeshTracks() const
-{
-	return mMeshTracks.size();
-}
-
-Animation::MeshTrackIterator Animation::getMeshTrackIterator()
-{
-	return MeshTrackIterator(mMeshTracks);
-}
-
-Animation::MeshTrackConstIterator Animation::getMeshTrackConstIterator() const
-{
-	return MeshTrackConstIterator(mMeshTracks);
-}
-
 KFInterpolationMethod Animation::getKFInterpolationMethod() const
 {
 	return mInterpMethod;
@@ -215,22 +152,13 @@ float Animation::getLength() const
 			length = cur_length;
 	}
 
-	MeshTrackConstIterator mti = getMeshTrackConstIterator();
-	while( !mti.end() )
-	{
-		if( ( cur_length = mti.next()->getLength() ) > length )
-			length = cur_length;
-	}
-
 	return length;
 }
 
-void Animation::apply( Model* model, float time, float weight, float scale,
+void Animation::apply( Skeleton* skel, float time, float weight, float scale,
 					  const std::set<unsigned short> boneMask ) const
 {
-	zhAssert( model != NULL );
-
-	Skeleton* skel = model->getSkeleton();
+	zhAssert( skel != NULL );
 
 	// apply bone tracks
 	BoneTrackConstIterator bti = getBoneTrackConstIterator();
@@ -238,14 +166,7 @@ void Animation::apply( Model* model, float time, float weight, float scale,
 	{
 		BoneAnimationTrack* bat = bti.next();
 		if( boneMask.count( bat->getBoneId() ) <= 0 )
-			bat->apply( model, time, weight, scale );
-	}
-
-	// apply mesh tracks
-	MeshTrackConstIterator mti = getMeshTrackConstIterator();
-	while( !mti.end() )
-	{
-		mti.next()->apply( model, time, weight, scale );
+			bat->apply( skel, time, weight, scale );
 	}
 }
 
@@ -269,11 +190,6 @@ SimEventAnnotationContainer* Animation::getSimEventAnnotations() const
 	return mSimEventAnnots;
 }
 
-GesturePhaseAnnotationContainer* Animation::getGesturePhaseAnnotations() const
-{
-	return mGestPhaseAnnots;
-}
-
 size_t Animation::_calcMemoryUsage() const
 {
 	size_t mem_usage = 0;
@@ -287,25 +203,12 @@ size_t Animation::_calcMemoryUsage() const
 			( sizeof(float) + 2 * sizeof(Vector3) + sizeof(Quat) ) );
 	}
 
-	MeshTrackConstIterator mti = getMeshTrackConstIterator();
-	while( !mti.end() )
-	{
-		MeshAnimationTrack* mat = mti.next();
-		
-		if( mat->getNumKeyFrames() <= 0 )
-			continue;
-
-		mem_usage += ( mti.next()->getNumKeyFrames() * sizeof(float) *
-			((MorphKeyFrame*)mat->getKeyFrame(0))->getMorphTargetWeights().size() );
-	}
-
 	// Compute memory usage from annotations:
 
 	mem_usage += mTransAnnots->getNumAnnotations() * sizeof(TransitionAnnotation);
 	mem_usage += mParamTransAnnots->getNumAnnotations() * sizeof(ParamTransitionAnnotation);
 	mem_usage += mPlantConstrAnnots->getNumAnnotations() * sizeof(PlantConstraintAnnotation);
 	mem_usage += mSimEventAnnots->getNumAnnotations() * sizeof(SimEventAnnotation);
-	mem_usage += mGestPhaseAnnots->getNumAnnotations() * sizeof(GesturePhaseAnnotation);
 
 	return mem_usage;
 }
@@ -316,7 +219,7 @@ void Animation::_clone( Animation* clonePtr ) const
 
 	// Copy animation tracks:
 
-	// create empty bone tracks
+	// Create empty bone tracks
 	BoneTrackConstIterator bti = getBoneTrackConstIterator();
 	while( !bti.end() )
 	{
@@ -324,15 +227,7 @@ void Animation::_clone( Animation* clonePtr ) const
 		clonePtr->createBoneTrack( bat->getBoneId() );
 	}
 
-	// create empty mesh tracks
-	MeshTrackConstIterator mti = getMeshTrackConstIterator();
-	while( !mti.end() )
-	{
-		MeshAnimationTrack* mat = mti.next();
-		clonePtr->createMeshTrack( mat->getMeshId() );
-	}
-
-	// copy bone tracks
+	// Copy bone tracks
 	bti = getBoneTrackConstIterator();
 	while( !bti.end() )
 	{
@@ -349,29 +244,13 @@ void Animation::_clone( Animation* clonePtr ) const
 		}
 	}
 
-	// copy mesh tracks
-	mti = getMeshTrackConstIterator();
-	while( !mti.end() )
-	{
-		MeshAnimationTrack* mat = mti.next();
-		MeshAnimationTrack* cmat = clonePtr->getMeshTrack( mat->getMeshId() );
-
-		for( unsigned int kfi = 0; kfi < mat->getNumKeyFrames(); ++kfi )
-		{
-			MorphKeyFrame* kf = ( MorphKeyFrame* )mat->getKeyFrame(kfi);
-			MorphKeyFrame* ckf = ( MorphKeyFrame* )cmat->createKeyFrame( kf->getTime() );
-			ckf->setMorphTargetWeights( kf->getMorphTargetWeights() );
-		}
-	}
-
 	clonePtr->setKFInterpolationMethod( mInterpMethod );
 
-	// copy local annotations
+	// Copy local annotations
 	mTransAnnots->_clone( clonePtr->mTransAnnots );
 	mParamTransAnnots->_clone( clonePtr->mParamTransAnnots );
 	mPlantConstrAnnots->_clone( clonePtr->mPlantConstrAnnots );
 	mSimEventAnnots->_clone( clonePtr->mSimEventAnnots );
-	mGestPhaseAnnots->_clone( clonePtr->mGestPhaseAnnots );
 }
 
 }

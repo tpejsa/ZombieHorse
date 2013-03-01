@@ -21,7 +21,7 @@ SOFTWARE.
 ******************************************************************************/
 
 #include "zhBoneAnimationTrack.h"
-#include "zhModel.h"
+#include "zhSkeleton.h"
 #include "zhAnimation.h"
 
 namespace zh
@@ -139,10 +139,9 @@ void BoneAnimationTrack::getInterpolatedKeyFrame( float time, KeyFrame* kf ) con
 	}
 }
 
-void BoneAnimationTrack::apply( Model* model, float time, float weight, float scale ) const
+void BoneAnimationTrack::apply( Skeleton* skeleton, float time, float weight, float scale ) const
 {
 	TransformKeyFrame tkf( time, 0 );
-	Skeleton* skel = model->getSkeleton();
 	Bone* bone = skel->getBone(mBoneId);
 
 	getInterpolatedKeyFrame( time, &tkf );

@@ -24,12 +24,12 @@ SOFTWARE.
 #define __zhPlantConstrDetector_h__
 
 #include "zhPrereq.h"
-#include "zhIKSolver.h"
+//#include "zhIKSolver.h"
 
 namespace zh
 {
 
-class Model;
+class Skeleton;
 class Animation;
 
 /**
@@ -45,10 +45,10 @@ public:
 	/**
 	* Constructor.
 	*
-	* @param mdl Pointer to the character model.
+	* @param skel Pointer to the character skeleton.
 	* @param anim Pointer to 
 	*/
-	PlantConstrDetector( Model* mdl, Animation* anim );
+	PlantConstrDetector( Skeleton* skel, Animation* anim );
 
 	/**
 	* Destructor.
@@ -56,9 +56,9 @@ public:
 	virtual ~PlantConstrDetector();
 
 	/**
-	* Gets the pointer to the character model.
+	* Gets the pointer to the character skeleton.
 	*/
-	Model* getModel() const { return mMdl; }
+	Skeleton* getSkeleton() const { return mSkel; }
 
 	/**
 	* Gets the pointer to the animation.
@@ -107,30 +107,30 @@ public:
 	* Gets the IK solver that is used for
 	* footskate cleanup.
 	*/
-	IKSolver* getIKSolver() const;
+	//IKSolver* getIKSolver() const;
 
 	/**
 	* Sets the IK solver that is used for
 	* footskate cleanup.
 	*/
-	void setIKSolver( IKSolverClass solver );
+	//void setIKSolver( IKSolverClass solver );
 
 	/**
 	* Cleans up footskate artifacts in the animation.
 	*/
-	virtual void cleanup();
+	//virtual void cleanup();
 
 protected:
 
 	void _createPlantConstr( float startTime, float endTime, unsigned short boneId );
 
-	Model* mMdl;
+	Skeleton* mSkel;
 	Animation* mAnim;
 
 	float mMaxPosChange;
 	float mMinConstrLength;
 
-	IKSolver* mSolver;
+	//IKSolver* mSolver;
 
 };
 

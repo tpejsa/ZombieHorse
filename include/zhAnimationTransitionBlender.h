@@ -65,10 +65,13 @@ public:
 		* @param endTime Transition end time.
 		* @param targetTime Transition start time in the target animation.
 		* @param targetNode Pointer to the target animation node.
-		* @param targetParams Parameter values in the target animation node (ignored if targetNode is not parametrized).
+		* @param targetParams Parameter values in the target animation node
+		* (ignored if targetNode is not parametrized).
 		*/
-		Transition( float startTime, float endTime, float targetTime, AnimationNode* targetNode, const Vector& targetParams )
-			: mStartTime(startTime), mEndTime(endTime), mTargetTime(targetTime), mTargetNode(targetNode), mTargetParams(targetParams)
+		Transition( float startTime, float endTime,
+			float targetTime, AnimationNode* targetNode, const Vector& targetParams )
+			: mStartTime(startTime), mEndTime(endTime),
+			mTargetTime(targetTime), mTargetNode(targetNode), mTargetParams(targetParams)
 
 		{
 		}
@@ -171,12 +174,12 @@ public:
 	* @remark This property enables the animation to be
 	* translated and rotated in space.
 	*/
-	const Model::Situation& getOrigin() const;
+	const Skeleton::Situation& getOrigin() const;
 
 	/**
 	* Sets this animation's origin in space.
 	*/
-	void setOrigin( const Model::Situation& origin );
+	void setOrigin( const Skeleton::Situation& origin );
 
 	/**
 	* Gets a pointer to the currently active animation node.
@@ -304,7 +307,7 @@ public:
 	/**
 	* Gets the current origin for the target animation.
 	*/
-	virtual const Model::Situation& _getNextOrigin() const;
+	virtual const Skeleton::Situation& _getNextOrigin() const;
 
 	/**
 	* If true, a transition has just started.
@@ -324,7 +327,7 @@ public:
 	* Any node that represents an animation with a mover channel
 	* should override this method, otherwise alignment won't work correctly.
 	*/
-	Model::Situation _sampleMover() const;
+	Skeleton::Situation _sampleMover() const;
 
 	/**
 	* Calculates the AnimationNode memory usage.
@@ -374,7 +377,7 @@ protected:
 	AnimationNode* mDefaultNode;
 
 	float mNextTime;
-	Model::Situation mNextOrigin;
+	Skeleton::Situation mNextOrigin;
 	Vector mNextParams;
 	mutable bool mTransStarted;
 	mutable bool mTransFinished;

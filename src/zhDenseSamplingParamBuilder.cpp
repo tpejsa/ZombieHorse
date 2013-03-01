@@ -21,8 +21,9 @@ SOFTWARE.
 ******************************************************************************/
 
 #include "zhDenseSamplingParamBuilder.h"
+#include "zhMath.h"
 #include "zhString.h"
-#include "zhModel.h"
+#include "zhSkeleton.h"
 #include "zhAnimationSpace.h"
 
 #include "ctime"
@@ -32,8 +33,8 @@ SOFTWARE.
 namespace zh
 {
 
-DenseSamplingParamBuilder::DenseSamplingParamBuilder( Model* mdl, AnimationSpace* animSpace )
-: ParamAnimationBuilder( mdl, animSpace ), mMaxExtrap(0.15f), mMinSampleDist(0.00001f)
+DenseSamplingParamBuilder::DenseSamplingParamBuilder( Skeleton* skel, AnimationSpace* animSpace )
+: ParamAnimationBuilder( skel, animSpace ), mMaxExtrap(0.15f), mMinSampleDist(0.00001f)
 {
 }
 

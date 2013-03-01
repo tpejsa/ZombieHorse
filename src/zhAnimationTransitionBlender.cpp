@@ -70,16 +70,16 @@ float AnimationTransitionBlender::getPlayLength() const
 	return cn->getPlayLength();
 }
 
-const Model::Situation& AnimationTransitionBlender::getOrigin() const
+const Skeleton::Situation& AnimationTransitionBlender::getOrigin() const
 {
 	AnimationNode* cn = getCurrentNode();
 	if( cn == NULL )
-		return Model::Situation::Identity;
+		return Skeleton::Situation::Identity;
 
 	return cn->getOrigin();
 }
 
-void AnimationTransitionBlender::setOrigin( const Model::Situation& origin )
+void AnimationTransitionBlender::setOrigin( const Skeleton::Situation& origin )
 {
 	AnimationNode* cn = getCurrentNode();
 	if( cn == NULL )
@@ -368,7 +368,7 @@ float AnimationTransitionBlender::_getNextTime() const
 	return mNextTime;
 }
 
-const Model::Situation& AnimationTransitionBlender::_getNextOrigin() const
+const Skeleton::Situation& AnimationTransitionBlender::_getNextOrigin() const
 {
 	return mNextOrigin;
 }
@@ -383,11 +383,11 @@ bool AnimationTransitionBlender::_getTransitionFinished() const
 	return mTransFinished;
 }
 
-Model::Situation AnimationTransitionBlender::_sampleMover() const
+Skeleton::Situation AnimationTransitionBlender::_sampleMover() const
 {
 	AnimationNode* cn = getCurrentNode();
 	if( cn == NULL )
-		return Model::Situation::Identity;
+		return Skeleton::Situation::Identity;
 
 	return cn->_sampleMover();
 }
@@ -608,7 +608,7 @@ void AnimationTransitionBlender::_applyNode( float weight, const std::set<unsign
 		mCurrentNode->apply( weight * mWeight, boneMask );
 
 		float ctime = 0;
-		Model::Situation corig;
+		Skeleton::Situation corig;
 		Vector cparams;
 		if( mCurrentNode == mNextNode )
 		{

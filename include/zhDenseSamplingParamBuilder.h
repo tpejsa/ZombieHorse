@@ -37,10 +37,10 @@ public:
 	/**
 	* Constructor.
 	*
-	* @param mdl Pointer to the character model.
+	* @param skel Pointer to the character skeleton.
 	* @param animSpace Pointer to the animation space.
 	*/
-	DenseSamplingParamBuilder( Model* mdl, AnimationSpace* animSpace );
+	DenseSamplingParamBuilder( Skeleton* skel, AnimationSpace* animSpace );
 
 	/**
 	* Destructor.

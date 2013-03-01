@@ -24,36 +24,21 @@ SOFTWARE.
 #include "zhMemoryPool.h"
 #include "zhAnimationManager.h"
 #include "zhAnimation.h"
-#include "zhAnimationSpace.h"
-#include "zhAnimationTreeManager.h"
-#include "zhAnimationSampler.h"
-#include "zhFaceController.h"
-#include "zhAnimationMixer.h"
-#include "zhAnimationBlender.h"
-#include "zhAnimationTransitionBlender.h"
-#include "zhBoneTransformController.h"
-#include "zhBoneIKController.h"
+#include "zhAnimationTree.h"
 #include "zhZHALoader.h"
 #include "zhZHASerializer.h"
-#include "zhZHTLoader.h"
-#include "zhZHTSerializer.h"
-#include "zhModelController.h"
-#include "zhAnimationController.h"
+#include "zhBVHLoader.h"
 
 namespace zh
 {
 
 AnimationSystem::AnimationSystem()
 {
-	mPluginDir = "";
-	mCharCtrlFact = new CharacterControllerFactory();
 }
 
 AnimationSystem::~AnimationSystem()
 {
-	//unloadAllPlugins();
-	deleteAllCharacters();
-	delete mCharCtrlFact;
+	deleteAllSkeletons();
 }
 
 bool AnimationSystem::init( const std::string& cfgPath )
@@ -65,29 +50,17 @@ bool AnimationSystem::init( const std::string& cfgPath )
 	// create instances of various singletons
 	MemoryPool::Instance();
 	AnimationManager::Instance();
-	AnimationTreeManager::Instance();
+	AnimationTree::Instance();
 	
 	// register resource loaders and serializers
 	zhRegister_ResourceLoader( getAnimationManager(), ZHALoader );
 	zhRegister_ResourceSerializer( getAnimationManager(), ZHASerializer );
-	zhRegister_ResourceLoader( getAnimationTreeManager(), ZHTLoader );
-	zhRegister_ResourceSerializer( getAnimationTreeManager(), ZHTSerializer );
-
-	// register character controllers
-	zhRegister_CharacterController( ModelController );
-	zhRegister_CharacterController( AnimationController );
+	zhRegister_ResourceLoader( getAnimationManager(), BVHLoader );
 
 	// register animation nodes and bone controllers
 	zhRegister_AnimationNode( AnimationSampler );
-	zhRegister_AnimationNode( FaceController );
-	zhRegister_AnimationNode( AnimationMixer );
 	zhRegister_AnimationNode( AnimationBlender );
 	zhRegister_AnimationNode( AnimationTransitionBlender );
-	zhRegister_BoneController( BoneTransformController );
-	zhRegister_BoneController( BoneIKController );
-
-	// register default plug-ins
-	// TODO
 
 	// load config.xml (configuration settings, res. dirs, plugin dir, plugins)
 	// TODO
@@ -96,174 +69,107 @@ bool AnimationSystem::init( const std::string& cfgPath )
 	return true;
 }
 
-void AnimationSystem::update( float dt )
+Skeleton* AnimationSystem::createSkeleton( const std::string& name )
 {
-	CharacterIterator ci = getCharacterIterator();
-	while( !ci.end() )
-		ci.next()->update(dt);
-}
+	zhAssert( !hasSkeleton(name) );
 
-Character* AnimationSystem::createCharacter( const std::string& id )
-{
-	zhAssert( !hasCharacter(id) );
+	zhLog( "AnimationSystem", "createSkeleton",
+		"Creating Skeleton  %s.", name.c_str() );
 
-	zhLog( "AnimationSystem", "createCharacter",
-		"Creating Character  %s.", id.c_str() );
-
-	Character* ch = new Character(id);
-	mCharacters[id] = ch;
+	Skeleton* ch = new Skeleton(name);
+	mSkeletons[name] = ch;
 
 	return ch;
 }
 
-Character* AnimationSystem::createCharacter( const std::string& id, const std::string& templName )
+void AnimationSystem::deleteSkeleton( const std::string& name )
 {
-	zhAssert( !hasCharacter(id) );
-	zhAssert( hasCharacterTemplate(templName) );
+	zhLog( "AnimationSystem", "deleteSkeleton", "Deleting skeleton %s.", name.c_str() );
 
-	zhLog( "AnimationSystem", "createCharacter",
-		"Creating Character %s using template %s.", id.c_str(), templName.c_str() );
-
-	// create the Character
-	Character* ch = new Character(id);
-	mCharacters[id] = ch;
-
-	// create all CharacterControllers specified in the template
-	const CharacterTemplate& ch_templ = getCharacterTemplate(templName);
-	CharacterTemplate::ControllerConstIterator ccni = ch_templ.getControllerConstIterator();
-	while( !ccni.end() )
-	{
-		std::string ccn = ccni.next();
-
-		unsigned long ccid = mCharCtrlFact->findClassIdByName(ccn);
-		if( ccid == zhClass_NULL )
-		{
-			zhLog( "AnimationSystem", "createCharacter",
-				"ERROR: Failed to create CharacterController %s specified in template %s. CharacterController class not registered.",
-				ccn.c_str(), templName.c_str() );
-
-			zhSetErrorCode( SystemError_ClassNotRegistered );
-			continue;
-		}
-
-		ch->createController( ccid, ccn );
-	}
-
-	// set the controller update order specified in the template
-	std::list<CharacterController*> order;
-	for( std::list<std::string>::const_iterator uoi = ch_templ.getControllerUpdateOrder().begin();
-		uoi != ch_templ.getControllerUpdateOrder().end(); ++uoi )
-		order.push_back( ch->getController( *uoi ) );
-	ch->setControllerUpdateOrder(order);
-
-	zhSetErrorCode( SystemError_None );
-	return ch;
-}
-
-void AnimationSystem::deleteCharacter( const std::string& id )
-{
-	zhLog( "AnimationSystem", "deleteCharacter", "Deleting character %s.", id.c_str() );
-
-	Character* ch = getCharacter(id);
+	Skeleton* ch = getSkeleton(name);
 
 	if( ch == NULL )
 		return;
 
-	mCharacters.erase(id);
+	mSkeletons.erase(name);
 	delete ch;
 }
 
-void AnimationSystem::deleteAllCharacters()
+void AnimationSystem::deleteAllSkeletons()
 {
-	zhLog( "AnimationSystem", "deleteCharacter",
-		"Deleting all characters." );
+	zhLog( "AnimationSystem", "deleteSkeleton",
+		"Deleting all skeletons." );
 
-	for( std::map<std::string, Character*>::iterator ci = mCharacters.begin(); ci != mCharacters.end(); ++ci )
+	for( std::map<std::string, Skeleton*>::iterator ci = mSkeletons.begin(); ci != mSkeletons.end(); ++ci )
 		delete ci->second;
 
-	mCharacters.clear();
+	mSkeletons.clear();
 }
 
-bool AnimationSystem::hasCharacter( const std::string& id ) const
+bool AnimationSystem::hasSkeleton( const std::string& name ) const
 {
-	return mCharacters.count(id) > 0;
+	return mSkeletons.count(name) > 0;
 }
 
-Character* AnimationSystem::getCharacter( const std::string& id ) const
+Skeleton* AnimationSystem::getSkeleton( const std::string& name ) const
 {
-	std::map<std::string, Character*>::const_iterator ci = mCharacters.find(id);
+	std::map<std::string, Skeleton*>::const_iterator ci = mSkeletons.find(name);
 
-	if( ci != mCharacters.end() )
+	if( ci != mSkeletons.end() )
 		return ci->second;
 
 	return NULL;
 }
 
-AnimationSystem::CharacterIterator AnimationSystem::getCharacterIterator()
+AnimationSystem::SkeletonIterator AnimationSystem::getSkeletonIterator()
 {
-	return CharacterIterator( mCharacters );
+	return SkeletonIterator( mSkeletons );
 }
 
-AnimationSystem::CharacterConstIterator AnimationSystem::getCharacterConstIterator() const
+AnimationSystem::SkeletonConstIterator AnimationSystem::getSkeletonConstIterator() const
 {
-	return CharacterConstIterator( mCharacters );
+	return SkeletonConstIterator( mSkeletons );
 }
 
-unsigned int AnimationSystem::getNumCharacters() const
+unsigned int AnimationSystem::getNumSkeletons() const
 {
-	return mCharacters.size();
+	return mSkeletons.size();
 }
 
-void AnimationSystem::addCharacterTemplate( const CharacterTemplate& templ )
+AnimationSetPtr AnimationSystem::loadAnimationSet( const std::string& path, const std::string& skel )
 {
-	zhAssert( !hasCharacterTemplate( templ.getName() ) );
-
-	zhLog( "AnimationSystem", "addCharacterTemplate",
-		"Adding CharacterTemplate %s.", templ.getName().c_str() );
-
-	mCharacterTemplates.insert( make_pair( templ.getName(), templ ) );
 }
 
-void AnimationSystem::removeCharacterTemplate( const std::string& templName )
+void AnimationSystem::deleteAnimationSet( const std::string& name ) const
 {
-	std::map<std::string, CharacterTemplate>::iterator cti = mCharacterTemplates.find(templName);
-	if( cti != mCharacterTemplates.end() )
-	{
-		zhLog( "AnimationSystem", "removeCharacterTemplate",
-			"Removing CharacterTemplate %s.", templName.c_str() );
-
-		mCharacterTemplates.erase(cti);
-	}
 }
 
-void AnimationSystem::removeAllCharacterTemplates()
+void AnimationSystem::deleteAllAnimations( const std::string& name ) const
 {
-	zhLog( "AnimationSystem", "removeAllCharacterTemplates",
-		"Removing all CharacterTemplates." );
-
-	mCharacterTemplates.clear();
 }
 
-bool AnimationSystem::hasCharacterTemplate( const std::string& templName ) const
+AnimationSetPtr AnimationSystem::getAnimationSet( const std::string& name ) const
 {
-	return mCharacterTemplates.count(templName) > 0;
 }
 
-const CharacterTemplate& AnimationSystem::getCharacterTemplate( const std::string& templName ) const
+bool AnimationSystem::hasAnimationSet( const std::string& name ) const
 {
-	zhAssert( hasCharacterTemplate(templName) );
-
-	return mCharacterTemplates.find(templName)->second;
 }
 
-unsigned int AnimationSystem::getNumCharacterTemplates() const
+AnimationSystem::AnimationSetIterator AnimationSystem::getAnimationSetIterator()
 {
-	return mCharacterTemplates.size();
 }
 
-AnimationSystem::CharacterTemplateConstIterator AnimationSystem::getCharacterTemplateConstIterator() const
+AnimationSystem::AnimationSetConstIterator AnimationSystem::getAnimationSetConstIterator() const
 {
-	return CharacterTemplateConstIterator( mCharacterTemplates );
+}
+
+Animation* AnimationSystem::getAnimation( const std::string& animName ) const
+{
+}
+
+bool AnimationSystem::hasAnimation( const std::string& animName ) const
+{
 }
 
 AnimationManager* AnimationSystem::getAnimationManager() const
@@ -271,19 +177,149 @@ AnimationManager* AnimationSystem::getAnimationManager() const
 	return AnimationManager::Instance();
 }
 
-AnimationTreeManager* AnimationSystem::getAnimationTreeManager() const
+void AnimationSystem::createAnimationFromSegment( const std::string& newAnimName,
+	const std::string& origAnimName, float startTime, float length )
 {
-	return AnimationTreeManager::Instance();
+	/*
+	// create new animation
+	unsigned short anim_id = 0;
+	while( anim_set->hasAnimation(anim_id) ) ++anim_id;
+	anim = anim_set->createAnimation( anim_id, anim_name );
+
+	// fill up animation with key-frames
+	// first create bone tracks
+	zh::Animation::BoneTrackConstIterator bti = raw_anim->getBoneTrackConstIterator();
+	while( !bti.end() )
+	{
+		BoneAnimationTrack* rbat = bti.next();
+		BoneAnimationTrack* bat = anim->createBoneTrack( rbat->getBoneId() );
+		
+		// create initial key-frame
+		zh::TransformKeyFrame* tkf = static_cast<zh::TransformKeyFrame*>( bat->createKeyFrame(0) );
+		rbat->getInterpolatedKeyFrame( anim_seg.getStartTime(), tkf );
+
+		// create final key-frame
+		tkf = static_cast<zh::TransformKeyFrame*>( bat->createKeyFrame( anim_seg.getEndTime() - anim_seg.getStartTime() ) );
+		rbat->getInterpolatedKeyFrame( anim_seg.getEndTime(), tkf );
+
+		// copy intervening key-frames
+		for( unsigned int kfi = 0; kfi < rbat->getNumKeyFrames(); ++kfi )
+		{
+			zh::TransformKeyFrame* rtkf = static_cast<zh::TransformKeyFrame*>( rbat->getKeyFrame(kfi) );
+			
+			if( rtkf->getTime() <= anim_seg.getStartTime() )
+				continue;
+			if( rtkf->getTime() >= anim_seg.getEndTime() )
+				break;
+
+			tkf = static_cast<zh::TransformKeyFrame*>( bat->createKeyFrame( rtkf->getTime() - anim_seg.getStartTime() ) );
+			tkf->setTranslation( rtkf->getTranslation() );
+			tkf->setRotation( rtkf->getRotation() );
+			tkf->setScale( rtkf->getScale() );
+		}
+	}
+	// then create mesh tracks
+	zh::Animation::MeshTrackConstIterator mti = raw_anim->getMeshTrackConstIterator();
+	while( !mti.end() )
+	{
+		MeshAnimationTrack* rmat = mti.next();
+		MeshAnimationTrack* mat = anim->createMeshTrack( rmat->getMeshId() );
+		
+		// create initial key-frame
+		zh::MorphKeyFrame* mkf = static_cast<MorphKeyFrame*>( mat->createKeyFrame(0) );
+		rmat->getInterpolatedKeyFrame( anim_seg.getStartTime(), mkf );
+
+		// create final key-frame
+		mkf = static_cast<MorphKeyFrame*>( mat->createKeyFrame( anim_seg.getEndTime() - anim_seg.getStartTime() ) );
+		rmat->getInterpolatedKeyFrame( anim_seg.getEndTime(), mkf );
+
+		// copy intervening key-frames
+		for( unsigned int kfi = 0; kfi < rmat->getNumKeyFrames(); ++kfi )
+		{
+			zh::MorphKeyFrame* rmkf = static_cast<MorphKeyFrame*>( rmat->getKeyFrame(kfi) );
+			
+			if( rmkf->getTime() <= anim_seg.getStartTime() )
+				continue;
+			if( rmkf->getTime() >= anim_seg.getEndTime() )
+				break;
+
+			mkf = static_cast<MorphKeyFrame*>( mat->createKeyFrame( rmkf->getTime() - anim_seg.getStartTime() ) );
+			mkf->setMorphTargetWeights( rmkf->getMorphTargetWeights() );
+		}
+	}
+
+	// TODO: copy annots as well
+	*/
+}
+
+Skeleton* AnimationSystem::getOutputSkeleton() const
+{
+}
+
+void AnimationSystem::setOutputSkeleton( const std::string& name )
+{
+}
+
+void AnimationSystem::playAnimation( const std::string& animName )
+{
+}
+
+void AnimationSystem::playAnimationNow( const std::string& animName )
+{
+}
+
+void AnimationSystem::stopAnimation()
+{
+}
+
+bool AnimationSystem::isAnimationPlaying() const
+{
+}
+
+void AnimationSystem::pauseAnimation()
+{
+}
+
+void AnimationSystem::unpauseAnimation()
+{
+}
+	
+bool AnimationSystem::isAnimationPaused() const
+{
+}
+
+float AnimationSystem::getAnimationTime() const
+{
+}
+
+void AnimationSystem::setAnimationTime( float time )
+{
+}
+
+float AnimationSystem::getAnimationRate() const
+{
+}
+
+void AnimationSystem::setAnimationRate( float rate )
+{
+}
+
+float AnimationSystem::getAnimationLength() const
+{
+}
+
+void AnimationSystem::update( float dt ) const
+{
+}
+
+AnimationTree* AnimationSystem::getAnimationTree() const
+{
+	return AnimationTree::Instance();
 }
 
 MemoryPool* AnimationSystem::getMemoryPool() const
 {
 	return MemoryPool::Instance();
-}
-
-AnimationSystem::CharacterControllerFactory* AnimationSystem::_getCharacterControllerFactory() const
-{
-	return mCharCtrlFact;
 }
 
 }

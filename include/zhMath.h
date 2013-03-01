@@ -32,6 +32,5 @@ SOFTWARE.
 #include "zhMatrix.h"
 #include "zhQBSpline.h"
 #include "zhCatmullRomSpline.h"
-#include "zhValueSmoother.h"
 
 #endif // __zhMath_h__

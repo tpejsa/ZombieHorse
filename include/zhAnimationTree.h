@@ -25,68 +25,52 @@ SOFTWARE.
 
 #include "zhPrereq.h"
 #include "zhLogger.h"
-#include "zhSmartPtr.h"
 #include "zhObjectFactory.h"
-#include "zhResourceManager.h"
-#include "zhModel.h"
+#include "zhSkeleton.h"
 #include "zhAnimationSet.h"
 
-#define zhAnimationTree_ClassId 2
-#define zhAnimationTree_ClassName "AnimationTree"
+#define zhDeclare_AnimationNode( AN, classId, className ) \
+	zhDeclare_Class( AnimationNode, AN, classId, className, unsigned short )
+#define zhRegister_AnimationNode( AN ) \
+	AnimationSystem::Instance()->getAnimationTree()->_getNodeFactory()->registerClass( AN::ClassId(), AN::ClassName(), &AN::Create )
+#define zhUnregister_AnimationNode( AN ) \
+	AnimationSystem::Instance()->getAnimationTree()->_getNodeFactory()->registerClass( AN::ClassId() )
 
 namespace zh
 {
 
 class AnimationTree;
-class AnimationTreeInstance;
-class AnimationController;
 class AnimationNode;
-class BoneController;
-
-typedef SmartPtr<AnimationTree> AnimationTreePtr;
 
 /**
 * @brief Animation tree resource.
 */
-class zhDeclSpec AnimationTree : public Resource
+class zhDeclSpec AnimationTree
 {
 
 public:
 
 	typedef MapIterator< std::map<unsigned short, AnimationNode*> > NodeIterator;
 	typedef MapConstIterator< std::map<unsigned short, AnimationNode*> > NodeConstIterator;
-	typedef MapIterator< std::map<unsigned short, BoneController*> > BoneControllerIterator;
-	typedef MapConstIterator< std::map<unsigned short, BoneController*> > BoneControllerConstIterator;
+
+	typedef ObjectFactory< AnimationNode, unsigned short > NodeFactory;
 
 	/**
 	* Constructor.
 	*
-	* @param id AnimationTree ID.
-	* @param name AnimationTree name.
-	* @param mgr Owning ResourceManager.
+	* @param name Animation tree name.
 	*/
-	AnimationTree( unsigned long id, const std::string& name, ResourceManager* mgr );
+	AnimationTree( const std::string& name );
 
 	/**
 	* Destructor.
 	*/
-	~AnimationTree();
+	virtual ~AnimationTree();
 
 	/**
-	* Gets the character model affected by this animation tree.
-	*
-	* @return Character model or NULL if no model is
-	* associated with this anim. tree.
+	* Gets the animation tree name.
 	*/
-	virtual Model* getModel() const;
-
-	/**
-	* Sets the character model affected by this animation tree.
-	*
-	* @param mdl Character model or NULL if no model should be
-	* associated with this anim. tree.
-	*/
-	virtual void setModel( Model* mdl );
+	virtual const std::string& getName() const;
 
 	/**
 	* Gets the root animation node.
@@ -191,119 +175,6 @@ public:
 	virtual NodeConstIterator getNodeConstIterator() const;
 
 	/**
-	* Gets the first bone controller in the chain.
-	*/
-	virtual BoneController* getFirst() const;
-
-	/**
-	* Sets the first bone controller in the chain.
-	*
-	* @param id Bone controller ID.
-	*/
-	virtual void setFirst( unsigned short id );
-
-	/**
-	* Sets the first bone controller in the chain.
-	*
-	* @param name Bone controller name.
-	*/
-	virtual void setFirst( const std::string& name );
-
-	/**
-	* Sets the first bone controller in the chain.
-	*
-	* @param bc Bone controller or
-	* NULL to unset current first.
-	*/
-	virtual void setFirst( BoneController* bc );
-
-	/**
-	* Gets the last bone controller in the chain.
-	*/
-	virtual BoneController* getLast() const;
-
-	/**
-	* Creates a new bone controller.
-	*
-	* @param classId Bone controller class ID.
-	* @param id Bone controller ID.
-	* @param name Bone controller name.
-	* @return Pointer to the bone controller.
-	*/
-	virtual BoneController* createBoneController( unsigned long classId,
-		unsigned short id, const std::string& name );
-
-	/**
-	* Deletes the specified bone controller.
-	*
-	* @param id Bone controller ID.
-	*/
-	virtual void deleteBoneController( unsigned short id );
-
-	/**
-	* Deletes the specified bone controller.
-	*
-	* @param name Bone controller name.
-	*/
-	virtual void deleteBoneController( const std::string& name );
-
-	/**
-	* Deletes all bone controllers in the animation tree.
-	*/
-	virtual void deleteAllBoneControllers();
-
-	/**
-	* Checks if the specified animation bone controller exists in the animation tree.
-	*
-	* @param id Bone controller ID.
-	* @return true if the bone controller exists, false otherwise.
-	*/
-	virtual bool hasBoneController( unsigned short id ) const;
-
-	/**
-	* Checks if the specified bone controller exists in the animation tree.
-	*
-	* @param name Bone controller name.
-	* @return true if the bone controller exists, false otherwise.
-	*/
-	virtual bool hasBoneController( const std::string& name ) const;
-
-	/**
-	* Gets a pointer to the specified bone controller.
-	*
-	* @param id Bone controller ID.
-	* @return Pointer to specified bone controller
-	* or NULL if the bone controller doesn't exist.
-	*/
-	virtual BoneController* getBoneController( unsigned short id ) const;
-
-	/**
-	* Gets a pointer to the specified animation bone controller.
-	*
-	* @param name BoneController name.
-	* @return Pointer to specified bone controller
-	* or NULL if the bone controller doesn't exist.
-	*/
-	virtual BoneController* getBoneController( const std::string& name ) const;
-
-	/**
-	* Gets the number of bone controllers in the animation tree.
-	*/
-	virtual unsigned int getNumBoneControllers() const;
-
-	/**
-	* Gets an iterator over the map of bone controllers
-	* in the animation tree.
-	*/
-	virtual BoneControllerIterator getBoneControllerIterator();
-
-	/**
-	* Gets a const iterator over the map of bone controllers
-	* in the animation tree.
-	*/
-	virtual BoneControllerConstIterator getBoneControllerConstIterator() const;
-
-	/**
 	* If false, mover channel in sampled animations is applied directly,
 	* otherwise it is left to individual animation nodes
 	* to recompute the mover channel.
@@ -325,29 +196,18 @@ public:
 	virtual void update( float dt );
 
 	/**
-	* Applies animation in this instance to the specified character model.
+	* Applies animation in this instance to the specified character skeleton.
 	*
-	* @param model Pointer to the Model that
-	* this animation tree instance should apply to.
+	* @param skel Pointer to the Skeleton that animation should be applied to.
 	*/
-	virtual void apply() const;
-	
-	/**
-	* Calculates the resource memory usage.
-	*/
-	size_t _calcMemoryUsage() const;
+	virtual void apply( Skeleton* skel ) const;
 
 	/**
-	* Unloads the resource, freeing up the memory it occupies.
-	*/
-	void _unload();
-
-	/**
-	* Creates a deep copy of the resource.
+	* Creates a deep copy of the animation tree.
 	*
 	* @param clonePtr Pointer to the copy.
 	*/
-	void _clone( Resource* clonePtr ) const;
+	void _clone( AnimationTree* clonePtr ) const;
 
 	/**
 	* Updates the name of the specified animation node.
@@ -358,15 +218,7 @@ public:
 	virtual void _renameNode( AnimationNode* node, const std::string& newName );
 
 	/**
-	* Updates the name of the specified bone controller.
-	*
-	* @remark This function is not meant to be called directly.
-	* To rename a bone controller, use BoneController::setName().
-	*/
-	virtual void _renameBoneController( BoneController* boneCtrl, const std::string& newName );
-
-	/**
-	* Gets the cumulative blend weight of animations applied to the model
+	* Gets the cumulative blend weight of animations applied to the skeleton
 	* so far.
 	*
 	* @remark This property is useful for additive blending and is used
@@ -375,91 +227,48 @@ public:
 	virtual float _getTotalWeight() const;
 
 	/**
-	* Sets the cumulative blend weight of animations applied to the model
+	* Sets the cumulative blend weight of animations applied to the skeleton
 	* so far.
 	*/
 	virtual void _setTotalWeight( float weight );
 
 	/**
-	* Gets the current character situation.
+	* Gets a pointer to the skeleton to which animation is being applied.
 	*/
-	virtual const Model::Situation& _getPrevSituation() const;
+	virtual Skeleton* _getCurrentSkeleton() const;
 
 	/**
-	* Sets the current character situation.
+	* Sets pointer to the skeleton to which animation is being applied.
 	*/
-	virtual void _setPrevSituation( const Model::Situation& sit );
+	virtual void _setCurrentSkeleton( Skeleton* skel );
+
+	/**
+	* Gets the character situation at the end of previous frame.
+	*/
+	virtual const Skeleton::Situation& _getPrevSituation() const;
+
+	/**
+	* Sets the character situation at the end of previous frame.
+	*/
+	virtual void _setPrevSituation( const Skeleton::Situation& sit );
+
+	/**
+	* Gets the factory that produces nodes for the animation tree.
+	*/
+	virtual NodeFactory* _getNodeFactory() const;
 
 protected:
 
-	Model* mMdl;
-
+	std::string mName;
 	AnimationNode* mRoot;
 	std::map<unsigned short, AnimationNode*> mNodesById;
 	std::map<std::string, AnimationNode*> mNodesByName;
-
-	BoneController* mFirst;
-	std::map<unsigned short, BoneController*> mBoneControllersById;
-	std::map<std::string, BoneController*> mBoneControllersByName;
-
 	bool mApplyMover;
-
 	float mTotalWeight;
-	mutable Model::Situation mPrevSit;
+	mutable Skeleton* mCurSkel;
+	mutable Skeleton::Situation mPrevSit;
 
-};
-
-/**
-* @brief Class representing an animation tree instance.
-*/
-class zhDeclSpec AnimationTreeInstance : public AnimationTree
-{
-
-public:
-
-	/**
-	* Constructor.
-	*
-	* @param animTree Original animation tree resource.
-	* @param ctrl Owning animation controller.
-	*/
-	AnimationTreeInstance( AnimationTreePtr animTree, AnimationController* ctrl );
-
-	/**
-	* Destructor.
-	*/
-	~AnimationTreeInstance();
-
-	/**
-	* Gets the original animation tree resource from which
-	* this instance was created.
-	*/
-	virtual AnimationTreePtr getAnimationTree() const;
-
-	/**
-	* Gets the owning animation controller.
-	*/
-	virtual AnimationController* getController() const;
-
-	/**
-	* This override will never be called and always returns 0.
-	*/
-	size_t _calcMemoryUsage() const;
-
-	/**
-	* This override will never be called and does nothing.
-	*/
-	void _unload();
-
-	/**
-	* This override will never be called and does nothing.
-	*/
-	void _clone( Resource* clonePtr ) const;
-
-protected:
-
-	AnimationTreePtr mAnimTreeRes;
-	AnimationController* mOwner;
+	NodeFactory* mNodeFact;
 
 };
 

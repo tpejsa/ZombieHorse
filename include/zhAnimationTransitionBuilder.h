@@ -28,7 +28,7 @@ SOFTWARE.
 namespace zh
 {
 
-class Model;
+class Skeleton;
 class Animation;
 class AnimationSpace;
 class MatchGraph;
@@ -45,9 +45,9 @@ public:
 	/**
 	* Constructor.
 	*
-	* @param mdl Character model.
+	* @param skel Character skeleton.
 	*/
-	AnimationTransitionBuilder( Model* mdl );
+	AnimationTransitionBuilder( Skeleton* skel );
 
 	/**
 	* Destructor.
@@ -55,11 +55,11 @@ public:
 	virtual ~AnimationTransitionBuilder();
 
 	/**
-	* Gets the character model.
+	* Gets the character skeleton.
 	*
-	* @return Pointer to the model.
+	* @return Pointer to the skeleton.
 	*/
-	virtual Model* getModel() const { return mMdl; }
+	virtual Skeleton* getSkeleton() const { return mSkel; }
 
 	/**
 	* Builds a transition between two animations.
@@ -113,7 +113,7 @@ public:
 
 protected:
 
-	Model* mMdl;
+	Skeleton* mSkel;
 
 };
 

@@ -27,7 +27,7 @@ SOFTWARE.
 #include "zhIterators.h"
 #include "zhAllocObj.h"
 #include "zhMemoryPool.h"
-#include "zhModel.h"
+#include "zhSkeleton.h"
 #include "zhEvent.h"
 
 namespace zh
@@ -38,8 +38,7 @@ enum AnimationAnnotationClass
 	AnimAnnot_Transition,
 	AnimAnnot_ParamTransition,
 	AnimAnnot_PlantConstraint,
-	AnimAnnot_SimEvent,
-	AnimAnnot_GesturePhase
+	AnimAnnot_SimEvent
 };
 
 /**
@@ -166,13 +165,13 @@ public:
 	* Gets the 2D transformation that aligns the target animation
 	* to the source animation in the ground plane.
 	*/
-	const Model::Situation& getAlignTransf() const;
+	const Skeleton::Situation& getAlignTransf() const;
 
 	/**
 	* Sets the 2D transformation that aligns the target animation
 	* to the source animation in the ground plane.
 	*/
-	void setAlignTransf( const Model::Situation& transf );
+	void setAlignTransf( const Skeleton::Situation& transf );
 
 	/**
 	* Copies annotation data to another annotation.
@@ -186,7 +185,7 @@ private:
 	unsigned long mTargetSetId;
 	unsigned short mTargetId;
 	float mTargetTime;
-	Model::Situation mAlignTransf;
+	Skeleton::Situation mAlignTransf;
 
 };
 
@@ -271,13 +270,13 @@ public:
 	* Gets the 2D transformation that aligns the target animation
 	* to the source animation in the ground plane.
 	*/
-	const Model::Situation& getAlignTransf() const;
+	const Skeleton::Situation& getAlignTransf() const;
 
 	/**
 	* Sets the 2D transformation that aligns the target animation
 	* to the source animation in the ground plane.
 	*/
-	void setAlignTransf( const Model::Situation& transf );
+	void setAlignTransf( const Skeleton::Situation& transf );
 
 	/**
 	* Copies annotation data to another annotation.
@@ -292,7 +291,7 @@ private:
 	unsigned short mTargetId;
 	Vector mLBound, mUBound;
 	float mTargetTime;
-	Model::Situation mAlignTransf;
+	Skeleton::Situation mAlignTransf;
 
 };
 
@@ -405,68 +404,6 @@ private:
 
 	unsigned short mEvtCId;
 	unsigned short mEvtId;
-
-};
-
-enum AnimationGesturePhase
-{
-	GesturePhase_Start,
-	GesturePhase_Ready,
-	GesturePhase_StrokeStart,
-	GesturePhase_Stroke,
-	GesturePhase_StrokeEnd,
-	GesturePhase_Relax,
-	GesturePhase_End
-};
-
-/**
-* @brief Class representing an animation annotation
-* denoting the animation phase (principally used for gestures).
-*/
-class zhDeclSpec GesturePhaseAnnotation : public AnimationAnnotation
-{
-
-public:
-
-	/**
-	* Constructor.
-	*
-	* @param startTime Animation annotation start time.
-	* @param endTime Animation annotation end time.
-	* @param gesturePhase Gesture phase denoted by the annotation.
-	*/
-	GesturePhaseAnnotation( float startTime, float endTime );
-
-	/**
-	* Destructor.
-	*/
-	~GesturePhaseAnnotation();
-
-	/**
-	* Gets the animation annotation class ID.
-	*/
-	AnimationAnnotationClass getClassId() const { return AnimAnnot_GesturePhase; }
-
-	/**
-	* Gets the gesture phase denoted by the annotation.
-	*/
-	AnimationGesturePhase getGesturePhase() const;
-
-	/**
-	* Sets the gesture phase denoted by the annotation.
-	*/
-	void setGesturePhase( AnimationGesturePhase gesturePhase );
-
-	/**
-	* Copies annotation data to another annotation.
-	*
-	* @param clonePtr Pointer to the copy.
-	*/
-	void _clone( AnimationAnnotation* clonePtr ) const;
-
-private:
-
-	AnimationGesturePhase mGesturePhase;
 
 };
 
@@ -669,25 +606,6 @@ public:
 	* Gets the animation annotation class ID.
 	*/
 	AnimationAnnotationClass getClassId() const { return AnimAnnot_SimEvent; }
-
-protected:
-
-	AnimationAnnotation* _createAnnotation( float startTime, float endTime );
-
-};
-
-/**
-* @brief Gesture phase annotation container class.
-*/
-class zhDeclSpec GesturePhaseAnnotationContainer : public AnimationAnnotationContainer
-{
-
-public:
-
-	/**
-	* Gets the animation annotation class ID.
-	*/
-	AnimationAnnotationClass getClassId() const { return AnimAnnot_GesturePhase; }
 
 protected:
 

@@ -39,6 +39,120 @@ class zhDeclSpec Skeleton
 
 public:
 
+	/**
+	* @brief Specifies the position and orientation of the character
+	* in world coordinates in 2D horizontal plane.
+	*/
+	struct zhDeclSpec Situation
+	{
+
+	public:
+
+		/**
+		* Constructor.
+		*/
+		Situation();
+
+		/**
+		* Constructor.
+		*
+		* @param posX x-position.
+		* @param posZ z-position.
+		* @param orientY y-angle.
+		*/
+		Situation( float posX, float posZ, float orientY );
+
+		/**
+		* Constructor.
+		* 
+		* @param pos 3D position.
+		* @param orient 3D orientation.
+		*/
+		Situation( const Vector3& pos, const Quat& orient );
+
+		/**
+		* Gets the position as a 3D vector.
+		*/
+		Vector3 getPosition() const;
+
+		/**
+		* Sets the position.
+		*/
+		void setPosition( const Vector3& pos );
+
+		/**
+		* Gets the orientation as a quaternion.
+		*/
+		Quat getOrientation() const;
+
+		/**
+		* Sets the orientation.
+		*/
+		void setOrientation( const Quat& orient );
+
+		/**
+		* Gets the x position.
+		*/
+		float getPosX() const;
+
+		/**
+		* Gets the z position.
+		*/
+		float getPosZ() const;
+
+		/**
+		* Gets the orientation about vertical axis.
+		*
+		* @param posX x-position.
+		* @param posZ z-position.
+		* @param orientY y-angle.
+		*/
+		float getOrientY() const;
+
+		/**
+		* Inverts this situation.
+		*/
+		Situation& invert();
+
+		/**
+		* Gets the inverse of this situation.
+		*/
+		Situation getInverse() const;
+
+		/**
+		* Applies a transformation to this situation.
+		*/
+		Situation& transform( const Situation& transf );
+
+		/**
+		* Gets this situation with a transformation applied.
+		*/
+		Situation getTransformed( const Situation& transf ) const;
+
+		/**
+		* Gets the transformation from this situation to another one.
+		*/
+		Situation getTransformTo( const Situation& sit ) const;
+
+		/**
+		* Projects this situation to ground plane (x-z).
+		*/
+		const Situation& projectToGround();
+
+		/**
+		* Gets the projection of this situation to ground plane (x-z).
+		*/
+		Situation getProjToGround() const;
+
+		static const Situation Identity;
+
+	private:
+
+		Vector3 mPos;
+		Quat mOrient;
+
+	};
+
 	typedef MapIterator< std::map<unsigned short, Bone*> > BoneIterator;
 	typedef MapConstIterator< std::map<unsigned short, Bone*> > BoneConstIterator;
 
@@ -51,6 +165,18 @@ public:
 	* Destructor.
 	*/
 	~Skeleton();
+
+	/**
+	* Gets the position and orientation of the character model
+	* in the 2D horizontal plane.
+	*/
+	Situation getSituation() const;
+
+	/**
+	* Sets the position and orientation of the character model
+	* in the 2D horizontal plane.
+	*/
+	void setSituation( const Situation& sit );
 
 	/**
 	* Gets the skeleton's root bone.
@@ -124,6 +250,41 @@ private:
 	std::map<std::string, Bone*> mBonesByName;
 
 };
+
+template <>
+inline std::string toString<Skeleton::Situation>( const Skeleton::Situation& sit )
+{
+	std::ostringstream oss;
+
+	oss << sit.getPosX();
+	oss << " ";
+	oss << sit.getPosZ();
+	oss << " ";
+	oss << sit.getOrientY();
+
+	return oss.str();
+}
+
+template <>
+inline Skeleton::Situation fromString<Skeleton::Situation>( const std::string& tstr )
+{
+	float px, pz, oy;
+	std::istringstream iss(tstr);
+
+	if( iss.eof() )
+		return Skeleton::Situation::Identity;
+	iss >> px;
+
+	if( iss.eof() )
+		return Skeleton::Situation::Identity;
+	iss >> pz;
+
+	if( iss.eof() )
+		return Skeleton::Situation::Identity;
+	iss >> oy;
+
+	return Skeleton::Situation( px, pz, oy );
+}
 
 }
 

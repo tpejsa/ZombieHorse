@@ -26,7 +26,7 @@ SOFTWARE.
 #include "zhPrereq.h"
 #include "zhIterators.h"
 #include "zhMath.h"
-#include "zhModel.h"
+#include "zhSkeleton.h"
 #include "zhAnimationSegment.h"
 #include "zhAnimationDistanceGrid.h"
 
@@ -269,18 +269,18 @@ public:
 	AnimationIndex* getAnimationIndex() const;
 
 	/**
-	* Gets the character model.
+	* Gets the character skeleton.
 	*
-	* @return Pointer to the model.
+	* @return Pointer to the skeleton.
 	*/
-	Model* getModel() const;
+	Skeleton* getSkeleton() const;
 
 	/**
-	* Sets the character model.
+	* Sets the character skeleton.
 	*
-	* @param mdl Pointer to the model.
+	* @param skel Pointer to the skeleton.
 	*/
-	void setModel( Model* mdl );
+	void setSkeleton( Skeleton* skel );
 
 	/**
 	* Gets the first indexed animation.
@@ -428,7 +428,7 @@ protected:
 
 	Index mInd;
 	AnimationIndex* mAnimIndex;
-	Model* mMdl;
+	Skeleton* mSkel;
 	unsigned int mNumSamples1;
 	unsigned int mNumSamples2;
 	unsigned int mSampleRate;

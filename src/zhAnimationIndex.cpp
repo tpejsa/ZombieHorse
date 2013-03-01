@@ -31,7 +31,7 @@ namespace zh
 {
 
 AnimationIndex::AnimationIndex( unsigned long id, const std::string& name, ResourceManager* mgr )
-: Resource( id, name, mgr ), mMdl(NULL)
+: Resource( id, name, mgr ), mSkel(NULL)
 {
 }
 
@@ -40,14 +40,14 @@ AnimationIndex::~AnimationIndex()
 	dropIndex();
 }
 
-Model* AnimationIndex::getModel() const
+Skeleton* AnimationIndex::getSkeleton() const
 {
-	return mMdl;
+	return mSkel;
 }
 
-void AnimationIndex::setModel( Model* mdl )
+void AnimationIndex::setSkeleton( Skeleton* skel )
 {
-	mMdl = mdl;
+	mSkel = skel;
 }
 
 void AnimationIndex::addAnimationSegment( const AnimationSegment& animSeg )
@@ -95,7 +95,7 @@ void AnimationIndex::buildIndex( unsigned int resampleFactor,
 								float wndLength, float minDist, float maxDistDiff,
 								float minChainLength, float maxBridgeLength )
 {
-	zhAssert( mMdl != NULL );
+	zhAssert( mSkel != NULL );
 
 	dropIndex();
 
@@ -113,7 +113,7 @@ void AnimationIndex::buildIndex( unsigned int resampleFactor,
 
 			// we don't have a match web for this pair of animations, build one
 			MatchWeb* mw = new MatchWeb( mwi, this, zhAnimation_SampleRate );
-			mw->setModel(mMdl);
+			mw->setSkeleton(mSkel);
 			mw->build( resampleFactor, wndLength, minDist, maxDistDiff, minChainLength, maxBridgeLength );
 			mMatchWebs[mwi] = mw;
 
@@ -360,7 +360,7 @@ void AnimationIndex::_clone( Resource* clonePtr ) const
 
 	AnimationIndex* clone = static_cast<AnimationIndex*>(clonePtr);
 
-	clone->setModel(mMdl);
+	clone->setSkeleton(mSkel);
 	clone->mAnimSegs = mAnimSegs;
 
 	// clone match webs
@@ -370,7 +370,7 @@ void AnimationIndex::_clone( Resource* clonePtr ) const
 		MatchWeb* mw = mwi.next();
 
 		MatchWeb* clone_mw = new MatchWeb( mw->getIndex(), clone, mw->getSampleRate() );
-		clone_mw->setModel( mw->getModel() );
+		clone_mw->setSkeleton( mw->getSkeleton() );
 		clone->mMatchWebs.insert( make_pair( clone_mw->getIndex(), clone_mw ) );
 		
 		for( unsigned int path_i = 0; path_i < mw->getNumPaths(); ++path_i )

@@ -30,10 +30,10 @@ SOFTWARE.
 namespace zh
 {
 
-AnimationSpaceBuilder::AnimationSpaceBuilder( Model* mdl, AnimationSpace* animSpace )
-: mMdl(mdl), mAnimSpace(animSpace)
+AnimationSpaceBuilder::AnimationSpaceBuilder( Skeleton* skel, AnimationSpace* animSpace )
+: mSkel(skel), mAnimSpace(animSpace)
 {
-	zhAssert( mdl != NULL );
+	zhAssert( skel != NULL );
 	zhAssert( animSpace != NULL );
 }
 
@@ -135,7 +135,6 @@ void AnimationSpaceBuilder::build( MatchGraph* matches, unsigned short refNodeHa
 		//_copyAnnotsToBaseAnim( anim_seg, anim_seg.getAnimation()->getParamTransitionAnnotations(), banim->getParamTransitionAnnotations() );
 		_copyAnnotsToBaseAnim( anim_seg, anim_seg.getAnimation()->getPlantConstraintAnnotations(), banim->getPlantConstraintAnnotations() );
 		_copyAnnotsToBaseAnim( anim_seg, anim_seg.getAnimation()->getSimEventAnnotations(), banim->getSimEventAnnotations() );
-		_copyAnnotsToBaseAnim( anim_seg, anim_seg.getAnimation()->getGesturePhaseAnnotations(), banim->getGesturePhaseAnnotations() );
 	}
 
 	//
@@ -158,9 +157,9 @@ void AnimationSpaceBuilder::build( MatchGraph* matches, unsigned short refNodeHa
 				tw_samples[sample_i].set( banim_i, sample_i / ((float)zhAnimation_SampleRate) * mKnotSpacing );
 			else
 				tw_samples[sample_i].set( banim_i, ref_anim->getLength() );
-			align_samples[sample_i].set( 3 * banim_i, Model::Situation::Identity.getPosX() );
-			align_samples[sample_i].set( 3 * banim_i + 1, Model::Situation::Identity.getPosZ() );
-			align_samples[sample_i].set( 3 * banim_i + 2, Model::Situation::Identity.getOrientY() );
+			align_samples[sample_i].set( 3 * banim_i, Skeleton::Situation::Identity.getPosX() );
+			align_samples[sample_i].set( 3 * banim_i + 1, Skeleton::Situation::Identity.getPosZ() );
+			align_samples[sample_i].set( 3 * banim_i + 2, Skeleton::Situation::Identity.getOrientY() );
 		}
 
 		for( std::map<unsigned short, std::vector<MatchGraph::Node*> >::const_iterator node_i = paths.begin();
@@ -190,9 +189,9 @@ void AnimationSpaceBuilder::build( MatchGraph* matches, unsigned short refNodeHa
 							tw_samples[sample_i].set( tbanim_i, sample_i / ((float)zhAnimation_SampleRate) * mKnotSpacing );
 						else
 							tw_samples[sample_i].set(tbanim_i, ref_anim->getLength() );
-						align_samples[sample_i].set( 3 * tbanim_i, Model::Situation::Identity.getPosX() );
-						align_samples[sample_i].set( 3 * tbanim_i + 1, Model::Situation::Identity.getPosZ() );
-						align_samples[sample_i].set( 3 * tbanim_i + 2, Model::Situation::Identity.getOrientY() );
+						align_samples[sample_i].set( 3 * tbanim_i, Skeleton::Situation::Identity.getPosX() );
+						align_samples[sample_i].set( 3 * tbanim_i + 1, Skeleton::Situation::Identity.getPosZ() );
+						align_samples[sample_i].set( 3 * tbanim_i + 2, Skeleton::Situation::Identity.getOrientY() );
 					}
 				}
 				else
@@ -211,7 +210,7 @@ void AnimationSpaceBuilder::build( MatchGraph* matches, unsigned short refNodeHa
 
 						tw_samples[sample_i].set( tbanim_i, cur_node == edge->getNode2() ? align_inf.getTime2() : align_inf.getTime1() );
 
-						Model::Situation transf( align_samples[sample_i].get( 3 * tbanim_i ),
+						Skeleton::Situation transf( align_samples[sample_i].get( 3 * tbanim_i ),
 							align_samples[sample_i].get( 3 * tbanim_i + 1 ),
 							align_samples[sample_i].get( 3 * tbanim_i + 2 ) );
 						transf = transf.transform( align_inf.getAlignTransf() ); /// TODO: is this OK?

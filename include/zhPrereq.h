@@ -42,7 +42,6 @@ SOFTWARE.
 #define zhMemoryPool_MaxObjSize 128
 #define zhAnimationParam_SampleInterpK 10 // k-value used for kNN interpolation of parameter samples in param. animations
 #define zhBlend_TWTimeStep 0.1f // maximum Euler step used in blending with timewarping
-#define zhIK_CCDNumIters 10 // default max. number of iterations for CCD IK solver
 #define zhAnimation_SampleRate 30 // animation sample rate (in frames per second)
 #define zhAnimationParam_SampleDensity 10 // dense sampling factor for parametric spaces (the total number of dense samples is this factor X number of base samples)
 #define zhBlend_DegeneracyLimit 3 // maximum number of consecutive frames in one animation

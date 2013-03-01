@@ -60,7 +60,7 @@ public:
 		* @param time2 Time in the second animation.
 		* @param alignTransf Aligning 2D tranformation.
 		*/
-		MatchPoint( float time1, float time2, const Model::Situation& alignTransf ) : mTime1(time1), mTime2(time2), mAlignTransf(alignTransf) { }
+		MatchPoint( float time1, float time2, const Skeleton::Situation& alignTransf ) : mTime1(time1), mTime2(time2), mAlignTransf(alignTransf) { }
 
 		/**
 		* Gets the time in the first animation.
@@ -75,12 +75,12 @@ public:
 		/**
 		* Gets the aligning 2D transformation at the match point.
 		*/
-		const Model::Situation& getAlignTransf() const { return mAlignTransf; }
+		const Skeleton::Situation& getAlignTransf() const { return mAlignTransf; }
 
 	private:
 
 		float mTime1, mTime2;
-		Model::Situation mAlignTransf;
+		Skeleton::Situation mAlignTransf;
 
 	};
 

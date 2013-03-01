@@ -37,11 +37,10 @@ namespace zh
 {
 
 // TODO: add events for the following:
-// - when a match web has been built
-// - when a set of matches has been found
-// - when a match web has been loaded
-// - when a match web has been saved
-// - 
+// - When a match web has been built
+// - When a set of matches has been found
+// - When a match web has been loaded
+// - When a match web has been saved
 
 class AnimationIndex;
 
@@ -78,18 +77,18 @@ public:
 	~AnimationIndex();
 
 	/**
-	* Gets the character model.
+	* Gets the character skeleton.
 	*
-	* @return Pointer to the model.
+	* @return Pointer to the skeleton.
 	*/
-	Model* getModel() const;
+	Skeleton* getSkeleton() const;
 
 	/**
-	* Sets the character model.
+	* Sets the character skeleton.
 	*
-	* @param mdl Pointer to the model.
+	* @param skel Pointer to the skeleton.
 	*/
-	void setModel( Model* mdl );
+	void setSkeleton( Skeleton* skel );
 
 	/**
 	* Adds an animation segment to the animation index.
@@ -240,7 +239,7 @@ public:
 
 private:
 
-	Model* mMdl;
+	Skeleton* mSkel;
 
 	std::vector<AnimationSegment> mAnimSegs;
 	std::map<MatchWeb::Index, MatchWeb*> mMatchWebs;

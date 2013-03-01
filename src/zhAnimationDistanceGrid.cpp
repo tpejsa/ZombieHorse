@@ -26,20 +26,20 @@ SOFTWARE.
 namespace zh
 {
 
-AnimationDistanceGrid::AnimationDistanceGrid( Model* mdl, const AnimationSegment& anim1, const AnimationSegment& anim2, unsigned int sampleRate )
-: mMdl(mdl), mAnim1(anim1), mAnim2(anim2), mSampleRate(sampleRate), mWndLen(0), mMinDist(0)
+AnimationDistanceGrid::AnimationDistanceGrid( Skeleton* skel, const AnimationSegment& anim1, const AnimationSegment& anim2, unsigned int sampleRate )
+: mSkel(skel), mAnim1(anim1), mAnim2(anim2), mSampleRate(sampleRate), mWndLen(0), mMinDist(0)
 {
-	zhAssert( mdl != NULL );
+	zhAssert( skel != NULL );
 	zhAssert( sampleRate > 0 );
 
 	// init. bone weights
-	/*Skeleton::BoneConstIterator bone_i = mdl->getSkeleton()->getBoneConstIterator();
+	/*Skeleton::BoneConstIterator bone_i = skel->getSkeleton()->getBoneConstIterator();
 	while( !bone_i.end() )
 	{
 		Bone* bone = bone_i.next();
-		mBoneWeights[ bone->getId() ] = 1.f / mdl->getSkeleton()->getNumBones();
+		mBoneWeights[ bone->getId() ] = 1.f / skel->getSkeleton()->getNumBones();
 	}*/
-	_computeBoneWeights( mMdl->getSkeleton()->getRoot() );
+	_computeBoneWeights( mSkel->getRoot() );
 	// normalize weights
 	float total_weight = 0;
 	for( std::map<unsigned short, float>::const_iterator jwi = mBoneWeights.begin();
@@ -59,9 +59,9 @@ AnimationDistanceGrid::~AnimationDistanceGrid()
 {
 }
 
-Model* AnimationDistanceGrid::getModel() const
+Skeleton* AnimationDistanceGrid::getSkeleton() const
 {
-	return mMdl;
+	return mSkel;
 }
 
 float AnimationDistanceGrid::getBoneWeight( unsigned short boneId ) const
@@ -75,7 +75,7 @@ float AnimationDistanceGrid::getBoneWeight( unsigned short boneId ) const
 
 void AnimationDistanceGrid::setBoneWeight( unsigned short boneId, float weight )
 {
-	zhAssert( mMdl->getSkeleton()->hasBone(boneId) );
+	zhAssert( mSkel->hasBone(boneId) );
 
 	mBoneWeights[boneId] = weight;
 }
@@ -149,9 +149,8 @@ void AnimationDistanceGrid::build( float wndLength )
 	mWndLen = wndLength;
 
 	float dt = 1.f / mSampleRate; // offset between samples (poses)
-	Skeleton* skel = mMdl->getSkeleton();
-	std::vector<Vector3> pos1( mNumSamples1 * skel->getNumBones() ); // marker positions 1
-	std::vector<Vector3> pos2( mNumSamples2 * skel->getNumBones() ); // marker positions 2
+	std::vector<Vector3> pos1( mNumSamples1 * mSkel->getNumBones() ); // marker positions 1
+	std::vector<Vector3> pos2( mNumSamples2 * mSkel->getNumBones() ); // marker positions 2
 	std::vector<Vector3> avg_pos1( mNumSamples1 ); // weighted averages of marker positions 1
 	std::vector<Vector3> avg_pos2( mNumSamples2 ); // weighted averages of marker positions 2
 	std::vector<float> avg_poslen1( mNumSamples1 ); // weighted averages of squared lengths of marker positions 1
@@ -162,10 +161,10 @@ void AnimationDistanceGrid::build( float wndLength )
 	{
 		float t = mAnim1.getStartTime() + si * dt;
 
-		skel->resetToInitialPose();
-		mAnim1.getAnimation()->apply( mMdl, t, 1, 1, Animation::EmptyBoneMask );
+		mSkel->resetToInitialPose();
+		mAnim1.getAnimation()->apply( mSkel, t, 1, 1, Animation::EmptyBoneMask );
 
-		Skeleton::BoneConstIterator bone_i = skel->getBoneConstIterator();
+		Skeleton::BoneConstIterator bone_i = mSkel->getBoneConstIterator();
 		unsigned bone_i0 = 0;
 		Vector3 wpos;
 		while( !bone_i.end() )
@@ -173,7 +172,7 @@ void AnimationDistanceGrid::build( float wndLength )
 			Bone* bone = bone_i.next();
 
 			wpos = bone->getWorldPosition();
-			pos1[ (bone_i0++) + si * skel->getNumBones() ] = wpos;
+			pos1[ (bone_i0++) + si * mSkel->getNumBones() ] = wpos;
 			avg_pos1[si] += wpos * mBoneWeights[ bone->getId() ];
 			avg_poslen1[si] += wpos.lengthSq() * mBoneWeights[ bone->getId() ];
 		}
@@ -184,10 +183,10 @@ void AnimationDistanceGrid::build( float wndLength )
 	{
 		float t = mAnim2.getStartTime() + si * dt;
 
-		skel->resetToInitialPose();
-		mAnim2.getAnimation()->apply( mMdl, t, 1, 1, Animation::EmptyBoneMask );
+		mSkel->resetToInitialPose();
+		mAnim2.getAnimation()->apply( mSkel, t, 1, 1, Animation::EmptyBoneMask );
 
-		Skeleton::BoneConstIterator bone_i = skel->getBoneConstIterator();
+		Skeleton::BoneConstIterator bone_i = mSkel->getBoneConstIterator();
 		unsigned bone_i0 = 0;
 		Vector3 wpos;
 		while( !bone_i.end() )
@@ -195,14 +194,14 @@ void AnimationDistanceGrid::build( float wndLength )
 			Bone* bone = bone_i.next();
 
 			wpos = bone->getWorldPosition();
-			pos2[ (bone_i0++) + si * skel->getNumBones() ] = wpos;
+			pos2[ (bone_i0++) + si * mSkel->getNumBones() ] = wpos;
 			avg_pos2[si] += wpos * mBoneWeights[ bone->getId() ];
 			avg_poslen2[si] += wpos.lengthSq() * mBoneWeights[ bone->getId() ];
 		}
 	}
 	
 	// reset skeleton to initial pose and don't touch it anymore
-	skel->resetToInitialPose();
+	mSkel->resetToInitialPose();
 
 	std::vector<float> avg_xxzz( mNumSamples1 * mNumSamples2, 0 ); // weighted averages of combined marker positions (1)
 	std::vector<float> avg_xzzx( mNumSamples1 * mNumSamples2, 0 ); // weighted averages of marker positions (2)
@@ -213,15 +212,15 @@ void AnimationDistanceGrid::build( float wndLength )
 	{
 		for( unsigned int si1 = 0; si1 < mNumSamples1; ++si1 )
 		{
-			Skeleton::BoneConstIterator bone_i = skel->getBoneConstIterator();
+			Skeleton::BoneConstIterator bone_i = mSkel->getBoneConstIterator();
 			unsigned bone_i0 = 0;
 			while( !bone_i.end() )
 			{
 				Bone* bone = bone_i.next();
 
 				unsigned int pti = si1 + si2 * mNumSamples1,
-					pti1 = bone_i0 + si1 * skel->getNumBones(),
-					pti2 = bone_i0 + si2 * skel->getNumBones();
+					pti1 = bone_i0 + si1 * mSkel->getNumBones(),
+					pti2 = bone_i0 + si2 * mSkel->getNumBones();
 
 				avg_xxzz[pti] +=
 					( pos1[pti1].x * pos2[pti2].x + pos1[pti1].z * pos2[pti2].z ) *
@@ -324,7 +323,7 @@ void AnimationDistanceGrid::build( float wndLength )
 			if( dist < mMinDist ) mMinDist = dist;
 			if( dist > mMaxDist ) mMaxDist = dist;
 
-			mGrid[ si1 + mNumSamples1 * si2 ] = Point( Index( si1, si2 ), dist, Model::Situation( pos_x, pos_z, orient_y ) );
+			mGrid[ si1 + mNumSamples1 * si2 ] = Point( Index( si1, si2 ), dist, Skeleton::Situation( pos_x, pos_z, orient_y ) );
 		}
 	}
 
@@ -373,15 +372,15 @@ void AnimationDistanceGrid::setDistance( const Index& index, float dist )
 	mGrid[ index.first + mNumSamples1 * index.second ] = Point( index, dist, pt.getAlignTransf() );
 }
 
-const Model::Situation& AnimationDistanceGrid::getAlignTransf( const Index& index ) const
+const Skeleton::Situation& AnimationDistanceGrid::getAlignTransf( const Index& index ) const
 {
 	if( index.first >= mNumSamples1 || index.second >= mNumSamples2 )
-		return Model::Situation::Identity;
+		return Skeleton::Situation::Identity;
 	
 	return mGrid[ index.first + mNumSamples1 * index.second ].getAlignTransf();
 }
 
-void AnimationDistanceGrid::setAlignTransf( const Index& index, const Model::Situation& transf )
+void AnimationDistanceGrid::setAlignTransf( const Index& index, const Skeleton::Situation& transf )
 {
 	zhAssert( index.first < mNumSamples1 && index.second < mNumSamples2 );
 

@@ -118,22 +118,17 @@ public:
 	SimEventAnnotationContainer* getSimEventAnnotations() const;
 
 	/**
-	* Gets the container of gesture phase annotations.
-	*/
-	GesturePhaseAnnotationContainer* getGesturePhaseAnnotations() const;
-
-	/**
 	* Gets this animation's origin in space.
 	*
 	* @remark This property enables the animation to be
 	* translated and rotated in space.
 	*/
-	const Model::Situation& getOrigin() const;
+	const Skeleton::Situation& getOrigin() const;
 
 	/**
 	* Sets this animation's origin in space.
 	*/
-	void setOrigin( const Model::Situation& origin );
+	void setOrigin( const Skeleton::Situation& origin );
 
 	/**
 	* Gets the animation set containing
@@ -161,14 +156,14 @@ public:
 	virtual void setAnimation( AnimationSetPtr animSet, unsigned short animId );
 
 	/**
-	* Samples this animation's mover at the current time.
+	* Samples this animation's mover channel at the current time.
 	*
 	* @return Mover value (with origin transformation applied)
 	* @remark This is a helper method used for alignment of consecutive animations.
 	* Any node that represents an animation with a mover channel
 	* should override this method, otherwise alignment won't work correctly.
 	*/
-	Model::Situation _sampleMover() const;
+	Skeleton::Situation _sampleMover() const;
 
 	/**
 	* Calculates the AnimationNode memory usage.
@@ -211,7 +206,7 @@ protected:
 	void _applyNode( float weight = 1.f, const std::set<unsigned short>& boneMask = Animation::EmptyBoneMask ) const;
 
 	float mPlayTime;
-	Model::Situation mOrigin;
+	Skeleton::Situation mOrigin;
 
 	AnimationSetPtr mAnimSet;
 	unsigned short mAnimId;

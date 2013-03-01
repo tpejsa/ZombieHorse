@@ -73,7 +73,7 @@ bool AnimationSearchSystem::init( const std::string& cfgPath )
 	return true;
 }
 
-AnimationIndexPtr AnimationSearchSystem::buildIndex( unsigned long id, const std::string& name, Model* mdl,
+AnimationIndexPtr AnimationSearchSystem::buildIndex( unsigned long id, const std::string& name, Skeleton* skel,
 													const std::string& labelFilter )
 {
 	std::vector<AnimationSetPtr> ranims;
@@ -86,19 +86,19 @@ AnimationIndexPtr AnimationSearchSystem::buildIndex( unsigned long id, const std
 		ranims.push_back(ras);
 	}
 
-	return buildIndex( id, name, mdl, ranims, labelFilter );
+	return buildIndex( id, name, skel, ranims, labelFilter );
 }
 
-AnimationIndexPtr AnimationSearchSystem::buildIndex( unsigned long id, const std::string& name, Model* mdl,
+AnimationIndexPtr AnimationSearchSystem::buildIndex( unsigned long id, const std::string& name, Skeleton* skel,
 													std::vector<AnimationSetPtr> rawAnims, const std::string& labelFilter )
 {
 	AnimationIndexManager* aimgr = getAnimationIndexManager();
 	zhAssert( !aimgr->hasResource(id) && !aimgr->hasResource(name) );
-	zhAssert( mdl != NULL );
+	zhAssert( skel != NULL );
 
 	// create empty anim. index
 	AnimationIndexPtr anim_index = AnimationIndexPtr::DynamicCast<Resource>( aimgr->createResource( id, name ) );
-	anim_index->setModel(mdl);
+	anim_index->setModel(skel);
 
 	// get anim. labels
 	std::vector<std::string> labels;
@@ -239,10 +239,10 @@ AnimationSearchSystem::MatchGraphConstIterator AnimationSearchSystem::getMatchGr
 }
 
 AnimationSpace* AnimationSearchSystem::buildAnimationSpace( unsigned short id, const std::string& name,
-														   Model* mdl, AnimationSetPtr animSet,
+														   Skeleton* skel, AnimationSetPtr animSet,
 														   MatchGraph* matches, unsigned short refNodeHandle ) const
 {
-	zhAssert( mdl != NULL );
+	zhAssert( skel != NULL );
 	zhAssert( animSet != NULL );
 	zhAssert( !animSet->hasAnimationSpace(id) && !animSet->hasAnimationSpace(name) );
 
@@ -250,7 +250,7 @@ AnimationSpace* AnimationSearchSystem::buildAnimationSpace( unsigned short id, c
 	AnimationSpace* anim_space = animSet->createAnimationSpace( id, name );
 
 	// build animation space
-	AnimationSpaceBuilder* asb = new AnimationSpaceBuilder( mdl, anim_space );
+	AnimationSpaceBuilder* asb = new AnimationSpaceBuilder( skel, anim_space );
 	asb->setBuildBlendCurves(mBuildBlendCurves);
 	asb->setKnotSpacing(mKnotSpacing);
 	asb->setMatchAnnotations(mMatchAnnots);
@@ -268,13 +268,13 @@ void AnimationSearchSystem::computeAnnotMatches( AnimationSpace* animSpace ) con
 	mm->makeMatches();
 }
 
-void AnimationSearchSystem::parametrizeAnimSpace( Model* mdl, AnimationSpace* animSpace, const std::vector<AnimationParamSpec>& paramSpecs,
+void AnimationSearchSystem::parametrizeAnimSpace( Skeleton* skel, AnimationSpace* animSpace, const std::vector<AnimationParamSpec>& paramSpecs,
 												 AnimationParamClass paramClass )
 {
 	zhAssert( animSpace != NULL );
-	zhAssert( mdl != NULL );
+	zhAssert( skel != NULL );
 
-	DenseSamplingParamBuilder* pab = new DenseSamplingParamBuilder( mdl, animSpace );
+	DenseSamplingParamBuilder* pab = new DenseSamplingParamBuilder( skel, animSpace );
 	pab->setMaxExtrapolation(mMaxExtrap);
 	pab->setMinSampleDistance(mMinSampleDist);
 	pab->parametrize(paramSpecs);
@@ -301,7 +301,7 @@ void AnimationSearchSystem::setMinSampleDistance( float minSampleDist )
 	mMinSampleDist = minSampleDist;
 }
 
-void AnimationSearchSystem::buildTransitions( Model* mdl, const std::string& labelFilter )
+void AnimationSearchSystem::buildTransitions( Skeleton* skel, const std::string& labelFilter )
 {
 	std::vector<AnimationSetPtr> ranims;
 
@@ -313,13 +313,13 @@ void AnimationSearchSystem::buildTransitions( Model* mdl, const std::string& lab
 		ranims.push_back(ras);
 	}
 
-	return buildTransitions(mdl, ranims, labelFilter );
+	return buildTransitions(skel, ranims, labelFilter );
 }
 
-void AnimationSearchSystem::buildTransitions( Model* mdl, std::vector<AnimationSetPtr> rawAnims,
+void AnimationSearchSystem::buildTransitions( Skeleton* skel, std::vector<AnimationSetPtr> rawAnims,
 											 const std::string& labelFilter )
 {
-	zhAssert( mdl != NULL );
+	zhAssert( skel != NULL );
 
 	// get anim. labels
 	std::vector<std::string> labels;
@@ -362,7 +362,7 @@ void AnimationSearchSystem::buildTransitions( Model* mdl, std::vector<AnimationS
 	}
 
 	// build transitions between each two anims
-	AnimationTransitionBuilder* ptb = new AnimationTransitionBuilder(mdl);
+	AnimationTransitionBuilder* ptb = new AnimationTransitionBuilder(skel);
 	for( unsigned int anim_i1 = 0; anim_i1 < anims.size(); ++anim_i1 )
 	{
 		for( unsigned int anim_i2 = anim_i1; anim_i2 < anims.size(); ++anim_i2 )
@@ -373,52 +373,52 @@ void AnimationSearchSystem::buildTransitions( Model* mdl, std::vector<AnimationS
 	delete ptb;
 }
 
-unsigned int AnimationSearchSystem::buildTransitions( Model* mdl, AnimationSpace* srcAnim, AnimationSpace* trgAnim )
+unsigned int AnimationSearchSystem::buildTransitions( Skeleton* skel, AnimationSpace* srcAnim, AnimationSpace* trgAnim )
 {
-	zhAssert( mdl != NULL );
+	zhAssert( skel != NULL );
 	zhAssert( srcAnim != NULL );
 	zhAssert( trgAnim != NULL );
 
-	AnimationTransitionBuilder* ptb = new AnimationTransitionBuilder(mdl);
+	AnimationTransitionBuilder* ptb = new AnimationTransitionBuilder(skel);
 	unsigned int num_built = ptb->buildTransitions( srcAnim, trgAnim, mWndLength, mMinDist );
 	delete ptb;
 
 	return num_built;
 }
 
-unsigned int AnimationSearchSystem::buildTransitions( Model* mdl, AnimationSpace* srcAnim, Animation* trgAnim )
+unsigned int AnimationSearchSystem::buildTransitions( Skeleton* skel, AnimationSpace* srcAnim, Animation* trgAnim )
 {
-	zhAssert( mdl != NULL );
+	zhAssert( skel != NULL );
 	zhAssert( srcAnim != NULL );
 	zhAssert( trgAnim != NULL );
 
-	AnimationTransitionBuilder* ptb = new AnimationTransitionBuilder(mdl);
+	AnimationTransitionBuilder* ptb = new AnimationTransitionBuilder(skel);
 	unsigned int num_built = ptb->buildTransitions( srcAnim, trgAnim, mWndLength, mMinDist );
 	delete ptb;
 
 	return num_built;
 }
 
-unsigned int AnimationSearchSystem::buildTransitions( Model* mdl, Animation* srcAnim, AnimationSpace* trgAnim )
+unsigned int AnimationSearchSystem::buildTransitions( Skeleton* skel, Animation* srcAnim, AnimationSpace* trgAnim )
 {
-	zhAssert( mdl != NULL );
+	zhAssert( skel != NULL );
 	zhAssert( srcAnim != NULL );
 	zhAssert( trgAnim != NULL );
 
-	AnimationTransitionBuilder* ptb = new AnimationTransitionBuilder(mdl);
+	AnimationTransitionBuilder* ptb = new AnimationTransitionBuilder(skel);
 	unsigned int num_built = ptb->buildTransitions( srcAnim, trgAnim, mWndLength, mMinDist );
 	delete ptb;
 
 	return num_built;
 }
 
-unsigned int AnimationSearchSystem::buildTransitions( Model* mdl, Animation* srcAnim, Animation* trgAnim )
+unsigned int AnimationSearchSystem::buildTransitions( Skeleton* skel, Animation* srcAnim, Animation* trgAnim )
 {
-	zhAssert( mdl != NULL );
+	zhAssert( skel != NULL );
 	zhAssert( srcAnim != NULL );
 	zhAssert( trgAnim != NULL );
 
-	AnimationTransitionBuilder* ptb = new AnimationTransitionBuilder(mdl);
+	AnimationTransitionBuilder* ptb = new AnimationTransitionBuilder(skel);
 	unsigned int num_built = ptb->buildTransitions( srcAnim, trgAnim, mWndLength, mMinDist );
 	delete ptb;
 

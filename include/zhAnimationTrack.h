@@ -32,7 +32,7 @@ SOFTWARE.
 namespace zh
 {
 
-class Model;
+class Skeleton;
 class Animation;
 class AnimationTrack;
 
@@ -202,19 +202,19 @@ public:
 	virtual float getLength() const;
 
 	/**
-	* Applies the animation track to the specified model.
+	* Applies the animation track to the specified skeleton.
 	*
 	* This pure virtual function should be implemented in concrete
 	* animation track classes.
 	*
-	* @param model Pointer to the Model
+	* @param skeleton Pointer to the Skeleton
 	* which should be updated by this animation track.
 	* @param time Time at which this animation track should be applied.
 	* @param weight Blend weight with which this animation track
 	* should be applied.
 	* @param scale Scaling factor applied to this animation track.
 	*/
-	virtual void apply( Model* model, float time, float weight = 1.f, float scale = 1.f ) const = 0;
+	virtual void apply( Skeleton* skeleton, float time, float weight = 1.f, float scale = 1.f ) const = 0;
 
 protected:
 

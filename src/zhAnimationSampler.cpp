@@ -111,20 +111,12 @@ SimEventAnnotationContainer* AnimationSampler::getSimEventAnnotations() const
 	return anim->getSimEventAnnotations();
 }
 
-GesturePhaseAnnotationContainer* AnimationSampler::getGesturePhaseAnnotations() const
-{
-	Animation* anim = getAnimation();
-	zhAssert( anim != NULL );
-
-	return anim->getGesturePhaseAnnotations();
-}
-
-const Model::Situation& AnimationSampler::getOrigin() const
+const Skeleton::Situation& AnimationSampler::getOrigin() const
 {
 	return mOrigin;
 }
 
-void AnimationSampler::setOrigin( const Model::Situation& origin )
+void AnimationSampler::setOrigin( const Skeleton::Situation& origin )
 {
 	mOrigin = origin;
 }
@@ -155,12 +147,12 @@ void AnimationSampler::setAnimation( AnimationSetPtr animSet, unsigned short ani
 	mAnimId = animId;
 }
 
-Model::Situation AnimationSampler::_sampleMover() const
+Skeleton::Situation AnimationSampler::_sampleMover() const
 {
 	Animation* anim = getAnimation();
 
 	if( anim == NULL )
-		return Model::Situation::Identity;
+		return Skeleton::Situation::Identity;
 
 	Model* mdl = mOwner->getModel();
 	Skeleton* skel = mdl->getSkeleton();
@@ -174,7 +166,7 @@ Model::Situation AnimationSampler::_sampleMover() const
 	rbat->getInterpolatedKeyFrame( mPlayTime, &tkf );
 	Vector3 pos = ipos + tkf.getTranslation();
 	Quat orient = iorient * tkf.getRotation();
-	Model::Situation mv( pos, orient );
+	Skeleton::Situation mv( pos, orient );
 
 	// realign mover
 	mv = mOrigin.getTransformed(mv);
@@ -249,29 +241,16 @@ void AnimationSampler::_applyNode( float weight, const std::set<unsigned short>&
 	if( mOwner->getApplyMover() )
 	{
 		// get anim. mover
-		Model::Situation mv = _sampleMover();
+		Skeleton::Situation mv = _sampleMover();
 
 		// apply realigned mover
-		/*mv = Model::Situation( mv.getPosition() - root->getInitialPosition(),
+		/*mv = Skeleton::Situation( mv.getPosition() - root->getInitialPosition(),
 			root->getInitialOrientation().getInverse() * mv.getOrientation() );
 		root->translate( mv.getPosition() * weight );
 		root->rotate( Quat().slerp( mv.getOrientation(), weight ) );*/
 		root->setPosition( root->getPosition() + mv.getPosition() * weight );
 		root->setOrientation( root->getOrientation().slerp( mv.getOrientation(),
 			weight / ( mOwner->_getTotalWeight() + weight ) ) );
-
-		/*
-		float px1 = mv.getPosX(),
-			pz1 = mv.getPosZ(),
-			oy1 = mv.getOrientY();
-		Model::Situation sit = mdl->getSituation();
-		float px = sit.getPosX(),
-			pz = sit.getPosZ(),
-			oy = sit.getOrientY();
-		float total_w = mOwner->_getTotalWeight();
-		zhLog( "AnimationSampler", "_applyNode", "%s ; t = %f ; w/total_w = %.2f / %.2f ; mover = ( %f, %f, %f ) ; situation = ( %f, %f, %f )",
-			mName.c_str(), mPlayTime, weight, total_w, px1, pz1, oy1, px, pz, oy );
-		*/
 
 		// mover applied separately, so mask root bone
 		bone_mask.insert( root->getId() );

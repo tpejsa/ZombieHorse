@@ -25,7 +25,7 @@ SOFTWARE.
 
 #include "zhPrereq.h"
 #include "zhMath.h"
-#include "zhModel.h"
+#include "zhSkeleton.h"
 #include "zhAnimationSegment.h"
 
 namespace zh
@@ -67,7 +67,7 @@ public:
 		* @param dist Animation distance at the point.
 		* @param alignTransf Aligning 2D transformation at the point.
 		*/
-		Point( const Index& index, float dist, const Model::Situation& alignTransf )
+		Point( const Index& index, float dist, const Skeleton::Situation& alignTransf )
 			: mInd(index), mDist(dist), mAlignTransf(alignTransf)
 		{
 		}
@@ -85,7 +85,7 @@ public:
 		/**
 		* Gets the aligning 2D transformation at the point.
 		*/
-		const Model::Situation& getAlignTransf() const { return mAlignTransf; }
+		const Skeleton::Situation& getAlignTransf() const { return mAlignTransf; }
 
 		/**
 		* Gets the Manhattan distance to another point.
@@ -108,20 +108,20 @@ public:
 
 		Index mInd;
 		float mDist;
-		Model::Situation mAlignTransf;
+		Skeleton::Situation mAlignTransf;
 
 	};
 
 	/**
 	* Constructor.
 	*
-	* @param mdl Pointer to the model containing the skeleton
+	* @param skel Pointer to the skeleton.
 	* animated by the compared animations.
 	* @param anim1 The first animation segment.
 	* @param anim2 The second animation segment.
 	* @param sampleRate Animation sample rate.
 	*/
-	AnimationDistanceGrid( Model* mdl, const AnimationSegment& anim1, const AnimationSegment& anim2, unsigned int sampleRate = zhAnimation_SampleRate );
+	AnimationDistanceGrid( Skeleton* skel, const AnimationSegment& anim1, const AnimationSegment& anim2, unsigned int sampleRate = zhAnimation_SampleRate );
 
 	/**
 	* Destructor.
@@ -129,9 +129,9 @@ public:
 	~AnimationDistanceGrid();
 
 	/**
-	* Gets a pointer to the model.
+	* Gets a pointer to the skeleton.
 	*/
-	Model* getModel() const;
+	Skeleton* getSkeleton() const;
 
 	/**
 	* Gets the weight of the specified bone.
@@ -243,7 +243,7 @@ public:
 	* @param index Frame pair index.
 	* @return Aligning 2D transformation.
 	*/
-	const Model::Situation& getAlignTransf( const Index& index ) const;
+	const Skeleton::Situation& getAlignTransf( const Index& index ) const;
 
 	/**
 	* Sets the aligning 2D transformation
@@ -252,7 +252,7 @@ public:
 	* @param index Frame pair index.
 	* @param transf Aligning 2D transformation.
 	*/
-	void setAlignTransf( const Index& index, const Model::Situation& transf );
+	void setAlignTransf( const Index& index, const Skeleton::Situation& transf );
 
 	/**
 	* Gets the length of the animation window used
@@ -342,7 +342,7 @@ private:
 		std::vector<Point>& path ) const;
 	_DTWAnnot _DTW( const Index& ptIndex, const std::map<Index,_DTWAnnot>& dtwAnnots ) const;
 
-	Model* mMdl;
+	Skeleton* mSkel;
 	std::map<unsigned short, float> mBoneWeights;
 	AnimationSegment mAnim1;
 	unsigned int mNumSamples1;

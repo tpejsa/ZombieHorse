@@ -30,6 +30,8 @@ SOFTWARE.
 
 #define zhZHALoader_ClassId 1
 #define zhZHALoader_ClassName "ZHALoader"
+#define zhBVHLoader_ClassId 2
+#define zhBVHLoader_ClassName "BVHLoader"
 #define zhZHASerializer_ClassId 1
 #define zhZHASerializer_ClassName "ZHASerializer"
 

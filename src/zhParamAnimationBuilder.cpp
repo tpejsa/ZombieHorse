@@ -22,16 +22,16 @@ SOFTWARE.
 
 #include "zhParamAnimationBuilder.h"
 #include "zhString.h"
-#include "zhModel.h"
+#include "zhSkeleton.h"
 #include "zhAnimationSpace.h"
 
 namespace zh
 {
 
-ParamAnimationBuilder::ParamAnimationBuilder( Model* mdl, AnimationSpace* animSpace )
-: mMdl(mdl), mAnimSpace(animSpace)
+ParamAnimationBuilder::ParamAnimationBuilder( Skeleton* skel, AnimationSpace* animSpace )
+: mSkel(skel), mAnimSpace(animSpace)
 {
-	zhAssert( mdl != NULL && animSpace != NULL );
+	zhAssert( skel != NULL && animSpace != NULL );
 }
 
 ParamAnimationBuilder::~ParamAnimationBuilder()
@@ -46,8 +46,6 @@ void ParamAnimationBuilder::parametrize( const std::vector<AnimationParamSpec>& 
 	if( paramSpecs.empty() )
 		return;
 
-	Skeleton* skel = mMdl->getSkeleton();
-
 	// create empty parametrization
 	AnimationParametrization* animparam = mAnimSpace->createParametrization(
 		getClassId(), paramSpecs.size(), mAnimSpace->getNumBaseAnimations() );
@@ -55,12 +53,12 @@ void ParamAnimationBuilder::parametrize( const std::vector<AnimationParamSpec>& 
 	// extract param. values for each base anim.
 	for( unsigned int param_i = 0; param_i < paramSpecs.size(); ++param_i )
 	{
-		zhAssert( skel->hasBone( paramSpecs[param_i].getBoneId() ) &&
-			skel->hasBone( paramSpecs[param_i].getSuperBoneId() )
+		zhAssert( mSkel->hasBone( paramSpecs[param_i].getBoneId() ) &&
+			mSkel->hasBone( paramSpecs[param_i].getSuperBoneId() )
 			);
 
-		Bone *bone = skel->getBone( paramSpecs[param_i].getBoneId() ),
-			*superbone = skel->getBone( paramSpecs[param_i].getSuperBoneId() );
+		Bone *bone = mSkel->getBone( paramSpecs[param_i].getBoneId() ),
+			*superbone = mSkel->getBone( paramSpecs[param_i].getSuperBoneId() );
 
 		animparam->setParam( param_i, paramSpecs[param_i].getParamName() );
 
@@ -104,9 +102,9 @@ void ParamAnimationBuilder::parametrize( const std::vector<AnimationParamSpec>& 
 			}
 		}
 
-		// apply query base anim. to model at 0 time
-		skel->resetToInitialPose();
-		mAnimSpace->getBaseAnimation(qanim_i)->apply( mMdl, 0, 1, 1, Animation::EmptyBoneMask );
+		// apply query base anim. to skeleton at 0 time
+		mSkel->resetToInitialPose();
+		mAnimSpace->getBaseAnimation(qanim_i)->apply( mSkel, 0, 1, 1, Animation::EmptyBoneMask );
 
 		// get transf.'s
 		Vector3 bpos = superbone->getWorldPosition();
@@ -118,9 +116,9 @@ void ParamAnimationBuilder::parametrize( const std::vector<AnimationParamSpec>& 
 		{
 			Animation* banim = mAnimSpace->getBaseAnimation(banim_i);
 
-			// apply base anim. to model at the param. sample time
-			skel->resetToInitialPose();
-			banim->apply( mMdl, param_times[banim_i], 1, 1, Animation::EmptyBoneMask );
+			// apply base anim. to skeleton at the param. sample time
+			mSkel->resetToInitialPose();
+			banim->apply( mSkel, param_times[banim_i], 1, 1, Animation::EmptyBoneMask );
 
 			// extract param. values
 			float param = 0;
@@ -158,7 +156,7 @@ void ParamAnimationBuilder::parametrize( const std::vector<AnimationParamSpec>& 
 		}
 	}
 	
-	skel->resetToInitialPose();
+	mSkel->resetToInitialPose();
 
 	// generate the parametrization
 	_buildParametrization();

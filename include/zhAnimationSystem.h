@@ -20,50 +20,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __zhSystem_h__
-#define __zhSystem_h__
+#ifndef __zhAnimationSystem_h__
+#define __zhAnimationSystem_h__
 
 #include "zhPrereq.h"
 #include "zhIterators.h"
 #include "zhError.h"
-#include "zhObjectFactory.h"
 #include "zhSingleton.h"
-#include "zhCharacter.h"
+#include "zhSkeleton.h"
+#include "zhAnimationTree.h"
 
-#define zhAnimationSystem AnimationSystem::Instance()
-
-#define zhModelController_ClassId 1
-#define zhModelController_ClassName "ModelController"
-#define zhAnimationController_ClassId 2
-#define zhAnimationController_ClassName "AnimationController"
-#define zhLocomotionController_ClassId 3
-#define zhLocomotionController_ClassName "LocomotionController"
-#define zhSensoryController_ClassId 4
-#define zhSensoryController_ClassName "SensoryController"
-#define zhNavigationController_ClassId 5
-#define zhNavigationController_ClassName "NavigationController"
-
-#define zhDeclare_CharacterController( CC, classId, className ) \
-	zhDeclare_Class( CharacterController, CC, classId, className, std::string )
-#define zhRegister_CharacterController( CC ) \
-	AnimationSystem::Instance()->_getCharacterControllerFactory()->registerClass( CC::ClassId(), CC::ClassName(), &CC::Create )
-#define zhUnregister_CharacterController( CC ) \
-	AnimationSystem::Instance()->_getCharacterControllerFactory()->registerClass( CC::ClassId() )
+#define zhAnimationSystem zh::AnimationSystem::Instance()
 
 namespace zh
 {
 
-class CharacterController;
 class AnimationManager;
-class AnimationTreeManager;
-class Plugin;
 class MemoryPool;
 
 enum SystemError
 {
 	SystemError_None,
-	SystemError_FileNotFound,
-	SystemError_ClassNotRegistered
+	SystemError_ResourceLoadingFailed
 };
 
 /**
@@ -72,8 +50,7 @@ enum SystemError
 * AnimationSystem core. Handles the following tasks:
 * - system initialization and uninitialization
 * - system configuration (loadable from config.xml file)
-* - plugin load and registration
-* - access to core subsystems - characters, resource managers etc.
+* - access to core functionality - skeletons, animation loading and control, animation tree...
 */
 class zhDeclSpec AnimationSystem : public Singleton<AnimationSystem>
 {
@@ -84,15 +61,12 @@ public:
 
 	zhDeclare_ErrorState
 	
-	typedef MapIterator< std::map<std::string, Character*> > CharacterIterator;
-	typedef MapConstIterator< std::map<std::string, Character*> > CharacterConstIterator;
-
-	typedef MapConstIterator< std::map<std::string, CharacterTemplate> > CharacterTemplateConstIterator;
-
-	typedef MapIterator< std::map<unsigned long, Plugin*> > PluginIterator;
-	typedef MapConstIterator< std::map<unsigned long, Plugin*> > PluginConstIterator;
-
-	typedef ObjectFactory< CharacterController, std::string > CharacterControllerFactory;
+	typedef MapIterator< std::map<std::string, Skeleton*> > SkeletonIterator;
+	typedef MapConstIterator< std::map<std::string, Skeleton*> > SkeletonConstIterator;
+	typedef MapIterator< std::map<std::string, AnimationTree*> > AnimationTreeIterator;
+	typedef MapConstIterator< std::map<std::string, AnimationTree*> > AnimationTreeConstIterator;
+	typedef MapIterator< std::map<std::string, AnimationSetPtr> > AnimationSetIterator;
+	typedef MapConstIterator< std::map<std::string, AnimationSetPtr> > AnimationSetConstIterator;
 
 private:
 
@@ -120,117 +94,107 @@ public:
 	bool init( const std::string& cfgPath = "system.config.xml" );
 
 	/**
-	* Updates and applies the state of each Character.
+	* Creates a new Skeleton.
 	*
-	* @param dt Elapsed time.
+	* @param name Skeleton name.
+	* @return Pointer to the skeleton.
 	*/
-	void update( float dt );
+	Skeleton* createSkeleton( const std::string& name );
 
 	/**
-	* Creates a new Character.
+	* Deletes the skeleton with the specified name.
+	*/
+	void deleteSkeleton( const std::string& name );
+
+	/**
+	* Deletes all skeletons.
+	*/
+	void deleteAllSkeletons();
+
+	/**
+	* Returns true if the skeleton with the specified name exists, false otherwise.
+	*/
+	bool hasSkeleton( const std::string& name ) const;
+
+	/**
+	* Gets the skeleton with the specified name.
+	*/
+	Skeleton* getSkeleton( const std::string& name ) const;
+
+	/**
+	* Gets an iterator over the map of skeletons.
+	*/
+	SkeletonIterator getSkeletonIterator();
+
+	/**
+	* Gets a const iterator over the map of skeletons.
+	*/
+	SkeletonConstIterator getSkeletonConstIterator() const;
+
+	/**
+	* Gets the number of skeletons.
+	*/
+	unsigned int getNumSkeletons() const;
+
+	/**
+	* Loads an animation set from a file (BVH, ZHA...)
 	*
-	* @param id Character name.
-	* @return Pointer to the character.
+	* @param path Animation set path.
+	* @param skel Skeleton for the animation set.
+	* @return Animation set pointer, or NULL if loading has failed.
+	* @remark If skeleton is not specified, then a new skeleton will be
+	* automatically created, and assigned the same name as the animation set.
+	* However, if the loaded animation set is known to have the same skeleton
+	* as one of the existing ones, you can specify that skeleton and thus
+	* avoid spurious retargetting.
 	*/
-	Character* createCharacter( const std::string& id );
+	AnimationSetPtr loadAnimationSet( const std::string& path, const std::string& skel = "" );
 
 	/**
-	* Creates a new Character using the specified CharacterTemplate.
+	* Deletes the animation set with the specified name.
+	*/
+	void deleteAnimationSet( const std::string& name ) const;
+
+	/**
+	* Deletes all animations, across all animation sets.
+	*/
+	void deleteAllAnimations( const std::string& name ) const;
+
+	/**
+	* Gets the animation set with the specified name.
+	*/
+	AnimationSetPtr getAnimationSet( const std::string& name ) const;
+
+	/**
+	* Return true if the animation set with the specified name exists, false otherwise.
+	*/
+	bool hasAnimationSet( const std::string& name ) const;
+
+	/**
+	* Gets an iterator over the map of animation sets.
+	*/
+	AnimationSetIterator getAnimationSetIterator();
+
+	/**
+	* Gets a const iterator over the map of skeletons.
+	*/
+	AnimationSetConstIterator getAnimationSetConstIterator() const;
+
+	/**
+	* Gets an animation clip.
 	*
-	* @param id Character name.
-	* @param templName CharacterTemplate name.
-	* @return Pointer to the character.
-	* Sets error codes:
-	* - SystemError_None - no errors
-	* - SystemError_ClassNotRegistered - CharacterController class
-	* specified in the template not registered
+	* @param animName Fully-qualified animation name.
+	* @return Pointer to the animation clip.
 	*/
-	Character* createCharacter( const std::string& id, const std::string& templName );
+	Animation* getAnimation( const std::string& animName ) const;
 
 	/**
-	* Deletes the character with the specified name.
-	*/
-	void deleteCharacter( const std::string& id );
-
-	/**
-	* Deletes all characters.
-	*/
-	void deleteAllCharacters();
-
-	/**
-	* Returns true if the character with the specified name exists, false otherwise.
-	*/
-	bool hasCharacter( const std::string& id ) const;
-
-	/**
-	* Gets the character with the specified name.
-	*/
-	Character* getCharacter( const std::string& id ) const;
-
-	/**
-	* Gets an iterator over the map of characters.
-	*/
-	CharacterIterator getCharacterIterator();
-
-	/**
-	* Gets a const iterator over the map of characters.
-	*/
-	CharacterConstIterator getCharacterConstIterator() const;
-
-	/**
-	* Gets the number of characters.
-	*/
-	unsigned int getNumCharacters() const;
-
-	/**
-	* Adds a new CharacterTemplate.
-	*/
-	void addCharacterTemplate( const CharacterTemplate& templ );
-
-	/**
-	* Removes the specified CharacterTemplate.
+	* Returns true if the specified animation clip exists.
 	*
-	* @param templName CharacterTemplate name.
+	* @param animName Fully-qualified animation name.
+	* @return Pointer to the animation clip.
 	*/
-	void removeCharacterTemplate( const std::string& templName );
-
-	/**
-	* Removes all CharacterTemplates.
-	*/
-	void removeAllCharacterTemplates();
-
-	/**
-	* Returns true if the specified CharacterTemplate exists,
-	* otherwise false.
-	*
-	* @param templName CharacterTemplate name.
-	* @return true if the specified CharacterTemplate exists,
-	* false otherwise.
-	*/
-	bool hasCharacterTemplate( const std::string& templName ) const;
-
-	/**
-	* Gets the specified CharacterTemplate.
-	*
-	* @param templName CharacterTemplateName.
-	* @return CharacterTemplate.
-	*/
-	const CharacterTemplate& getCharacterTemplate( const std::string& templName ) const;
-
-	/**
-	* Gets the number of CharacterTemplates.
-	*/
-	unsigned int getNumCharacterTemplates() const;
-
-	/**
-	* Gets a const iterator over the map of CharacterTemplates.
-	*/
-	CharacterTemplateConstIterator getCharacterTemplateConstIterator() const;
-	
-	/**
-	* Gets a pointer to the memory pool.
-	*/
-	MemoryPool* getMemoryPool() const;
+	bool hasAnimation( const std::string& animName ) const;
 
 	/**
 	* Gets a pointer to the animation manager.
@@ -238,30 +202,133 @@ public:
 	AnimationManager* getAnimationManager() const;
 
 	/**
-	* Gets a pointer to the animation tree manager.
+	* Creates a new animation clip from a segment of an existing animation.
+	*
+	* @param newAnimName New animation name.
+	* @param origAnimName Fully-qualified original animation name.
+	* @param startTime Animation segment start time.
+	* @param length Animation segment length.
 	*/
-	AnimationTreeManager* getAnimationTreeManager() const;
+	void createAnimationFromSegment( const std::string& newAnimName, const std::string& origAnimName,
+		float startTime, float length );
 
 	/**
-	* Gets the factory that produces character controllers.
-	* This function is meant to be called only
-	* by Character class.
+	* Gets the current output skeleton.
+	*
+	* @return Pointer to the output skeleton.
 	*/
-	CharacterControllerFactory* _getCharacterControllerFactory() const;
+	Skeleton* getOutputSkeleton() const;
+
+	/**
+	* Sets the output skeleton.
+	*
+	* @param name Output skeleton name.
+	*/
+	void setOutputSkeleton( const std::string& name );
+
+	/**
+	* Queues the specified animation for playback.
+	*
+	* @param animName Fully-qualified animation name.
+	* @remark The specified animation will be added to the playback queue in
+	* the animation tree. The animation will be spatially aligned with the
+	* previous animation, and it will blend in gradually.
+	*/
+	void playAnimation( const std::string& animName );
+
+	/**
+	* Plays the specified animation right away, with original root position
+	* and orientation.
+	*
+	* @param animName Fully-qualified animation name.
+	*/
+	void playAnimationNow( const std::string& animName );
+
+	/**
+	* Stops playback of current animation and empties the animation queue.
+	*/
+	void stopAnimation();
+
+	/**
+	* Returns true if animation is currently playing, false otherwise.
+	*/
+	bool isAnimationPlaying() const;
+
+	/**
+	* Pauses the current animation.
+	*/
+	void pauseAnimation();
+
+	/**
+	* Unpauses the current animation.
+	*/
+	void unpauseAnimation();
+	
+	/**
+	* Returns true if animation is currently paused, false otherwise.
+	*/
+	bool isAnimationPaused() const;
+
+	/**
+	* Gets the current animation time.
+	*
+	* @return Current animation time.
+	*/
+	float getAnimationTime() const;
+
+	/**
+	* Sets the current animation time.
+	*
+	* @return Current animation time.
+	*/
+	void setAnimationTime( float time );
+
+	/**
+	* Gets the current animation playback rate.
+	*
+	* @return Current playback rate.
+	* @remark 1 is the animation's normal playback rate.
+	*/
+	float getAnimationRate() const;
+
+	/**
+	* Sets the animation playback rate.
+	*
+	* @param rate New playback rate.
+	* @remark 1 is the animation's normal playback rate.
+	*/
+	void setAnimationRate( float rate );
+
+	/**
+	* Gets the current animation length.
+	*
+	* @return Animation length.
+	*/
+	float getAnimationLength() const;
+
+	/**
+	* Updates and applies the currently playing animation.
+	*/
+	void update( float dt ) const;
+
+	/**
+	* Gets the current animation length.
+	*/
+	AnimationTree* getAnimationTree() const;
+
+	/**
+	* Gets a pointer to the memory pool.
+	*/
+	MemoryPool* getMemoryPool() const;
 
 private:
 
-	std::map<std::string, Character*> mCharacters;
-	std::map<std::string, CharacterTemplate> mCharacterTemplates;
-
-	std::string mPluginDir;
-	std::map<unsigned long, Plugin*> mPluginsByClassId;
-	std::map<std::string, Plugin*> mPluginsByClassName;
-
-	CharacterControllerFactory* mCharCtrlFact;
+	std::map<std::string, Skeleton*> mSkeletons;
+	AnimationTree* mAnimTree;
+	Skeleton* mOutSkel;
 
 };
 
 }
 
-#endif // __zhSystem_h__
+#endif // __zhAnimationSystem_h__

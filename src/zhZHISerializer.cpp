@@ -36,7 +36,7 @@ bool ZHISerializer::trySerialize( ResourcePtr res, const std::string& path )
 	std::string dir, filename, prefix, ext;
 	parsePathStr( path, dir, filename, prefix, ext );
 
-	if( ext != "vai" )
+	if( ext != "zhi" )
 		return false;
 
 	return true;
@@ -357,7 +357,7 @@ bool ZHISerializer::writePoint( rapidxml::xml_node<>* node, const AnimationDista
 	return true;
 }
 
-std::string ZHISerializer::writeSituation( const Model::Situation& sit )
+std::string ZHISerializer::writeSituation( const Skeleton::Situation& sit )
 {
 	return toString<float>( sit.getPosX() ) + " " + toString<float>( sit.getPosZ() ) + " " + toString<float>( sit.getOrientY() );
 }

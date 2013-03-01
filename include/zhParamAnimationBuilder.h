@@ -29,7 +29,7 @@ SOFTWARE.
 namespace zh
 {
 
-class Model;
+class Skeleton;
 class Animation;
 class AnimationSpace;
 class MatchGraph;
@@ -175,10 +175,10 @@ public:
 	/**
 	* Constructor.
 	*
-	* @param mdl Pointer to the character model.
+	* @param skel Pointer to the character skeleton.
 	* @param animSpace Pointer to the animation space.
 	*/
-	ParamAnimationBuilder( Model* mdl, AnimationSpace* animSpace );
+	ParamAnimationBuilder( Skeleton* skel, AnimationSpace* animSpace );
 
 	/**
 	* Destructor.
@@ -191,11 +191,11 @@ public:
 	virtual AnimationParamClass getClassId() const = 0;
 
 	/**
-	* Gets the character model.
+	* Gets the character skeleton.
 	*
-	* @return Pointer to the model.
+	* @return Pointer to the skeleton.
 	*/
-	Model* getModel() const { return mMdl; }
+	Skeleton* getSkeleton() const { return mSkel; }
 
 	/**
 	* Gets the animation space.
@@ -215,7 +215,7 @@ protected:
 
 	virtual void _buildParametrization() = 0;
 
-	Model* mMdl;
+	Skeleton* mSkel;
 	AnimationSpace* mAnimSpace;
 
 };

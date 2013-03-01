@@ -21,48 +21,47 @@ SOFTWARE.
 ******************************************************************************/
 
 #include "zhPlantConstrDetector.h"
-#include "zhModel.h"
+#include "zhSkeleton.h"
 #include "zhAnimation.h"
-#include "zhCCDSolver.h"
+//#include "zhCCDSolver.h"
 #include "zhAnimationSegment.h"
 
 namespace zh
 {
 
-PlantConstrDetector::PlantConstrDetector( Model* mdl, Animation* anim )
-: mMdl(mdl), mAnim(anim), mMaxPosChange(1.f), mMinConstrLength(0.1f), mSolver(NULL)
+PlantConstrDetector::PlantConstrDetector( Skeleton* skel, Animation* anim )
+: mSkel(skel), mAnim(anim), mMaxPosChange(1.f), mMinConstrLength(0.1f)//, mSolver(NULL)
 {
-	zhAssert( mdl != NULL );
+	zhAssert( skel != NULL );
 	zhAssert( anim != NULL );
 
-	setIKSolver(IKSolver_CCD);
+	/*setIKSolver(IKSolver_CCD);
 	static_cast<CCDSolver*>(mSolver)->setMaxAngleChange(zhPI4/2);
-	static_cast<CCDSolver*>(mSolver)->setNumIterations(50);
+	static_cast<CCDSolver*>(mSolver)->setNumIterations(50);*/
 }
 
 PlantConstrDetector::~PlantConstrDetector()
 {
-	if( mSolver != NULL ) delete mSolver;
+	//if( mSolver != NULL ) delete mSolver;
 }
 
 void PlantConstrDetector::detect( unsigned short boneId )
 {
-	Skeleton* skel = mMdl->getSkeleton(); // model skeleton
-	zhAssert( skel->hasBone(boneId) );
-	Bone* bone = skel->getBone(boneId);
+	zhAssert( mSkel->hasBone(boneId) );
+	Bone* bone = mSkel->getBone(boneId);
 	unsigned int num_samples = (unsigned int)( mAnim->getLength() * zhAnimation_SampleRate ) + 1; // number of samples in the anim.
 	float dt = 1.f / zhAnimation_SampleRate; // offset between samples
 
 	float stime = 0, etime; // constr. start and end times
-	skel->resetToInitialPose();
-	mAnim->apply( mMdl, 0, 1, 1, Animation::EmptyBoneMask );
+	mSkel->resetToInitialPose();
+	mAnim->apply( mSkel, 0, 1, 1, Animation::EmptyBoneMask );
 	Vector3 last_pos = bone->getWorldPosition(); // bone position in last frame
 	bool bone_stat = true; // flags indicating if the bone is stationary, and if it has been such long enough for there to be a constraint
 	for( unsigned int si = 0; si < num_samples; ++si )
 	{
 		float t = si * dt;
-		skel->resetToInitialPose();
-		mAnim->apply( mMdl, t, 1, 1, Animation::EmptyBoneMask );
+		mSkel->resetToInitialPose();
+		mAnim->apply( mSkel, t, 1, 1, Animation::EmptyBoneMask );
 
 		// get bone position on current frame
 		Vector3 pos = bone->getWorldPosition();
@@ -97,18 +96,17 @@ void PlantConstrDetector::detect( unsigned short boneId )
 		last_pos = pos;
 	}
 
-	skel->resetToInitialPose();
+	mSkel->resetToInitialPose();
 }
 
 void PlantConstrDetector::detect( const std::string& boneName )
 {
-	Skeleton* skel = mMdl->getSkeleton(); // model skeleton
-	zhAssert( skel->hasBone(boneName) );
+	zhAssert( mSkel->hasBone(boneName) );
 
-	detect( skel->getBone(boneName)->getId() );
+	detect( mSkel->getBone(boneName)->getId() );
 }
 
-IKSolver* PlantConstrDetector::getIKSolver() const
+/*IKSolver* PlantConstrDetector::getIKSolver() const
 {
 	return mSolver;
 }
@@ -122,14 +120,13 @@ void PlantConstrDetector::setIKSolver( IKSolverClass solver )
 
 void PlantConstrDetector::cleanup()
 {
-	Skeleton* skel = mMdl->getSkeleton(); // model skeleton
 	float dt = 1.f / zhAnimation_SampleRate; // offset between samples
 
 	PlantConstraintAnnotationContainer* annots = mAnim->getPlantConstraintAnnotations();
 	for( unsigned int annot_i = 0; annot_i < annots->getNumAnnotations(); ++annot_i )
 	{
 		PlantConstraintAnnotation* annot = static_cast<PlantConstraintAnnotation*>( annots->getAnnotation(annot_i) );
-		Bone* bone = skel->getBone( annot->getBoneId() );
+		Bone* bone = mSkel->getBone( annot->getBoneId() );
 
 		unsigned int num_samples = (unsigned int)( ( annot->getEndTime() - annot->getStartTime() ) * zhAnimation_SampleRate ); // number of samples in the anim. segment
 		std::vector<float> kftimes;
@@ -138,7 +135,7 @@ void PlantConstrDetector::cleanup()
 		std::map< unsigned short, std::vector<Vector3> > kfscal;
 
 		skel->resetToInitialPose();
-		mAnim->apply( mMdl, annot->getStartTime(), 1, 1, Animation::EmptyBoneMask );
+		mAnim->apply( mSkel, annot->getStartTime(), 1, 1, Animation::EmptyBoneMask );
 
 		// initialize IK solver
 		mSolver->setBoneId( bone->getId() );
@@ -152,8 +149,8 @@ void PlantConstrDetector::cleanup()
 			kftimes.push_back(t);
 			
 			skel->resetToInitialPose();
-			mAnim->apply( mMdl, t, 1, 1, Animation::EmptyBoneMask );
-			mSolver->solve(mMdl);
+			mAnim->apply( mSkel, t, 1, 1, Animation::EmptyBoneMask );
+			mSolver->solve(mSkel);
 
 			// TODO: how to make foot/hand position parallel to surface?
 
@@ -208,7 +205,7 @@ void PlantConstrDetector::cleanup()
 			pbone = pbone->getParent();
 		}
 	}
-}
+}*/
 
 void PlantConstrDetector::_createPlantConstr( float startTime, float endTime, unsigned short boneId )
 {

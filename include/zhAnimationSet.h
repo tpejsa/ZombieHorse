@@ -27,8 +27,10 @@ SOFTWARE.
 #include "zhIterators.h"
 #include "zhSmartPtr.h"
 #include "zhResourceManager.h"
-#include "zhModel.h"
+#include "zhSkeleton.h"
 #include "zhAnimationAnnotation.h"
+
+#define zhA(animSetName, animName) ((animSetName)+"::"+(animName))
 
 namespace zh
 {
@@ -147,6 +149,17 @@ public:
 	* Gets the number of key-frame animations in the AnimationSet.
 	*/
 	unsigned int getNumAnimations() const;
+
+	/**
+	* Creates a new animation clip from a segment of an existing animation.
+	*
+	* @param newAnimName New animation name.
+	* @param origAnimName Original animation name.
+	* @param startTime Animation segment start time.
+	* @param length Animation segment length.
+	*/
+	void createAnimationFromSegment( const std::string& newAnimName, const std::string& origAnimName,
+		float startTime, float length );
 
 	/**
 	* Creates a new key-frame animation in this AnimationSet.

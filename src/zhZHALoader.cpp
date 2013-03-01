@@ -22,7 +22,6 @@ SOFTWARE.
 
 #include "zhZHALoader.h"
 #include "zhBoneAnimationTrack.h"
-#include "zhMeshAnimationTrack.h"
 #include "zhString.h"
 #include "zhFileSystem.h"
 
@@ -39,7 +38,7 @@ bool ZHALoader::tryLoad( ResourcePtr res, const std::string& path )
 	std::string dir, filename, prefix, ext;
 	parsePathStr( path, dir, filename, prefix, ext );
 
-	if( ext != "va" )
+	if( ext != "zha" )
 		return false;
 
 	return true;
@@ -306,11 +305,6 @@ bool ZHALoader::parseTracks( rapidxml::xml_node<>* node )
 			if( !parseBoneTrack(child) )
 				return false;
 		}
-		else if( !strcmp( child->name(), "MeshTrack" ) )
-		{
-			if( !parseMeshTrack(child) )
-				return false;
-		}
 		else
 		{
 			return false;
@@ -486,103 +480,6 @@ bool ZHALoader::parseQuat( const std::string& qstr, Quat& q )
 	return true;
 }
 
-bool ZHALoader::parseMeshTrack( rapidxml::xml_node<>* node )
-{
-	rapidxml::xml_node<>* child;
-	rapidxml::xml_attribute<>* attrib;
-
-	unsigned short mesh_id;
-
-	// parse node attributes:
-	
-	attrib = node->first_attribute( "meshId" );
-	if( attrib == NULL )
-	{
-		zhLog( "ZHALoader", "parseMeshTrack", "ERROR: Invalid ZHA file. MeshTrack element missing meshId attribute." );
-		return false;
-	}
-	mesh_id = fromString<unsigned short>( attrib->value() );
-
-	// check attribute validity:
-
-	MeshAnimationTrack* mat = mAnim->createMeshTrack( mesh_id );
-
-	// parse child elements:
-
-	child = node->first_node( "MorphKeyFrames" );
-	if( child != NULL )
-	{
-		if( !parseMorphKeyFrames( child, mat ) )
-			return false;
-	}
-
-	return true;
-}
-
-bool ZHALoader::parseMorphKeyFrames( rapidxml::xml_node<>* node, MeshAnimationTrack* track )
-{
-	rapidxml::xml_node<>* child;
-
-	// parse child elements:
-
-	child = node->first_node();
-	while( child != NULL )
-	{
-		if( !strcmp( child->name(), "MorphKeyFrame" ) )
-		{
-			if( !parseMorphKeyFrame( child, track ) )
-				return false;
-		}
-		else
-		{
-			return false;
-		}
-
-		child = child->next_sibling();
-	}
-	
-	return true;
-}
-
-bool ZHALoader::parseMorphKeyFrame( rapidxml::xml_node<>* node, MeshAnimationTrack* track )
-{
-	rapidxml::xml_attribute<>* attrib;
-
-	float time;
-	Vector mtws;
-
-	// parse node attributes:
-
-	attrib = node->first_attribute( "time" );
-	if( attrib == NULL )
-	{
-		zhLog( "ZHALoader", "parseMorphKeyFrame", "ERROR: Invalid ZHA file. MorphKeyFrame element missing time attribute." );
-		return false;
-	}
-	time = fromString<float>( attrib->value() );
-
-	attrib = node->first_attribute( "MTWeights" );
-	if( attrib == NULL )
-	{
-		zhLog( "ZHALoader", "parseMorphKeyFrame", "ERROR: Invalid ZHA file. MorphKeyFrame element missing MTWeights attribute." );
-		return false;
-	}
-	if( !parseVector( attrib->value(), mtws ) )
-	{
-		zhLog( "ZHALoader", "parseMorphKeyFrame", "ERROR: Invalid ZHA file. MTWeights attribute of MorphKeyFrame element has invalid value." );
-		return false;
-	}
-
-	// check attribute validity:
-
-	// assign attribute values:
-
-	MorphKeyFrame* mkf = static_cast<MorphKeyFrame*>( track->createKeyFrame(time) );
-	mkf->setMorphTargetWeights(mtws);
-
-	return true;
-}
-
 bool ZHALoader::parseVector( const std::string& zhtr, Vector& v )
 {
 	std::vector<float> v0;
@@ -637,13 +534,11 @@ bool ZHALoader::parseAnnotation( rapidxml::xml_node<>* node )
 	ParamTransitionAnnotationContainer* ptannots = mAnim->getParamTransitionAnnotations();
 	PlantConstraintAnnotationContainer* pcannots = mAnim->getPlantConstraintAnnotations();
 	SimEventAnnotationContainer* seannots = mAnim->getSimEventAnnotations();
-	GesturePhaseAnnotationContainer* gpannots = mAnim->getGesturePhaseAnnotations();
 
 	TransitionAnnotation* tannot = NULL;
 	ParamTransitionAnnotation* ptannot = NULL;
 	PlantConstraintAnnotation* pcannot = NULL;
 	SimEventAnnotation* seannot = NULL;
-	GesturePhaseAnnotation* gpannot = NULL;
 
 	// parse node attributes:
 
@@ -686,10 +581,8 @@ bool ZHALoader::parseAnnotation( rapidxml::xml_node<>* node )
 		ptannot = static_cast<ParamTransitionAnnotation*>( ptannots->createAnnotation( start_time, end_time ) );
 	else if( class_id == AnimAnnot_PlantConstraint )
 		pcannot = static_cast<PlantConstraintAnnotation*>( pcannots->createAnnotation( start_time, end_time ) );
-	else if( class_id == AnimAnnot_SimEvent )
+	else // if( class_id == AnimAnnot_SimEvent )
 		seannot = static_cast<SimEventAnnotation*>( seannots->createAnnotation( start_time, end_time ) );
-	else // if( class_id == AnimAnnot_GesturePhase )
-		gpannot = static_cast<GesturePhaseAnnotation*>( gpannots->createAnnotation( start_time, end_time ) );
 
 	// parse child elements:
 
@@ -726,14 +619,6 @@ bool ZHALoader::parseAnnotation( rapidxml::xml_node<>* node )
 			return false;
 		}
 	}
-	else if( child != NULL &&
-		!strcmp( child->name(), "GesturePhaseAnnotation" ) )
-	{
-		if( !parseGesturePhaseAnnotation( child, gpannot ) )
-		{
-			return false;
-		}
-	}
 	else
 	{
 		zhLog( "ZHALoader", "parseAnnotation", "ERROR: Invalid ZHA file. Annotation element missing one of the following child elements: TransitionAnnotation|ParamTransitionAnnotation|PlantConstraintAnnotation|SimEventAnnotation|GesturePhaseAnnotation." );
@@ -753,8 +638,6 @@ bool ZHALoader::parseAnnotationClass( std::string annotClassStr, AnimationAnnota
 		annotClass = AnimAnnot_PlantConstraint;
 	else if( annotClassStr == "SimEvent" )
 		annotClass = AnimAnnot_SimEvent;
-	else if( annotClassStr == "GesturePhase" )
-		annotClass = AnimAnnot_GesturePhase;
 	else
 		return false;
 
@@ -769,7 +652,7 @@ bool ZHALoader::parseTransitionAnnotation( rapidxml::xml_node<>* node, Transitio
 	unsigned short target_id;
 	float target_time;
 	std::string aligntransf_str;
-	Model::Situation align_transf;
+	Skeleton::Situation align_transf;
 
 	// parse node attributes:
 
@@ -822,7 +705,7 @@ bool ZHALoader::parseTransitionAnnotation( rapidxml::xml_node<>* node, Transitio
 	return true;
 }
 
-bool ZHALoader::parseSituation( const std::string& sitStr, Model::Situation& sit )
+bool ZHALoader::parseSituation( const std::string& sitStr, Skeleton::Situation& sit )
 {
 	float x, z, ay;
 
@@ -837,7 +720,7 @@ bool ZHALoader::parseSituation( const std::string& sitStr, Model::Situation& sit
 		return false;
 	iss >> ay;
 	
-	sit = Model::Situation( x, z, ay );
+	sit = Skeleton::Situation( x, z, ay );
 
 	return true;
 }
@@ -852,7 +735,7 @@ bool ZHALoader::parseParamTransitionAnnotation( rapidxml::xml_node<>* node, Para
 	Vector ubound, lbound;
 	float target_time;
 	std::string aligntransf_str;
-	Model::Situation align_transf;
+	Skeleton::Situation align_transf;
 
 	// parse node attributes:
 
@@ -989,61 +872,6 @@ bool ZHALoader::parseSimEventAnnotation( rapidxml::xml_node<>* node, SimEventAnn
 
 	annot->setEventClassId( evt_classid );
 	annot->setEventId( evt_id );
-
-	return true;
-}
-
-bool ZHALoader::parseGesturePhaseAnnotation( rapidxml::xml_node<>* node, GesturePhaseAnnotation* annot )
-{
-	rapidxml::xml_attribute<>* attrib;
-
-	std::string gest_phase_str;
-	AnimationGesturePhase gest_phase;
-
-	// parse node attributes:
-
-	attrib = node->first_attribute( "gesturePhase" );
-	if( attrib == NULL )
-	{
-		zhLog( "ZHALoader", "parseGesturePhaseAnnotation", "ERROR: Invalid ZHA file. GesturePhaseAnnotation element missing gesturePhase attribute." );
-		return false;
-	}
-	gest_phase_str = attrib->value();
-
-	// check attribute validity:
-
-	if( !parseAnimationGesturePhase( gest_phase_str, gest_phase ) )
-	{
-		zhLog( "ZHALoader", "parseGesturePhaseAnnotation", "ERROR: Invalid ZHA file. gesturePhase attribute of GesturePhaseAnnotation element has invalid value: %s.",
-			gest_phase_str.c_str() );
-		return false;
-	}
-
-	// assign attribute values:
-
-	annot->setGesturePhase( gest_phase );
-
-	return true;
-}
-
-bool ZHALoader::parseAnimationGesturePhase( std::string gestPhaseStr, AnimationGesturePhase& gestPhase )
-{
-	if( gestPhaseStr == "Start" )
-		gestPhase = GesturePhase_Start;
-	else if( gestPhaseStr == "Ready" )
-		gestPhase = GesturePhase_Ready;
-	else if( gestPhaseStr == "StrokeStart" )
-		gestPhase = GesturePhase_StrokeStart;
-	else if( gestPhaseStr == "Stroke" )
-		gestPhase = GesturePhase_Stroke;
-	else if( gestPhaseStr == "StrokeEnd" )
-		gestPhase = GesturePhase_StrokeEnd;
-	else if( gestPhaseStr == "Relax" )
-		gestPhase = GesturePhase_Relax;
-	else if( gestPhaseStr == "End" )
-		gestPhase = GesturePhase_End;
-	else
-		return false;
 
 	return true;
 }

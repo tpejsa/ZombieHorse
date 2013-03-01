@@ -76,7 +76,7 @@ protected:
 	bool parsePath( rapidxml::xml_node<>* node );
 	bool parsePoints( rapidxml::xml_node<>* node, MatchWeb::Path& path );
 	bool parsePoint( rapidxml::xml_node<>* node, MatchWeb::Path& path );
-	bool parseSituation( const std::string& sitStr, Model::Situation& sit );
+	bool parseSituation( const std::string& sitStr, Skeleton::Situation& sit );
 	bool parseBranches( rapidxml::xml_node<>* node, MatchWeb::Path& path );
 	bool parseBranch( rapidxml::xml_node<>* node, MatchWeb::Path& path );
 
