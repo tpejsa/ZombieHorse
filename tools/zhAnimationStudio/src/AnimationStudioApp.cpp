@@ -121,7 +121,8 @@ bool AnimationStudioApp::frameStarted( const FrameEvent& evt )
 		// update ZombieHorse System
 		zhAnimationSystem->update( evt.timeSinceLastFrame );
 
-	// TODO: apply updated pose to render skeleton in OGRE
+	// Apply updated pose to the skeleton in viewport
+	mFrmMain->getOgreWindow()->updateRenderSkeletonPose( zhAnimationSystem->getOutputSkeleton() );
 
 	return true;
 }

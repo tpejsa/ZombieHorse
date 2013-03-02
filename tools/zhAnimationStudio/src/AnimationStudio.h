@@ -36,10 +36,18 @@ SOFTWARE.
 #define zhGround_Size 100
 #define zhGround_TileSize 100.f
 
+#define zhSkeleton_BoneSize 2.f
+#define zhSkeleton_BoneColor Ogre::ColourValue(0,0.6f,0.2f)
+
 #define zhCamera_Pos Ogre::Vector3( 200.f, 200.f, 200.f )
 #define zhCamera_Focus Ogre::Vector3( 0.f, 50.f, 0.f )
 #define zhCamera_TransSpeed 0.1f
 #define zhCamera_RotSpeed 1
+
+#define zhOgreVector3(v) Ogre::Vector3( (v).x, (v).y, (v).z )
+#define zhOgreQuat(q) Ogre::Quaternion( (q).w, (q).x, (q).y, (q).z )
+#define zhVector3(v) zh::Vector3( (v).x, (v).y, (v).z )
+#define zhQuat(q) zh::Quat( (q).w, (q).x, (q).y, (q).z )
 
 using namespace std;
 using namespace Ogre;

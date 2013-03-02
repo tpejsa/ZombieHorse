@@ -26,7 +26,7 @@ SOFTWARE.
 
 OgreWindow::OgreWindow( wxWindow *parent, wxWindowID id )
 : wxWindow( parent, id, parent->GetPosition(), parent->GetSize(), wxBORDER_SIMPLE, "OgreWindow" ),
-mFPS(0)
+mRenderSkel(NULL), mFPS(0)
 {
 }
 
@@ -37,6 +37,10 @@ float OgreWindow::getFrameRate() const
 
 void OgreWindow::showSkeleton( bool show )
 {
+	if( mRenderSkel == NULL )
+		return;
+
+	mRenderSkel->setVisible(show);
 }
 
 void OgreWindow::showGround( bool show )
@@ -149,7 +153,61 @@ void OgreWindow::showCoordAxesOnBone( const Ogre::String& boneName, bool show )
 
 void OgreWindow::setRenderSkeleton( zh::Skeleton* skel )
 {
-	// TODO: fill this in...
+	if( skel == NULL ) return;
+	Ogre::SceneManager* scenemgr = gApp->getSceneManager();
+
+	if( mRenderSkel != NULL )
+	{
+		// Delete existing skeleton
+		scenemgr->getRootSceneNode()->removeAndDestroyChild( mRenderSkel->getName() );
+		scenemgr->destroyAllManualObjects();
+	}
+
+	MaterialPtr bone_mat = MaterialManager::getSingleton().getByName( "BoneMat" );
+	if( bone_mat.isNull() )
+	{
+		// Create material for the bones
+		bone_mat = MaterialManager::getSingleton().create( "BoneMat", "General" );
+		bone_mat->setReceiveShadows(false);
+		bone_mat->setAmbient(zhSkeleton_BoneColor);
+		bone_mat->setDiffuse(zhSkeleton_BoneColor);
+	}
+
+	/*
+	skel = new zh::Skeleton("TestSkeleton");
+	zh::Bone* pelvis = skel->createBone(0,"pelvis");
+	zh::Bone* lHip = skel->createBone(1,"lHip");
+	zh::Bone* rHip = skel->createBone(2,"rHip");
+	zh::Bone* lKnee = skel->createBone(3,"lKnee");
+	zh::Bone* rKnee = skel->createBone(4,"rKnee");
+	pelvis->setInitialPosition( zh::Vector3(0,75,0) );
+	pelvis->addChild(lHip);
+	lHip->setInitialPosition( zh::Vector3(15,-15,0) );
+	pelvis->addChild(rHip);
+	rHip->setInitialPosition( zh::Vector3(-15,-15,0) );
+	lHip->addChild(lKnee);
+	lKnee->setInitialPosition( zh::Vector3(0,-30,0) );
+	rHip->addChild(rKnee);
+	rKnee->setInitialPosition( zh::Vector3(0,-30,0) );
+	*/
+	_createRenderSkeleton( skel->getRoot(), scenemgr->getRootSceneNode(), NULL );
+}
+
+void OgreWindow::updateRenderSkeletonPose( zh::Skeleton* skel )
+{
+	if( skel == NULL ) return;
+	Ogre::SceneManager* scenemgr = gApp->getSceneManager();
+
+	zh::Skeleton::BoneConstIterator bone_i = skel->getBoneConstIterator();
+	while( bone_i.hasMore() )
+	{
+		zh::Bone* bone = bone_i.next();
+		Ogre::SceneNode* rbone = scenemgr->getSceneNode(bone->getName());
+		if(rbone == NULL ) continue;
+
+		rbone->setPosition( zhOgreVector3(bone->getOrientation()) );
+		rbone->setOrientation( zhOgreQuat(bone->getOrientation()) );
+	}
 }
 
 void OgreWindow::createPointSet( const Ogre::String& name, const std::vector<Ogre::Vector3>& points,
@@ -307,6 +365,123 @@ void OgreWindow::OnMouseWheel( wxMouseEvent& evt )
 void OgreWindow::OnSize( wxSizeEvent& evt )
 {
 	gApp->resize( evt.GetSize().GetWidth(), evt.GetSize().GetHeight() );
+}
+
+void OgreWindow::_createRenderSkeleton( zh::Bone* bone, Ogre::SceneNode* renderParent, Ogre::SceneNode* parentObj )
+{
+	SceneNode* rbone = renderParent->createChildSceneNode( bone->getName() );
+	rbone->setPosition( zhOgreVector3(bone->getInitialPosition()) );
+	SceneNode* rbone_obj = rbone->createChildSceneNode( rbone->getName() + "Obj" );
+	rbone_obj->attachObject( _createBox(bone->getName(),"BoneMat",zhSkeleton_BoneSize) );
+
+	if( parentObj != NULL && bone->getParent()->getNumChildren() <= 1 )
+	{
+		parentObj->setPosition( 0.5f*rbone->getPosition() );
+		parentObj->setOrientation( Ogre::Vector3::UNIT_Y.getRotationTo(rbone->getPosition()) );
+		parentObj->setScale( 1, 0.5f*rbone->getPosition().length()/zhSkeleton_BoneSize, 1 );
+	}
+
+	zh::Bone::ChildIterator child_i = bone->getChildIterator();
+	while( child_i.hasMore() )
+	{
+		zh::Bone* child = child_i.next();
+		_createRenderSkeleton( child, rbone, rbone_obj );
+	}
+
+	if( bone->getNumChildren() <= 0 )
+		rbone_obj->scale( 0.5f, 0.5f, 0.5f );
+}
+
+ManualObject* OgreWindow::_createBox( const Ogre::String& name, const Ogre::String& matName, float size )
+{
+	Ogre::SceneManager* scenemgr = gApp->getSceneManager();
+
+	// Create bone objects in the scene
+	ManualObject* box = scenemgr->createManualObject(name);
+	box->begin( matName, Ogre::RenderOperation::OT_TRIANGLE_LIST );
+	//bone_obj->begin( "BaseWhiteNoLighting", Ogre::RenderOperation::OT_TRIANGLE_LIST );
+	// bottom
+	box->position( -size, -size, -size );
+	box->normal( 0.f, -1.f, 0.f );
+	box->position( size, -size, -size );
+	box->normal( 0.f, -1.f, 0.f );
+	box->position( -size, -size, size );
+	box->normal( 0.f, -1.f, 0.f );
+	box->position( -size, -size, size );
+	box->normal( 0.f, -1.f, 0.f );
+	box->position( size, -size, -size );
+	box->normal( 0.f, -1.f, 0.f );
+	box->position( size, -size, size );
+	box->normal( 0.f, -1.f, 0.f );
+	// top
+	box->position( -size, size, -size );
+	box->normal( 0.f, 1.f, 0.f );
+	box->position( -size, size, size );
+	box->normal( 0.f, 1.f, 0.f );
+	box->position( size, size, -size );
+	box->normal( 0.f, 1.f, 0.f );
+	box->position( -size, size, size );
+	box->normal( 0.f, 1.f, 0.f );
+	box->position( size, size, size );
+	box->normal( 0.f, 1.f, 0.f );
+	box->position( size, size, -size );
+	box->normal( 0.f, 1.f, 0.f );
+	// front
+	box->position( -size, -size, -size );
+	box->normal( 0.f, 0.f, -1.f );
+	box->position( -size, size, -size );
+	box->normal( 0.f, 0.f, -1.f );
+	box->position( size, -size, -size );
+	box->normal( 0.f, 0.f, -1.f );
+	box->position( -size, size, -size );
+	box->normal( 0.f, 0.f, -1.f );
+	box->position( size, size, -size );
+	box->normal( 0.f, 0.f, -1.f );
+	box->position( size, -size, -size );
+	box->normal( 0.f, 0.f, -1.f );
+	// back
+	box->position( -size, -size, size );
+	box->normal( 0.f, 0.f, 1.f );
+	box->position( size, -size, size );
+	box->normal( 0.f, 0.f, 1.f );
+	box->position( -size, size, size );
+	box->normal( 0.f, 0.f, 1.f );
+	box->position( -size, size, size );
+	box->normal( 0.f, 0.f, 1.f );
+	box->position( size, -size, size );
+	box->normal( 0.f, 0.f, 1.f );
+	box->position( size, size, size );
+	box->normal( 0.f, 0.f, 1.f );
+	// left
+	box->position( -size, -size, size );
+	box->normal( -1.f, 0.f, 0.f );
+	box->position( -size, size, size );
+	box->normal( -1.f, 0.f, 0.f );
+	box->position( -size, -size, -size );
+	box->normal( -1.f, 0.f, 0.f );
+	box->position( -size, size, size );
+	box->normal( -1.f, 0.f, 0.f );
+	box->position( -size, size, -size );
+	box->normal( -1.f, 0.f, 0.f );
+	box->position( -size, -size, -size );
+	box->normal( -1.f, 0.f, 0.f );
+	// right
+	box->position( size, -size, size );
+	box->normal( 1.f, 0.f, 0.f );
+	box->position( size, -size, -size );
+	box->normal( 1.f, 0.f, 0.f );
+	box->position( size, size, size );
+	box->normal( 1.f, 0.f, 0.f );
+	box->position( size, size, size );
+	box->normal( 1.f, 0.f, 0.f );
+	box->position( size, -size, -size );
+	box->normal( 1.f, 0.f, 0.f );
+	box->position( size, size, -size );
+	box->normal( 1.f, 0.f, 0.f );
+	// end...
+	box->end();
+
+	return box;
 }
 
 BEGIN_EVENT_TABLE( OgreWindow, wxWindow )

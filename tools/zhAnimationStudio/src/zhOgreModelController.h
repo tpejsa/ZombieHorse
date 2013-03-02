@@ -26,11 +26,6 @@ SOFTWARE.
 #include "zh.h"
 #include "ogre.h"
 
-#define zhOgreVector3(v) Ogre::Vector3( (v).x, (v).y, (v).z )
-#define zhOgreQuat(q) Ogre::Quaternion( (q).w, (q).x, (q).y, (q).z )
-#define zhVisageVector3(v) zh::Vector3( (v).x, (v).y, (v).z )
-#define zhVisageQuat(q) zh::Quat( (q).w, (q).x, (q).y, (q).z )
-
 using namespace std;
 using namespace Ogre;
 using namespace zh;

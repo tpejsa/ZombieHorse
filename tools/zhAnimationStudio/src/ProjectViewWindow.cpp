@@ -376,7 +376,8 @@ void ProjectViewWindow::OnMenu_AnimSelect( wxCommandEvent& evt )
 		);
 	
 	zh::Animation* anim = banim_data->getAnimation();
-	//gApp->selectAnimation( anim->getAnimationSet()->getName(), anim->getName() );
+	if( zhAnimationSystem->getOutputSkeleton() == NULL && zhAnimationSystem->getNumSkeletons() > 0 )
+		gApp->selectSkeleton( zhAnimationSystem->getSkeletonConstIterator().next()->getName() );
 	zhAnimationSystem->playAnimationNow(anim->getName());
 }
 

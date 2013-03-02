@@ -68,6 +68,11 @@ public:
 	void setRenderSkeleton( zh::Skeleton* skel );
 
 	/**
+	* Updates the render skeleton pose.
+	*/
+	void updateRenderSkeletonPose( zh::Skeleton* skel );
+
+	/**
 	* Creates a point set for rendering.
 	*
 	* @param name Point set name.
@@ -129,6 +134,10 @@ public:
 
 private:
 
+	void _createRenderSkeleton( zh::Bone* bone, Ogre::SceneNode* renderParent, Ogre::SceneNode* parentObj );
+	ManualObject* _createBox( const Ogre::String& name, const Ogre::String& matName, float size );
+
+	Ogre::SceneNode* mRenderSkel;
 	Ogre::Timer mFPSTimer; ///< Timer (for computing FPS).
 	float mFPS; ///< FPS count.
 

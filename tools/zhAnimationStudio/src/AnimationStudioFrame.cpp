@@ -79,7 +79,7 @@ mWndOgre(NULL), mWndTimeline(NULL), mWndProjectView(NULL)
 	
 	menu = new wxMenu();
 	menu->AppendCheckItem( ID_mnViewShowSkel, wxT("Show Skeleton") );
-	menu->Check( ID_mnViewShowSkel, false );
+	menu->Check( ID_mnViewShowSkel, true );
 	menu->AppendCheckItem( ID_mnViewShowGround, wxT("Show Ground") );
 	menu->Check( ID_mnViewShowGround, true );
 	menu->AppendCheckItem( ID_mnViewShowSkybox, wxT("Show Skybox") );
