@@ -38,28 +38,28 @@ public:
 	/**
 	* true if Select Mode is active, false otherwise.
 	*/
-	bool getSelectMode() const;
+	//bool getSelectMode() const;
 
 	/**
 	* Toggle Select Mode.
 	*/
-	bool setSelectMode( bool selMode = true ) const;
+	//bool setSelectMode( bool selMode = true ) const;
 
 	/**
 	* true if an animation segment is selected,
 	* false otherwise.
 	*/
-	bool hasSelection() const;
+	//bool hasSelection() const;
 
 	/**
 	* Gets the currently selected animation segment.
 	*/
-	AnimationSegment getSelection() const;
+	//AnimationSegment getSelection() const;
 
 	/**
 	* Cancel current selection.
 	*/
-	void deselect();
+	//void deselect();
 	
 	void OnPaint( wxPaintEvent& evt );
 

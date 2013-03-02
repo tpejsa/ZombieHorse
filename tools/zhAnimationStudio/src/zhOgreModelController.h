@@ -39,7 +39,7 @@ using namespace zh;
 * @brief Implementation of the ModelController class for updating
 * OGRE scene Entities.
 */
-class OgreModelController : public ModelController
+class OgreModelController// : public ModelController
 {
 
 public:
@@ -47,44 +47,44 @@ public:
 	typedef zh::VectorIterator< std::vector<Entity*> > EntityIterator;
 	typedef zh::VectorConstIterator< std::vector<Entity*> > EntityConstIterator;
 
-	zhDeclare_CharacterController( OgreModelController, 1000, "OgreModelController" )
+	//zhDeclare_CharacterController( OgreModelController, 1000, "OgreModelController" )
 
-	OgreModelController() : ModelController(), mSkeleton(NULL)
+	/*OgreModelController() : ModelController(), mSkeleton(NULL)
 	{
 	}
 
 	~OgreModelController()
 	{
-	}
+	}*/
 
 	/**
 	* Gets the OGRE scene manager.
 	*/
-	SceneManager* getSceneManager() const;
+	//SceneManager* getSceneManager() const;
 
 	/**
 	* Sets the OGRE scene manager.
 	*/
-	void setSceneManager( SceneManager* sceneMgr );
+	//void setSceneManager( SceneManager* sceneMgr );
 
 	/**
 	* Adds an OGRE Entity to the controller.
 	*
 	* @param ent Pointer to the Entity.
 	*/
-	void addEntity( Entity* ent );
+	//void addEntity( Entity* ent );
 
 	/**
 	* Removes an OGRE Entity from the controller.
 	*
 	* @param index Entity index.
 	*/
-	void removeEntity( unsigned int index );
+	//void removeEntity( unsigned int index );
 
 	/**
 	* Remvoes all OGRE Entities from the controller.
 	*/
-	void removeAllEntities();
+	//void removeAllEntities();
 
 	/**
 	* Gets an OGRE Entity from the controller.
@@ -92,38 +92,38 @@ public:
 	* @param index Entity index.
 	* @return Pointer to the Entity.
 	*/
-	Entity* getEntity( unsigned int index ) const;
+	//Entity* getEntity( unsigned int index ) const;
 
 	/**
 	* Gets the number of Entities in the controller.
 	*/
-	unsigned int getNumEntities() const;
+	//unsigned int getNumEntities() const;
 
 	/**
 	* Gets an iterator over the vector of Entities.
 	*/
-	EntityIterator getEntityIterator();
+	//EntityIterator getEntityIterator();
 
 	/**
 	* Get a const iterator over the vector of Entities.
 	*/
-	EntityConstIterator getEntityConstIterator() const;
+	//EntityConstIterator getEntityConstIterator() const;
 
 	/**
 	* Initializes the controller with provided Entities.
 	*/
-	void init();
+	//void init();
 
 	/**
 	* Updates the controller with elapsed time.
 	*/
-	void update( float dt );
+	//void update( float dt );
 
 private:
 
-	SceneManager* mSceneMgr;
+	/*SceneManager* mSceneMgr;
 	std::vector<Entity*> mEntities;
-	SkeletonInstance* mSkeleton;
+	SkeletonInstance* mSkeleton;*/
 
 };
 

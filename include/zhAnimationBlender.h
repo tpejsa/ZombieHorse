@@ -25,14 +25,13 @@ SOFTWARE.
 
 #include "zhPrereq.h"
 #include "zhIterators.h"
-#include "zhObjectFactory.h"
 #include "zhAnimationNode.h"
 #include "zhAnimationSpace.h"
 
 namespace zh
 {
 
-class Model;
+class Skeleton;
 class BoneIKController;
 
 /**
@@ -238,44 +237,6 @@ public:
 	virtual void setUseBlendCurves( bool useBlendCurves = true );
 
 	/**
-	* Returns true if a BoneIKController is defined for enforcement
-	* of plant contraints on the specified bone, otherwise false.
-	*
-	* @param boneId Bone ID.
-	*/
-	virtual bool hasPlantContrController( unsigned short boneId ) const;
-
-	/**
-	* Gets the BoneIKController used for enforcement of plant constraints
-	* on a specific bone.
-	*
-	* @param boneId Bone ID.
-	* @return Pointer to the BoneIKController.
-	*/
-	virtual BoneIKController* getPlantConstrController( unsigned short boneId ) const;
-
-	/**
-	* Sets the BoneIKController used for enforcement of plant constraints
-	* on a specific bone.
-	*
-	* @param boneId Bone ID.
-	* @param ctrl Pointer to the BoneIKController.
-	*/
-	virtual void setPlantConstrController( unsigned short boneId, BoneIKController* ctrl );
-
-	/**
-	* Gets an iterator over the map of BoneIKControllers used for
-	* plant constraint enforcement.
-	*/
-	virtual PlantConstrControllerIterator getPlantConstrControllerIterator();
-
-	/**
-	* Gets a const iterator over the map of BoneIKControllers used for
-	* plant constraint enforcement.
-	*/
-	virtual PlantConstrControllerConstIterator getPlantConstrControllerConstIterator() const;
-
-	/**
 	* Samples this animation's mover channel at the current time.
 	*
 	* @return Mover value (with origin transformation applied)
@@ -313,7 +274,7 @@ protected:
 	*
 	* @param dt Elapsed time.
 	*/
-	void _update( float dt );
+	void _updateNode( float dt );
 
 	/**
 	* Applies this animation node to the current model.

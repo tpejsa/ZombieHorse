@@ -136,14 +136,14 @@ public:
 	/**
 	* Applies the animation track to the specified skeleton.
 	*
-	* @param skeleton Pointer to the Skeleton
+	* @param skel Pointer to the Skeleton
 	* which should be updated by this animation track.
 	* @param time Time at which this animation track should be applied.
 	* @param weight Blend weight with which this animation track
 	* should be applied.
 	* @param scale Scaling factor applied to this animation track.
 	*/
-	 void apply( Skeleton* skeleton, float time, float weight = 1.f, float scale = 1.f ) const;
+	 void apply( Skeleton* skel, float time, float weight = 1.f, float scale = 1.f ) const;
 
 	 /**
 	 * Builds the splines used for key-frame interpolation.

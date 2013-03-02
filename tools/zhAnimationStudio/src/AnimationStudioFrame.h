@@ -37,33 +37,6 @@ class AnimTreeWindow;
 enum
 {
 	ID_frmMain,
-	ID_mnFile,
-	ID_mnFileNewProject,
-	ID_mnFileOpenProject,
-	ID_mnFileSaveProject,
-	ID_mnFileProjectSettings,
-	ID_mnFileCreate,
-	ID_mnFileCreateCharacter,
-	ID_mnFileCreateAnimSet,
-	ID_mnFileCreateAnimTree,
-	ID_mnFileAdd,
-	ID_mnFileAddRawAnimSet,
-	ID_mnFileAddAnimIndex,
-	ID_mnFileAddAnimSet,
-	ID_mnFileAddAnimTree,
-	ID_mnFileExit,
-	ID_mnEditUndo,
-	ID_mnEditRedo,
-	ID_mnEditCut,
-	ID_mnEditCopy,
-	ID_mnEditPaste,
-	ID_mnEditDelete,
-	ID_mnEditSelect,
-	ID_mnEditDeselect,
-	ID_mnViewTimeline,
-	ID_mnViewProject,
-	ID_mnViewProperties,
-	ID_mnViewAnimTree,
 	ID_mnViewShowSkel,
 	ID_mnViewShowGround,
 	ID_mnViewShowSkybox,
@@ -84,22 +57,7 @@ enum
 	ID_mnToolsDefineParam,
 	ID_mnToolsMatchAnnots,
 	ID_mnToolsBuildBlendCurves,
-	ID_mnAnimTree,
-	ID_mnAnimTreeCreateNode,
-	ID_mnAnimTreeCreateAnimSampler,
-	ID_mnAnimTreeCreateFaceController,
-	ID_mnAnimTreeCreateAnimBlender,
-	ID_mnAnimTreeCreateAnimTransBlender,
-	ID_mnAnimTreeCreateAnimMixer,
-	ID_mnAnimTreeCreateNodeOther,
-	ID_mnAnimTreeCreateBoneController,
-	ID_mnAnimTreeCreateBoneTransfController,
-	ID_mnAnimTreeCreateBoneIKController,
-	ID_mnAnimTreeCreateBoneControllerOther,
-	ID_mnAnimTreeCreateNodeForEachAnim,
-	ID_mnAnimTreeAutoArrangeNodes,
 	ID_mnHelp,
-	ID_mnHelpManual,
 	ID_mnHelpAbout,
 	ID_dlgProjectSettings,
 	ID_dlgBuildAnimIndex,
@@ -117,14 +75,9 @@ enum
 	ID_slPlaySlider,
 	ID_btnSelect,
 	ID_btnDeselect,
-	ID_tbTransitions,
-	ID_cbTargetAnims,
-	ID_txtTargetParams,
 	ID_wndOgre,
 	ID_wndTimeline,
-	ID_wndProjectView,
-	ID_wndProperties,
-	ID_wndAnimTree
+	ID_wndProjectView
 };
 
 /**
@@ -161,16 +114,6 @@ public:
 	ProjectViewWindow* getProjectViewWindow() const;
 
 	/**
-	* Gets a pointer to the properties window.
-	*/
-	PropertiesWindow* getPropertiesWindow() const;
-
-	/**
-	* Gets a pointer to the animation tree window.
-	*/
-	AnimTreeWindow* getAnimTreeWindow() const;
-
-	/**
 	* true if an animation segment is selected,
 	* false otherwise.
 	*/
@@ -181,30 +124,6 @@ public:
 	*/
 	AnimationSegment getSelection() const;
 
-	void OnMenu_FileNewProject( wxCommandEvent& evt );
-	void OnMenu_FileOpenProject( wxCommandEvent& evt );
-	void OnMenu_FileSaveProject( wxCommandEvent& evt );
-	void OnMenu_FileProjectSettings( wxCommandEvent& evt );
-	void OnMenu_FileCreateCharacter( wxCommandEvent& evt );
-	void OnMenu_FileCreateAnimSet( wxCommandEvent& evt );
-	void OnMenu_FileCreateAnimTree( wxCommandEvent& evt );
-	void OnMenu_FileAddRawAnimSet( wxCommandEvent& evt );
-	void OnMenu_FileAddAnimIndex( wxCommandEvent& evt );
-	void OnMenu_FileAddAnimSet( wxCommandEvent& evt );
-	void OnMenu_FileAddAnimTree( wxCommandEvent& evt );
-	void OnMenu_FileExit( wxCommandEvent& evt );
-	void OnMenu_EditUndo( wxCommandEvent& evt );
-	void OnMenu_EditRedo( wxCommandEvent& evt );
-	void OnMenu_EditCut( wxCommandEvent& evt );
-	void OnMenu_EditCopy( wxCommandEvent& evt );
-	void OnMenu_EditPaste( wxCommandEvent& evt );
-	void OnMenu_EditDelete( wxCommandEvent& evt );
-	void OnMenu_EditSelect( wxCommandEvent& evt );
-	void OnMenu_EditDeselect( wxCommandEvent& evt );
-	void OnMenu_ViewTimeline( wxCommandEvent& evt );
-	void OnMenu_ViewProject( wxCommandEvent& evt );
-	void OnMenu_ViewProperties( wxCommandEvent& evt );
-	void OnMenu_ViewAnimTree( wxCommandEvent& evt );
 	void OnMenu_ViewShowSkel( wxCommandEvent& evt );
 	void OnMenu_ViewShowGround( wxCommandEvent& evt );
 	void OnMenu_ViewShowSkybox( wxCommandEvent& evt );
@@ -224,18 +143,6 @@ public:
 	void OnMenu_ToolsDefineParam( wxCommandEvent& evt );
 	void OnMenu_ToolsMatchAnnots( wxCommandEvent& evt );
 	void OnMenu_ToolsBuildBlendCurves( wxCommandEvent& evt );
-	void OnMenu_AnimTreeCreateAnimSampler( wxCommandEvent& evt );
-	void OnMenu_AnimTreeCreateFaceController( wxCommandEvent& evt );
-	void OnMenu_AnimTreeCreateAnimBlender( wxCommandEvent& evt );
-	void OnMenu_AnimTreeCreateAnimTransBlender( wxCommandEvent& evt );
-	void OnMenu_AnimTreeCreateAnimMixer( wxCommandEvent& evt );
-	void OnMenu_AnimTreeCreateNodeOther( wxCommandEvent& evt );
-	void OnMenu_AnimTreeCreateBoneTransfController( wxCommandEvent& evt );
-	void OnMenu_AnimTreeCreateBoneIKController( wxCommandEvent& evt );
-	void OnMenu_AnimTreeCreateBoneControllerOther( wxCommandEvent& evt );
-	void OnMenu_AnimTreeCreateNodeForEachAnim( wxCommandEvent& evt );
-	void OnMenu_AnimTreeAutoArrangeNodes( wxCommandEvent& evt );
-	void OnMenu_HelpManual( wxCommandEvent& evt );
 	void OnMenu_HelpAbout( wxCommandEvent& evt );
 	void OnTool_AnnotStart( wxCommandEvent& evt );
 	void OnComboBox_Annots( wxCommandEvent& evt );
@@ -245,7 +152,6 @@ public:
 	void OnScroll_PlaySlider( wxScrollEvent& evt );
 	void OnTool_Select( wxCommandEvent& evt );
 	void OnTool_Deselect( wxCommandEvent& evt );
-	void OnComboBox_TargetAnims( wxCommandEvent& evt );
 	void OnIdle( wxIdleEvent& evt );
 
 	DECLARE_EVENT_TABLE()
@@ -259,7 +165,6 @@ protected:
 	wxMenuBar* mbMain; ///< Pointer to the main menu.
 	wxToolBar* mTbAnnots; ///< Pointer to the annotation toolbar.
 	wxToolBar* mTbPlayer; ///< Pointer to the player toolbar.
-	wxToolBar* mTbTransitions; ///< Pointer to the transitions toolbar.
 
 	bool mSelectMode;
 	float mSelectStart, mSelectEnd;
@@ -267,8 +172,6 @@ protected:
 	OgreWindow* mWndOgre;
 	TimelineWindow* mWndTimeline;
 	ProjectViewWindow* mWndProjectView;
-	PropertiesWindow* mWndProperties;
-	AnimTreeWindow* mWndAnimTree;
 
 };
 

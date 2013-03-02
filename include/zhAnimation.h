@@ -148,6 +148,12 @@ public:
 	float getLength() const;
 
 	/**
+	* Gets the animation frame rate (valid only for uniform sampling
+	* animations, like motion capture data).
+	*/
+	int getFrameRate() const;
+
+	/**
 	* Applies the animation to the specified skeleton.
 	* 
 	* @param skel Pointer to the Skeleton which should be updated

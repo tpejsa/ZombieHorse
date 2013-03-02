@@ -25,11 +25,11 @@ SOFTWARE.
 #include "AnimationStudioFrame.h"
 #include "OgreWindow.h"
 
-DefineAnimParamDialog::DefineAnimParamDialog( wxWindow* parent, wxWindowID id, Model* mdl, AnimationSpace* animSpace )
+DefineAnimParamDialog::DefineAnimParamDialog( wxWindow* parent, wxWindowID id, zh::Skeleton* skel, AnimationSpace* animSpace )
 : wxDialog( parent, id, "Define Parametrization", wxDefaultPosition, wxSize( 450, 510 ), wxDEFAULT_DIALOG_STYLE ),
-mMdl(mdl), mAnimSpace(animSpace)
+mSkel(skel), mAnimSpace(animSpace)
 {
-	zhAssert( mdl != NULL && mdl->getSkeleton()->getNumBones() > 0 );
+	zhAssert( skel != NULL && skel->getNumBones() > 0 );
 	zhAssert( animSpace != NULL && animSpace->getNumBaseAnimations() > 0 );
 
 	new wxStaticBox( this, wxID_ANY, "Parametrization settings",
@@ -97,7 +97,7 @@ mMdl(mdl), mAnimSpace(animSpace)
 	new wxStaticText( this, wxID_ANY, "Bone:",
 		wxPoint( 200, 230 ), wxSize( 80, 20 ) );
 	wxArrayString bone_choices;
-	zh::Skeleton::BoneConstIterator bone_i = mMdl->getSkeleton()->getBoneConstIterator();
+	zh::Skeleton::BoneConstIterator bone_i = skel->getBoneConstIterator();
 	while( !bone_i.end() )
 	{
 		zh::Bone* bone = bone_i.next();
@@ -146,7 +146,7 @@ DefineAnimParamDialog::~DefineAnimParamDialog()
 	gApp->setAnimationEnabled(true);
 	
 	// hide coord. axes
-	gApp->getAppFrame()->getOgreWindow()->show3DAxesOnBone( "", false );
+	gApp->getAppFrame()->getOgreWindow()->showCoordAxesOnBone( "", false );
 }
 
 void DefineAnimParamDialog::OnComboBox_ParamClass( wxCommandEvent& evt )
@@ -162,10 +162,10 @@ void DefineAnimParamDialog::OnListBox_Params( wxCommandEvent& evt )
 	_updateParamSpecCtrls(pspec);
 
 	// show coord. axes
-	mMdl->getSkeleton()->resetToInitialPose();
-	mParamSpecs[mCurParam].getBaseAnimation()->apply( mMdl, 0, 1 );
-	zh::Bone* sbone = mMdl->getSkeleton()->getBone( mParamSpecs[mCurParam].getSuperBoneId() );
-	gApp->getAppFrame()->getOgreWindow()->show3DAxesOnBone( sbone->getName() );
+	mSkel->resetToInitialPose();
+	mParamSpecs[mCurParam].getBaseAnimation()->apply( mSkel, 0, 1 );
+	zh::Bone* sbone = mSkel->getBone( mParamSpecs[mCurParam].getSuperBoneId() );
+	gApp->getAppFrame()->getOgreWindow()->showCoordAxesOnBone( sbone->getName() );
 
 	_applyAnim();
 
@@ -178,7 +178,7 @@ void DefineAnimParamDialog::OnButton_Add( wxCommandEvent& evt )
 
 	AnimationParamSpec pspec = AnimationParamSpec( param_name,
 		mAnimSpace->getBaseAnimation(0), 0,
-		mMdl->getSkeleton()->getRoot()->getId(), mMdl->getSkeleton()->getRoot()->getId(),
+		mSkel->getRoot()->getId(),mSkel->getRoot()->getId(),
 		AnimationParamSpec::TransfType_Translation, AnimationParamSpec::Axis_x );
 	mParamSpecs.push_back(pspec);
 
@@ -265,8 +265,8 @@ void DefineAnimParamDialog::OnTextEnter_Time( wxCommandEvent& evt )
 
 void DefineAnimParamDialog::OnComboBox_Bone( wxCommandEvent& evt )
 {
-	zh::Bone* bone = mMdl->getSkeleton()->getBone( mCbBone->GetValue().c_str() );
-	zh::Bone* sbone = mMdl->getSkeleton()->getBone( mCbSuperBone->GetValue().c_str() );
+	zh::Bone* bone = mSkel->getBone( mCbBone->GetValue().c_str() );
+	zh::Bone* sbone = mSkel->getBone( mCbSuperBone->GetValue().c_str() );
 	zh::Bone* pbone = bone;
 	bool super = false;
 	
@@ -279,7 +279,7 @@ void DefineAnimParamDialog::OnComboBox_Bone( wxCommandEvent& evt )
 			break;
 		}
 
-		if( pbone == mMdl->getSkeleton()->getRoot() )
+		if( pbone == mSkel->getRoot() )
 			break;
 
 		pbone = pbone->getParent();
@@ -287,8 +287,8 @@ void DefineAnimParamDialog::OnComboBox_Bone( wxCommandEvent& evt )
 
 	if( !super )
 	{
-		mCbSuperBone->SetValue( mMdl->getSkeleton()->getRoot()->getName() );
-		mParamSpecs[mCurParam].setSuperiorBoneId( mMdl->getSkeleton()->getRoot()->getId() );
+		mCbSuperBone->SetValue( mSkel->getRoot()->getName() );
+		mParamSpecs[mCurParam].setSuperiorBoneId( mSkel->getRoot()->getId() );
 	}
 
 	mParamSpecs[mCurParam].setBoneId( bone->getId() );
@@ -298,8 +298,8 @@ void DefineAnimParamDialog::OnComboBox_Bone( wxCommandEvent& evt )
 
 void DefineAnimParamDialog::OnComboBox_SuperBone( wxCommandEvent& evt )
 {
-	zh::Bone* bone = mMdl->getSkeleton()->getBone( mCbBone->GetValue().c_str() );
-	zh::Bone* sbone = mMdl->getSkeleton()->getBone( mCbSuperBone->GetValue().c_str() );
+	zh::Bone* bone = mSkel->getBone( mCbBone->GetValue().c_str() );
+	zh::Bone* sbone = mSkel->getBone( mCbSuperBone->GetValue().c_str() );
 	zh::Bone* pbone = bone;
 	bool super = false;
 	
@@ -312,7 +312,7 @@ void DefineAnimParamDialog::OnComboBox_SuperBone( wxCommandEvent& evt )
 			break;
 		}
 
-		if( pbone == mMdl->getSkeleton()->getRoot() )
+		if( pbone == mSkel->getRoot() )
 			break;
 
 		pbone = pbone->getParent();
@@ -327,10 +327,10 @@ void DefineAnimParamDialog::OnComboBox_SuperBone( wxCommandEvent& evt )
 	mParamSpecs[mCurParam].setSuperiorBoneId( sbone->getId() );
 
 	// show coord. axes
-	mMdl->getSkeleton()->resetToInitialPose();
-	mParamSpecs[mCurParam].getBaseAnimation()->apply( mMdl, 0, 1 );
-	sbone = mMdl->getSkeleton()->getBone( mParamSpecs[mCurParam].getSuperBoneId() );
-	gApp->getAppFrame()->getOgreWindow()->show3DAxesOnBone( sbone->getName() );
+	mSkel->resetToInitialPose();
+	mParamSpecs[mCurParam].getBaseAnimation()->apply( mSkel, 0, 1 );
+	sbone = mSkel->getBone( mParamSpecs[mCurParam].getSuperBoneId() );
+	gApp->getAppFrame()->getOgreWindow()->showCoordAxesOnBone( sbone->getName() );
 
 	_applyAnim();
 
@@ -432,8 +432,8 @@ void DefineAnimParamDialog::_updateParamSpecCtrls( const AnimationParamSpec& par
 	mCbBaseAnim->SetValue( paramSpec.getBaseAnimation()->getName() );
 	mTxtTime->SetValue( toString<float>( paramSpec.getTime() ) );
 	mStxLength->SetLabel( toString<float>( paramSpec.getBaseAnimation()->getLength() ) );
-	mCbBone->SetValue( mMdl->getSkeleton()->getBone( paramSpec.getBoneId() )->getName() );
-	mCbSuperBone->SetValue( mMdl->getSkeleton()->getBone( paramSpec.getSuperBoneId() )->getName() );
+	mCbBone->SetValue( mSkel->getBone( paramSpec.getBoneId() )->getName() );
+	mCbSuperBone->SetValue( mSkel->getBone( paramSpec.getSuperBoneId() )->getName() );
 	mCbTransfType->SetValue(transf);
 	mCbAxis->SetValue(axis);
 }
@@ -455,12 +455,12 @@ void DefineAnimParamDialog::_applyAnim()
 	float time = fromString<float>( mTxtTime->GetValue().c_str() );
 
 	// render character at specified time
-	gApp->applyAnimation( anim->getAnimationSet()->getName(), anim->getName(), time );
+	//gApp->applyAnimation( anim->getAnimationSet()->getName(), anim->getName(), time );
 
 	// show coord. axes
-	mMdl->getSkeleton()->resetToInitialPose();
-	zh::Bone* sbone = mMdl->getSkeleton()->getBone( mParamSpecs[mCurParam].getSuperBoneId() );
-	gApp->getAppFrame()->getOgreWindow()->show3DAxesOnBone( sbone->getName() );
+	mSkel->resetToInitialPose();
+	zh::Bone* sbone = mSkel->getBone( mParamSpecs[mCurParam].getSuperBoneId() );
+	gApp->getAppFrame()->getOgreWindow()->showCoordAxesOnBone( sbone->getName() );
 }
 
 BEGIN_EVENT_TABLE( DefineAnimParamDialog, wxDialog )

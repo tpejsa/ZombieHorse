@@ -78,7 +78,7 @@ void MotionGraphView::redraw()
 	
 void MotionGraphView::render( wxDC& dc )
 {
-	Character* ch = gApp->getCurrentCharacter();
+	/*Character* ch = gApp->getCurrentCharacter();
 
 	dc.SetBackground( *wxWHITE_BRUSH );
 	dc.Clear();
@@ -196,7 +196,7 @@ void MotionGraphView::render( wxDC& dc )
 					4, 4 );
 			}
 		}
-	}
+	}*/
 }
 
 void MotionGraphView::OnLeftDown( wxMouseEvent& evt )
@@ -234,7 +234,7 @@ void MotionGraphView::OnPaint( wxPaintEvent& evt )
 
 void MotionGraphView::_initView()
 {
-	Character* ch = gApp->getCurrentCharacter();
+	/*Character* ch = gApp->getCurrentCharacter();
 	mMaxLen = 0;
 
 	// add anim. clips to render list in default order
@@ -303,7 +303,7 @@ void MotionGraphView::_initView()
 		}
 	}
 
-	_updateSize();
+	_updateSize();*/
 }
 
 void MotionGraphView::_updateSize()

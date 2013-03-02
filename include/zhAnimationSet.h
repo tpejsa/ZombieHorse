@@ -30,8 +30,6 @@ SOFTWARE.
 #include "zhSkeleton.h"
 #include "zhAnimationAnnotation.h"
 
-#define zhA(animSetName, animName) ((animSetName)+"::"+(animName))
-
 namespace zh
 {
 

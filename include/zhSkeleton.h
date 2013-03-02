@@ -158,13 +158,20 @@ public:
 
 	/**
 	* Constructor.
+	*
+	* @param name Skeleton name.
 	*/
-	Skeleton();
+	Skeleton( const std::string& name );
 
 	/**
 	* Destructor.
 	*/
 	~Skeleton();
+
+	/**
+	* Gets the skeleton name.
+	*/
+	const std::string& getName() const;
 
 	/**
 	* Gets the position and orientation of the character model
@@ -245,6 +252,7 @@ public:
 
 private:
 
+	std::string mName;
 	mutable Bone* mRoot;
 	std::map<unsigned short, Bone*> mBonesById;
 	std::map<std::string, Bone*> mBonesByName;

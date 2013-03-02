@@ -193,7 +193,7 @@ protected:
 	*
 	* @param dt Elapsed time.
 	*/
-	void _update( float dt );
+	void _updateNode( float dt );
 
 	/**
 	* Applies this animation node to the current model.

@@ -132,10 +132,8 @@ void AnnotationMatchMaker::makeMatches( AnimationAnnotationClass annotClass )
 				base_annots0[banim_i] = new ParamTransitionAnnotationContainer();
 			else if( annotClass == AnimAnnot_PlantConstraint )
 				base_annots0[banim_i] = new PlantConstraintAnnotationContainer();
-			else if( annotClass == AnimAnnot_SimEvent )
+			else // if( annotClass == AnimAnnot_SimEvent )
 				base_annots0[banim_i] = new SimEventAnnotationContainer();
-			else // if( annotClass == AnimAnnot_GesturePhase )
-				base_annots0[banim_i] = new GesturePhaseAnnotationContainer();
 
 			for( unsigned int annot_i = 0; annot_i < base_annots[banim_i]->getNumAnnotations(); ++annot_i )
 			{

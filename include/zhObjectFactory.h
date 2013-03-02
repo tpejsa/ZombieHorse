@@ -74,7 +74,7 @@ public: \
 * @brief Simple object factory class template.
 *
 * ObjectFactory class template is a simple implementation of object factory
-* design pattern. Object factories are used throughout visage7 and form
+* design pattern. Object factories are used throughout ZombieHorse and form
 * the cornerstone of its extension mechanisms.
 *
 * Suppose you have an existing object factory implementation called

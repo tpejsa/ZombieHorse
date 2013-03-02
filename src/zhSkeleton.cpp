@@ -141,13 +141,18 @@ Skeleton::Situation Skeleton::Situation::getProjToGround() const
 	return sit;
 }
 
-Skeleton::Skeleton() : mRoot(NULL)
+Skeleton::Skeleton( const std::string& name ) : mName(name), mRoot(NULL)
 {
 }
 
 Skeleton::~Skeleton()
 {
 	deleteAllBones();
+}
+
+const std::string& Skeleton::getName() const
+{
+	return mName;
 }
 
 Skeleton::Situation Skeleton::getSituation() const

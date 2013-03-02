@@ -29,6 +29,8 @@ SOFTWARE.
 namespace zh
 {
 
+class AnimationNode;
+
 /**
 * @brief Generic event triggered when an annotation
 * is encountered during animation playback.

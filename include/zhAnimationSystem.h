@@ -31,6 +31,7 @@ SOFTWARE.
 #include "zhAnimationTree.h"
 
 #define zhAnimationSystem zh::AnimationSystem::Instance()
+#define zhA(animSetName, animName) ((animSetName)+"::"+(animName))
 
 namespace zh
 {
@@ -63,10 +64,6 @@ public:
 	
 	typedef MapIterator< std::map<std::string, Skeleton*> > SkeletonIterator;
 	typedef MapConstIterator< std::map<std::string, Skeleton*> > SkeletonConstIterator;
-	typedef MapIterator< std::map<std::string, AnimationTree*> > AnimationTreeIterator;
-	typedef MapConstIterator< std::map<std::string, AnimationTree*> > AnimationTreeConstIterator;
-	typedef MapIterator< std::map<std::string, AnimationSetPtr> > AnimationSetIterator;
-	typedef MapConstIterator< std::map<std::string, AnimationSetPtr> > AnimationSetConstIterator;
 
 private:
 
@@ -150,15 +147,17 @@ public:
 	*/
 	AnimationSetPtr loadAnimationSet( const std::string& path, const std::string& skel = "" );
 
+	// TODO: add serialization support
+
 	/**
 	* Deletes the animation set with the specified name.
 	*/
-	void deleteAnimationSet( const std::string& name ) const;
+	void deleteAnimationSet( const std::string& name );
 
 	/**
 	* Deletes all animations, across all animation sets.
 	*/
-	void deleteAllAnimations( const std::string& name ) const;
+	void deleteAllAnimations( const std::string& name );
 
 	/**
 	* Gets the animation set with the specified name.
@@ -171,14 +170,23 @@ public:
 	bool hasAnimationSet( const std::string& name ) const;
 
 	/**
-	* Gets an iterator over the map of animation sets.
+	* Creates a new animation clip from a segment of an existing animation.
+	*
+	* @param newAnimName New animation name.
+	* @param origAnimName Fully-qualified original animation name.
+	* @param startTime Animation segment start time.
+	* @param length Animation segment length.
+	* @return Pointer to the newly created animation.
 	*/
-	AnimationSetIterator getAnimationSetIterator();
+	Animation* createAnimationFromSegment( const std::string& newAnimName, const std::string& origAnimName,
+		float startTime, float length );
 
 	/**
-	* Gets a const iterator over the map of skeletons.
+	* Deletes the specified animation.
+	*
+	* @param name Fully-qualified animation name.
 	*/
-	AnimationSetConstIterator getAnimationSetConstIterator() const;
+	void deleteAnimation( const std::string& name );
 
 	/**
 	* Gets an animation clip.
@@ -197,20 +205,14 @@ public:
 	bool hasAnimation( const std::string& animName ) const;
 
 	/**
+	* Gets the list of all currently loaded animations.
+	*/
+	void getAnimationList( std::vector<Animation*>& animList ) const;
+
+	/**
 	* Gets a pointer to the animation manager.
 	*/
 	AnimationManager* getAnimationManager() const;
-
-	/**
-	* Creates a new animation clip from a segment of an existing animation.
-	*
-	* @param newAnimName New animation name.
-	* @param origAnimName Fully-qualified original animation name.
-	* @param startTime Animation segment start time.
-	* @param length Animation segment length.
-	*/
-	void createAnimationFromSegment( const std::string& newAnimName, const std::string& origAnimName,
-		float startTime, float length );
 
 	/**
 	* Gets the current output skeleton.
@@ -248,6 +250,11 @@ public:
 	* Stops playback of current animation and empties the animation queue.
 	*/
 	void stopAnimation();
+
+	/**
+	* Gets the animation that's currently playing.
+	*/
+	Animation* getCurrentAnimation() const;
 
 	/**
 	* Returns true if animation is currently playing, false otherwise.
@@ -312,20 +319,29 @@ public:
 	void update( float dt ) const;
 
 	/**
-	* Gets the current animation length.
+	* Gets the animation tree used for playback, blending and queueing.
 	*/
 	AnimationTree* getAnimationTree() const;
+
+	// TODO: add functions for end-effector specification and cleanup
 
 	/**
 	* Gets a pointer to the memory pool.
 	*/
 	MemoryPool* getMemoryPool() const;
 
+	/**
+	* Parses the fully-qualified animation name to obtain animation set name
+	* and animation clip name.
+	*/
+	static void ParseAnimationName( const std::string& fullName,
+		std::string& animSetName, std::string& animName );
+
 private:
 
 	std::map<std::string, Skeleton*> mSkeletons;
-	AnimationTree* mAnimTree;
 	Skeleton* mOutSkel;
+	AnimationTree* mAnimTree;
 
 };
 

@@ -22,6 +22,7 @@ SOFTWARE.
 
 #include "zhAnimationSystem.h"
 #include "zhMemoryPool.h"
+#include "zhFileSystem.h"
 #include "zhAnimationManager.h"
 #include "zhAnimation.h"
 #include "zhAnimationTree.h"
@@ -29,16 +30,19 @@ SOFTWARE.
 #include "zhZHASerializer.h"
 #include "zhBVHLoader.h"
 
+#include <boost/algorithm/string.hpp>
+
 namespace zh
 {
 
-AnimationSystem::AnimationSystem()
+AnimationSystem::AnimationSystem() : mOutSkel(NULL)
 {
+	mAnimTree = new AnimationTree("MainTree");
 }
 
 AnimationSystem::~AnimationSystem()
 {
-	deleteAllSkeletons();
+	delete mAnimTree;
 }
 
 bool AnimationSystem::init( const std::string& cfgPath )
@@ -50,7 +54,6 @@ bool AnimationSystem::init( const std::string& cfgPath )
 	// create instances of various singletons
 	MemoryPool::Instance();
 	AnimationManager::Instance();
-	AnimationTree::Instance();
 	
 	// register resource loaders and serializers
 	zhRegister_ResourceLoader( getAnimationManager(), ZHALoader );
@@ -76,23 +79,26 @@ Skeleton* AnimationSystem::createSkeleton( const std::string& name )
 	zhLog( "AnimationSystem", "createSkeleton",
 		"Creating Skeleton  %s.", name.c_str() );
 
-	Skeleton* ch = new Skeleton(name);
-	mSkeletons[name] = ch;
+	Skeleton* skel = new Skeleton(name);
+	mSkeletons[name] = skel;
 
-	return ch;
+	if( mOutSkel == NULL )
+		mOutSkel = skel;
+
+	return skel;
 }
 
 void AnimationSystem::deleteSkeleton( const std::string& name )
 {
 	zhLog( "AnimationSystem", "deleteSkeleton", "Deleting skeleton %s.", name.c_str() );
 
-	Skeleton* ch = getSkeleton(name);
+	Skeleton* skel = getSkeleton(name);
 
-	if( ch == NULL )
+	if( skel == NULL )
 		return;
 
 	mSkeletons.erase(name);
-	delete ch;
+	delete skel;
 }
 
 void AnimationSystem::deleteAllSkeletons()
@@ -138,56 +144,114 @@ unsigned int AnimationSystem::getNumSkeletons() const
 
 AnimationSetPtr AnimationSystem::loadAnimationSet( const std::string& path, const std::string& skel )
 {
+	zhLog( "AnimationSystem", "loadAnimationSet",
+		"Loading animation set from path %s.", path.c_str() );
+
+	AnimationManager* anim_mgr = getAnimationManager();
+
+	// Determine name for animation set
+	std::string dir, filename, animset_name, ext;
+	parsePathStr( path, dir, filename, animset_name, ext );
+	int asi = 0;
+	std::string banimset_name = animset_name;
+	while( anim_mgr->hasResource(animset_name) )
+		animset_name = banimset_name + toString<int>(asi++);
+
+	// Determine animation set ID
+	unsigned int animset_id = 0;
+	while( anim_mgr->hasResource(animset_id) ) ++animset_id;
+	
+	// Create and load animation set
+	AnimationSetPtr anim_set = AnimationSetPtr::DynamicCast<zh::Resource>( 
+		anim_mgr->createResource( animset_id, animset_name ) );
+	if( !anim_mgr->loadResource( animset_id, path ) )
+	{
+		zhLog( "AnimationSystem", "loadAnimationSet",
+			"ERROR: Failed to load animation set (%d, %s) from path %s.",
+			animset_id, animset_name.c_str(), path.c_str() );
+		anim_mgr->deleteResource(animset_id);
+	}
+
+	// Add animation nodes to tree
+	if( mAnimTree->getRoot() == NULL )
+	{
+		mAnimTree->createNode( AnimationTransitionBlender::ClassId(), 0, "Root" );
+		mAnimTree->setRoot("Root");
+	}
+	AnimationSet::AnimationConstIterator anim_i = anim_set->getAnimationConstIterator();
+	while( anim_i.hasMore() )
+	{
+		Animation* anim = anim_i.next();
+		std::string node_name = anim_set->getName() + "::" + anim->getName();
+		if( mAnimTree->hasNode(node_name) )
+			continue;
+
+		AnimationSampler* node = static_cast<AnimationSampler*>(
+			mAnimTree->createNode( AnimationSampler::ClassId(), mAnimTree->getNumNodes(), node_name )
+			);
+		mAnimTree->getNode("Root")->addChild(node);
+	}
+	// TODO: Add nodes under correct retargetting node (specified by skel param.)
+
+	zhLog( "AnimationSystem", "loadAnimationSet",
+		"Loaded animation set (%d, %s) from path %s.",
+		animset_id, animset_name.c_str(), path.c_str() );
+
+	return anim_set;
 }
 
-void AnimationSystem::deleteAnimationSet( const std::string& name ) const
+void AnimationSystem::deleteAnimationSet( const std::string& name )
 {
+	zhLog( "AnimationSystem", "deleteAnimationSet",
+		"Deleting animation set %s.", name.c_str() );
+
+	AnimationManager* anim_mgr = getAnimationManager();
+
+	// Remove animation nodes from tree
+	AnimationSetPtr anim_set = AnimationSetPtr::DynamicCast<zh::Resource>(
+		anim_mgr->getResource(name) );
+	AnimationSet::AnimationConstIterator anim_i = anim_set->getAnimationConstIterator();
+	while( anim_i.hasMore() )
+	{
+		Animation* anim = anim_i.next();
+		mAnimTree->deleteNode( zhA( name, anim->getName() ) );
+	}
+
+	anim_mgr->deleteResource(name);
 }
 
-void AnimationSystem::deleteAllAnimations( const std::string& name ) const
+void AnimationSystem::deleteAllAnimations( const std::string& name )
 {
+	zhLog( "AnimationSystem", "deleteAnimationSet",
+		"Deleting all currently loaded animation sets.", name.c_str() );
+
+	AnimationManager* anim_mgr = getAnimationManager();
+
+	mAnimTree->deleteAllNodes();
+	anim_mgr->deleteAllResources();
 }
 
 AnimationSetPtr AnimationSystem::getAnimationSet( const std::string& name ) const
 {
+	return AnimationSetPtr::DynamicCast<zh::Resource>( getAnimationManager()->getResource(name) );
 }
 
 bool AnimationSystem::hasAnimationSet( const std::string& name ) const
 {
+	return getAnimationManager()->hasResource(name);
 }
 
-AnimationSystem::AnimationSetIterator AnimationSystem::getAnimationSetIterator()
-{
-}
-
-AnimationSystem::AnimationSetConstIterator AnimationSystem::getAnimationSetConstIterator() const
-{
-}
-
-Animation* AnimationSystem::getAnimation( const std::string& animName ) const
-{
-}
-
-bool AnimationSystem::hasAnimation( const std::string& animName ) const
-{
-}
-
-AnimationManager* AnimationSystem::getAnimationManager() const
-{
-	return AnimationManager::Instance();
-}
-
-void AnimationSystem::createAnimationFromSegment( const std::string& newAnimName,
+Animation* AnimationSystem::createAnimationFromSegment( const std::string& newAnimName,
 	const std::string& origAnimName, float startTime, float length )
 {
+	// TODO
 	/*
-	// create new animation
+	// Create new animation
 	unsigned short anim_id = 0;
 	while( anim_set->hasAnimation(anim_id) ) ++anim_id;
 	anim = anim_set->createAnimation( anim_id, anim_name );
 
-	// fill up animation with key-frames
-	// first create bone tracks
+	// Fill up animation with key-frames
 	zh::Animation::BoneTrackConstIterator bti = raw_anim->getBoneTrackConstIterator();
 	while( !bti.end() )
 	{
@@ -218,108 +282,216 @@ void AnimationSystem::createAnimationFromSegment( const std::string& newAnimName
 			tkf->setScale( rtkf->getScale() );
 		}
 	}
-	// then create mesh tracks
-	zh::Animation::MeshTrackConstIterator mti = raw_anim->getMeshTrackConstIterator();
-	while( !mti.end() )
-	{
-		MeshAnimationTrack* rmat = mti.next();
-		MeshAnimationTrack* mat = anim->createMeshTrack( rmat->getMeshId() );
-		
-		// create initial key-frame
-		zh::MorphKeyFrame* mkf = static_cast<MorphKeyFrame*>( mat->createKeyFrame(0) );
-		rmat->getInterpolatedKeyFrame( anim_seg.getStartTime(), mkf );
 
-		// create final key-frame
-		mkf = static_cast<MorphKeyFrame*>( mat->createKeyFrame( anim_seg.getEndTime() - anim_seg.getStartTime() ) );
-		rmat->getInterpolatedKeyFrame( anim_seg.getEndTime(), mkf );
-
-		// copy intervening key-frames
-		for( unsigned int kfi = 0; kfi < rmat->getNumKeyFrames(); ++kfi )
-		{
-			zh::MorphKeyFrame* rmkf = static_cast<MorphKeyFrame*>( rmat->getKeyFrame(kfi) );
-			
-			if( rmkf->getTime() <= anim_seg.getStartTime() )
-				continue;
-			if( rmkf->getTime() >= anim_seg.getEndTime() )
-				break;
-
-			mkf = static_cast<MorphKeyFrame*>( mat->createKeyFrame( rmkf->getTime() - anim_seg.getStartTime() ) );
-			mkf->setMorphTargetWeights( rmkf->getMorphTargetWeights() );
-		}
-	}
-
-	// TODO: copy annots as well
+	// TODO: Copy annots. as well
 	*/
+
+	return NULL;
+}
+
+void AnimationSystem::deleteAnimation( const std::string& name )
+{
+	zhLog( "AnimationSystem", "deleteAnimation",
+		"Deleting animation %s.", name.c_str() );
+
+	std::string animset_name, anim_name;
+	ParseAnimationName( name, animset_name, anim_name );
+
+	// Remove animation node from tree
+	mAnimTree->deleteNode(name);
+
+	AnimationSetPtr anim_set = getAnimationSet(animset_name);
+	if( anim_set != NULL )
+		anim_set->deleteAnimation(anim_name);
+}
+
+Animation* AnimationSystem::getAnimation( const std::string& animName ) const
+{
+	std::string animset_name, anim_name;
+	ParseAnimationName( animName, animset_name, anim_name );
+
+	AnimationSetPtr anim_set = getAnimationSet(animset_name);
+	return anim_set == NULL ? NULL : anim_set->getAnimation(anim_name);
+}
+
+bool AnimationSystem::hasAnimation( const std::string& animName ) const
+{
+	std::string animset_name, anim_name;
+	ParseAnimationName( animName, animset_name, anim_name );
+
+	AnimationSetPtr anim_set = getAnimationSet(animset_name);
+	return anim_set == NULL ? false : anim_set->hasAnimation(anim_name);
+}
+
+void AnimationSystem::getAnimationList( std::vector<Animation*>& animList ) const
+{
+	animList.clear();
+
+	ResourceManager::ResourceConstIterator res_i =
+		getAnimationManager()->getResourceConstIterator();
+	while( res_i.hasMore() )
+	{
+		AnimationSetPtr anim_set = AnimationSetPtr::DynamicCast<zh::Resource>( res_i.next() );
+		AnimationSet::AnimationConstIterator anim_i = anim_set->getAnimationConstIterator();
+		while( anim_i.hasMore() )
+			animList.push_back( anim_i.next() );
+	}
+}
+
+AnimationManager* AnimationSystem::getAnimationManager() const
+{
+	return AnimationManager::Instance();
 }
 
 Skeleton* AnimationSystem::getOutputSkeleton() const
 {
+	return mOutSkel;
 }
 
 void AnimationSystem::setOutputSkeleton( const std::string& name )
 {
+	zhAssert( hasSkeleton(name) );
+
+	mOutSkel = getSkeleton(name);
+	
+	zhLog( "AnimationSystem", "setOutputSkeleton",
+		"Output skeleton is now %s.", name.c_str() );
 }
 
 void AnimationSystem::playAnimation( const std::string& animName )
 {
+	// TODO: add animation to the queue,
+	// or play right away if there's nothing playing
 }
 
 void AnimationSystem::playAnimationNow( const std::string& animName )
 {
+	// TODO: clear animation queue and play the animation
 }
 
 void AnimationSystem::stopAnimation()
 {
+	AnimationNode* root = mAnimTree->getRoot();
+	if( root != NULL )
+	{
+		root->setPlaying(false);
+		static_cast<AnimationTransitionBlender*>(root)->removeAllTransitions();
+	}
+}
+
+Animation* AnimationSystem::getCurrentAnimation() const
+{
+	AnimationTree::NodeConstIterator node_i = mAnimTree->getNodeConstIterator();
+	while( node_i.hasMore() )
+	{
+		AnimationNode* node = node_i.next();
+		if( node->getClassId() == AnimationSampler::ClassId() &&
+			node->getPlaying() )
+			return static_cast<AnimationSampler*>(node)->getAnimation();
+	}
+
+	return NULL;
 }
 
 bool AnimationSystem::isAnimationPlaying() const
 {
+	AnimationNode* root = mAnimTree->getRoot();
+
+	return root != NULL && root->getPlaying();
 }
 
 void AnimationSystem::pauseAnimation()
 {
+	AnimationNode* root = mAnimTree->getRoot();
+	if( root != NULL )
+		root->setPaused(true);
 }
 
 void AnimationSystem::unpauseAnimation()
 {
+	AnimationNode* root = mAnimTree->getRoot();
+	if( root != NULL )
+		root->setPaused(false);
 }
 	
 bool AnimationSystem::isAnimationPaused() const
 {
+	AnimationNode* root = mAnimTree->getRoot();
+
+	return root != NULL && root->getPaused();
 }
 
 float AnimationSystem::getAnimationTime() const
 {
+	AnimationNode* root = mAnimTree->getRoot();
+	if( root != NULL )
+		return root->getPlayTime();
+
+	return 0;
 }
 
 void AnimationSystem::setAnimationTime( float time )
 {
+	AnimationNode* root = mAnimTree->getRoot();
+	if( root != NULL )
+		root->setPlayTime(time);
 }
 
 float AnimationSystem::getAnimationRate() const
 {
+	AnimationNode* root = mAnimTree->getRoot();
+	if( root != NULL )
+		return root->getPlayRate();
+
+	return 1;
 }
 
 void AnimationSystem::setAnimationRate( float rate )
 {
+	AnimationNode* root = mAnimTree->getRoot();
+	if( root != NULL )
+		root->setPlayRate(rate);
 }
 
 float AnimationSystem::getAnimationLength() const
 {
+	AnimationNode* root = mAnimTree->getRoot();
+	if( root != NULL )
+		return root->getPlayLength();
+
+	return 0;
 }
 
 void AnimationSystem::update( float dt ) const
 {
+	if( mOutSkel == NULL )
+		return;
+
+	mAnimTree->update(dt);
+	mAnimTree->apply(mOutSkel);
 }
 
 AnimationTree* AnimationSystem::getAnimationTree() const
 {
-	return AnimationTree::Instance();
+	return mAnimTree;
 }
 
 MemoryPool* AnimationSystem::getMemoryPool() const
 {
 	return MemoryPool::Instance();
+}
+
+void AnimationSystem::ParseAnimationName( const std::string& fullName,
+	std::string& animSetName, std::string& animName )
+{
+	std::string::size_type dli = animName.find("::");
+	if( dli == std::string::npos )
+		animSetName = animName = "";
+	else
+	{
+		std::string animset_name = animName.substr(0,dli);
+		std::string anim_name = animName.substr(dli+2);
+	}
 }
 
 }

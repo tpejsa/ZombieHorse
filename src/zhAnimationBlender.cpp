@@ -103,7 +103,7 @@ void AnimationBlender::setNormalizedPlayTime( float time )
 		while( !ci.end() )
 			ci.next()->setPlayTime(0);
 
-		_update( time * getPlayLength() );
+		_updateNode( time * getPlayLength() );
 	}
 }
 
@@ -459,7 +459,7 @@ void AnimationBlender::_clone( AnimationNode* clonePtr, bool shareData ) const
 	clone->mUseBlendCurves = mUseBlendCurves;
 }
 
-void AnimationBlender::_update( float dt )
+void AnimationBlender::_updateNode( float dt )
 {
 	AnimationSpace* anim_space = getAnimationSpace();
 	float play_length = getPlayLength();

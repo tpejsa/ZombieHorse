@@ -22,7 +22,7 @@ SOFTWARE.
 
 #include "zhOgreModelController.h"
 
-SceneManager* OgreModelController::getSceneManager() const
+/*SceneManager* OgreModelController::getSceneManager() const
 {
 	return mSceneMgr;
 }
@@ -108,7 +108,7 @@ void OgreModelController::init()
 			while( obi.hasMoreElements() )
 			{
 				Ogre::Bone* ob = obi.getNext();
-				ob->setManuallyControlled(true); // allows visage7 to manipulate bones
+				ob->setManuallyControlled(true); // allows ZombieHorse to manipulate bones
 				
 				zh::Bone* vb = skel->createBone( ob->getHandle(), ob->getName() );
 				vb->setInitialPosition( zhVisageVector3( ob->getInitialPosition() ) );
@@ -118,16 +118,16 @@ void OgreModelController::init()
 
 				// TODO: remove this
 				// create bone marker
-				/*if( ob->getName().find_first_of( "Bip" ) == Ogre::String::npos )
-					continue;
-				ManualObject* marker = mSceneMgr->createManualObject( ob->getName() );
-				marker->begin( "Samples/BoneMarker", RenderOperation::OT_POINT_LIST );
-				marker->position( 0, 0, 0 );
-				marker->colour( 0, 1, 0 );
-				marker->end();
-				SceneNode* marker_node = mSceneMgr->getRootSceneNode()->createChildSceneNode( ob->getName() );
-				marker_node->attachObject(marker);
-				marker_node->setPosition( zhOgreVector3( vb->getWorldPosition() ) );*/
+				//if( ob->getName().find_first_of( "Bip" ) == Ogre::String::npos )
+					//continue;
+				//ManualObject* marker = mSceneMgr->createManualObject( ob->getName() );
+				//marker->begin( "Samples/BoneMarker", RenderOperation::OT_POINT_LIST );
+				//marker->position( 0, 0, 0 );
+				//marker->colour( 0, 1, 0 );
+				//marker->end();
+				//SceneNode* marker_node = mSceneMgr->getRootSceneNode()->createChildSceneNode( ob->getName() );
+				//marker_node->attachObject(marker);
+				//marker_node->setPosition( zhOgreVector3( vb->getWorldPosition() ) );
 				//
 			}
 
@@ -185,12 +185,12 @@ void OgreModelController::update( float dt )
 			ob->setScale( zhOgreVector3( bone->getScale() ) );
 
 			// update marker position
-			/*SceneNode* marker_node = mSceneMgr->getSceneNode( ob->getName() );
-			if( marker_node != NULL )
-				marker_node->setPosition( zhOgreVector3( bone->getWorldPosition() ) );*/
+			//SceneNode* marker_node = mSceneMgr->getSceneNode( ob->getName() );
+			//if( marker_node != NULL )
+				//marker_node->setPosition( zhOgreVector3( bone->getWorldPosition() ) );
 		}
 	}
 
 	// copy morph target influences to OGRE entities
 	// TODO:
-}
+}*/

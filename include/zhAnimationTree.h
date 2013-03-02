@@ -28,19 +28,15 @@ SOFTWARE.
 #include "zhObjectFactory.h"
 #include "zhSkeleton.h"
 #include "zhAnimationSet.h"
-
-#define zhDeclare_AnimationNode( AN, classId, className ) \
-	zhDeclare_Class( AnimationNode, AN, classId, className, unsigned short )
-#define zhRegister_AnimationNode( AN ) \
-	AnimationSystem::Instance()->getAnimationTree()->_getNodeFactory()->registerClass( AN::ClassId(), AN::ClassName(), &AN::Create )
-#define zhUnregister_AnimationNode( AN ) \
-	AnimationSystem::Instance()->getAnimationTree()->_getNodeFactory()->registerClass( AN::ClassId() )
+#include "zhAnimationNode.h"
+#include "zhAnimationSampler.h"
+#include "zhAnimationBlender.h"
+#include "zhAnimationTransitionBlender.h"
 
 namespace zh
 {
 
 class AnimationTree;
-class AnimationNode;
 
 /**
 * @brief Animation tree resource.

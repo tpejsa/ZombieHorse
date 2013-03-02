@@ -33,8 +33,6 @@ SOFTWARE.
 
 #include "ogre.h"
 
-#include "zhOgreModelController.h"
-
 #define zhGround_Size 100
 #define zhGround_TileSize 100.f
 
@@ -42,8 +40,6 @@ SOFTWARE.
 #define zhCamera_Focus Ogre::Vector3( 0.f, 50.f, 0.f )
 #define zhCamera_TransSpeed 0.1f
 #define zhCamera_RotSpeed 1
-
-#define zhIntAnimTree_Name "AT_zhInternal"
 
 using namespace std;
 using namespace Ogre;

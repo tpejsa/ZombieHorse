@@ -37,6 +37,13 @@ SOFTWARE.
 #define zhAnimationTransitionBlender_ClassId 3
 #define zhAnimationTransitionBlender_ClassName "AnimationTransitionBlender"
 
+#define zhDeclare_AnimationNode( AN, classId, className ) \
+	zhDeclare_Class( AnimationNode, AN, classId, className, unsigned short )
+#define zhRegister_AnimationNode( AN ) \
+	AnimationSystem::Instance()->getAnimationTree()->_getNodeFactory()->registerClass( AN::ClassId(), AN::ClassName(), &AN::Create )
+#define zhUnregister_AnimationNode( AN ) \
+	AnimationSystem::Instance()->getAnimationTree()->_getNodeFactory()->registerClass( AN::ClassId() )
+
 namespace zh
 {
 
@@ -419,7 +426,7 @@ protected:
 	*
 	* @param dt Elapsed time.
 	*/
-	virtual void _update( float dt );
+	virtual void _updateNode( float dt );
 
 	/**
 	* Applies this animation node to the current model.

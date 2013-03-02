@@ -154,8 +154,7 @@ Skeleton::Situation AnimationSampler::_sampleMover() const
 	if( anim == NULL )
 		return Skeleton::Situation::Identity;
 
-	Model* mdl = mOwner->getModel();
-	Skeleton* skel = mdl->getSkeleton();
+	Skeleton* skel = mOwner->_getCurrentSkeleton();
 	Bone* root = skel->getRoot();
 
 	// sample anim. mover
@@ -214,7 +213,7 @@ void AnimationSampler::_clone( AnimationNode* clonePtr, bool shareData ) const
 	clone->mAnnotsEnabled = mAnnotsEnabled;
 }
 
-void AnimationSampler::_update( float dt )
+void AnimationSampler::_updateNode( float dt )
 {
 	float length = getPlayLength();
 	
@@ -231,8 +230,7 @@ void AnimationSampler::_applyNode( float weight, const std::set<unsigned short>&
 	if( anim == NULL )
 		return;
 
-	Model* mdl = mOwner->getModel();
-	Skeleton* skel = mdl->getSkeleton();
+	Skeleton* skel = mOwner->_getCurrentSkeleton();
 	Bone* root = skel->getRoot();
 	float scale = root->getScale().y;
 
@@ -257,7 +255,7 @@ void AnimationSampler::_applyNode( float weight, const std::set<unsigned short>&
 	}
 
 	// apply animation
-	anim->apply( mdl, mPlayTime, weight, scale, bone_mask );
+	anim->apply( skel, mPlayTime, weight, scale, bone_mask );
 }
 
 }

@@ -139,7 +139,7 @@ void BoneAnimationTrack::getInterpolatedKeyFrame( float time, KeyFrame* kf ) con
 	}
 }
 
-void BoneAnimationTrack::apply( Skeleton* skeleton, float time, float weight, float scale ) const
+void BoneAnimationTrack::apply( Skeleton* skel, float time, float weight, float scale ) const
 {
 	TransformKeyFrame tkf( time, 0 );
 	Bone* bone = skel->getBone(mBoneId);

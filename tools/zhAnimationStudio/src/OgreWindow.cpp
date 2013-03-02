@@ -54,7 +54,18 @@ void OgreWindow::showSkybox( bool show )
 		gApp->getSceneManager()->setSkyBox( false, "Samples/VisageSkyBox", 2000.f );
 }
 
-void OgreWindow::show3DAxesOnBone( const Ogre::String& boneName, bool show )
+void OgreWindow::showCoordAxesOnBones( bool show )
+{
+	zh::Skeleton* skel = zhAnimationSystem->getOutputSkeleton();
+	if( skel == NULL )
+		return;
+
+	zh::Skeleton::BoneConstIterator bone_i = skel->getBoneConstIterator();
+	while( !bone_i.end() )
+		showCoordAxesOnBone( bone_i.next()->getName(), show );
+}
+
+void OgreWindow::showCoordAxesOnBone( const Ogre::String& boneName, bool show )
 {
 	Ogre::SceneManager* scenemgr = gApp->getSceneManager();
 	Ogre::SkeletonInstance* oskel = NULL;
@@ -75,7 +86,7 @@ void OgreWindow::show3DAxesOnBone( const Ogre::String& boneName, bool show )
 	}
 	
 	// find specified bone
-	OgreModelController* omc = static_cast<OgreModelController*>( gApp->getCurrentCharacter()->getModelController() );
+	/*OgreModelController* omc = static_cast<OgreModelController*>( gApp->getCurrentCharacter()->getModelController() );
 	OgreModelController::EntityConstIterator oei = omc->getEntityConstIterator();
 	while( !oei.end() )
 	{
@@ -87,7 +98,8 @@ void OgreWindow::show3DAxesOnBone( const Ogre::String& boneName, bool show )
 
 			break;
 		}
-	}
+	}*/
+	// TODO: figure out what the bone is
 
 	zhAssert( oskel != NULL );
 
@@ -133,6 +145,11 @@ void OgreWindow::show3DAxesOnBone( const Ogre::String& boneName, bool show )
 	// position and orient the axes
 	axesnode->setPosition( obone->_getDerivedPosition() );
 	axesnode->setOrientation( obone->_getDerivedOrientation() );
+}
+
+void OgreWindow::setRenderSkeleton( zh::Skeleton* skel )
+{
+	// TODO: fill this in...
 }
 
 void OgreWindow::createPointSet( const Ogre::String& name, const std::vector<Ogre::Vector3>& points,

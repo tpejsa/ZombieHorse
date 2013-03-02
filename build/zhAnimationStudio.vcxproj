@@ -12,28 +12,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\tools\zhAnimationStudio\src\AnimAnnotGrid.h" />
-    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimationBlenderPropGrid.h" />
-    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimationMixerPropGrid.h" />
-    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimationNodePropGrid.h" />
-    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimationSamplerPropGrid.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\AnimationStudio.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\AnimationStudioApp.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\AnimationStudioFrame.h" />
-    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimationTransitionBlenderPropGrid.h" />
-    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimTreeConnexSpace.h" />
-    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimTreeWindow.h" />
-    <ClInclude Include="..\tools\zhAnimationStudio\src\BoneControllerPropGrid.h" />
-    <ClInclude Include="..\tools\zhAnimationStudio\src\BoneIKControllerPropGrid.h" />
-    <ClInclude Include="..\tools\zhAnimationStudio\src\BoneTransformControllerPropGrid.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\BuildAnimSpaceDialog.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\BuildIndexDialog.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\BuildMotionGraphDialog.h" />
-    <ClInclude Include="..\tools\zhAnimationStudio\src\Connex.h" />
-    <ClInclude Include="..\tools\zhAnimationStudio\src\ConnexNode.h" />
-    <ClInclude Include="..\tools\zhAnimationStudio\src\ConnexSpace.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\DefineAnimParamDialog.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\DotSceneLoader.h" />
-    <ClInclude Include="..\tools\zhAnimationStudio\src\FaceControllerPropGrid.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\MatchGraphView.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\MatchGraphViewDialog.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\MatchWebViewDialog.h" />
@@ -43,7 +29,6 @@
     <ClInclude Include="..\tools\zhAnimationStudio\src\OgreWindow.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\PlaySlider.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\ProjectViewWindow.h" />
-    <ClInclude Include="..\tools\zhAnimationStudio\src\PropertiesWindow.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\resource.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\TimelineWindow.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\wxImagePanel.h" />
@@ -51,27 +36,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\tools\zhAnimationStudio\src\AnimAnnotGrid.cpp" />
-    <ClCompile Include="..\tools\zhAnimationStudio\src\AnimationBlenderPropGrid.cpp" />
-    <ClCompile Include="..\tools\zhAnimationStudio\src\AnimationMixerPropGrid.cpp" />
-    <ClCompile Include="..\tools\zhAnimationStudio\src\AnimationNodePropGrid.cpp" />
-    <ClCompile Include="..\tools\zhAnimationStudio\src\AnimationSamplerPropGrid.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\AnimationStudioApp.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\AnimationStudioFrame.cpp" />
-    <ClCompile Include="..\tools\zhAnimationStudio\src\AnimationTransitionBlenderPropGrid.cpp" />
-    <ClCompile Include="..\tools\zhAnimationStudio\src\AnimTreeConnexSpace.cpp" />
-    <ClCompile Include="..\tools\zhAnimationStudio\src\AnimTreeWindow.cpp" />
-    <ClCompile Include="..\tools\zhAnimationStudio\src\BoneControllerPropGrid.cpp" />
-    <ClCompile Include="..\tools\zhAnimationStudio\src\BoneIKControllerPropGrid.cpp" />
-    <ClCompile Include="..\tools\zhAnimationStudio\src\BoneTransformControllerPropGrid.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\BuildAnimSpaceDialog.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\BuildIndexDialog.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\BuildMotionGraphDialog.cpp" />
-    <ClCompile Include="..\tools\zhAnimationStudio\src\Connex.cpp" />
-    <ClCompile Include="..\tools\zhAnimationStudio\src\ConnexNode.cpp" />
-    <ClCompile Include="..\tools\zhAnimationStudio\src\ConnexSpace.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\DefineAnimParamDialog.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\DotSceneLoader.cpp" />
-    <ClCompile Include="..\tools\zhAnimationStudio\src\FaceControllerPropGrid.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\MatchGraphView.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\MatchGraphViewDialog.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\MatchWebViewDialog.cpp" />
@@ -81,7 +52,6 @@
     <ClCompile Include="..\tools\zhAnimationStudio\src\OgreWindow.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\PlaySlider.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\ProjectViewWindow.cpp" />
-    <ClCompile Include="..\tools\zhAnimationStudio\src\PropertiesWindow.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\TimelineWindow.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\wxImagePanel.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\zhOgreModelController.cpp" />

@@ -155,6 +155,25 @@ float Animation::getLength() const
 	return length;
 }
 
+int Animation::getFrameRate() const
+{
+	float cur_length = 0, length = 0;
+	int num_fr = 0;
+
+	BoneTrackConstIterator bti = getBoneTrackConstIterator();
+	while( !bti.end() )
+	{
+		BoneAnimationTrack* bat = bti.next();
+		if( ( cur_length = bat->getLength() ) > length )
+		{
+			length = cur_length;
+			num_fr = bat->getNumKeyFrames();
+		}
+	}
+
+	return length > 0 ? zhRoundi(num_fr/length) : 0;
+}
+
 void Animation::apply( Skeleton* skel, float time, float weight, float scale,
 					  const std::set<unsigned short> boneMask ) const
 {

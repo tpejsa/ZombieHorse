@@ -27,8 +27,6 @@ MotionGraphViewDialog::MotionGraphViewDialog( wxWindow* parent, wxWindowID id, M
 : wxDialog( parent, id, "View Motion Graph", wxDefaultPosition, wxSize( 820, 720 ), wxDEFAULT_DIALOG_STYLE ),
 mWndMotionGraphView(NULL)
 {
-	Character* ch = gApp->getCurrentCharacter();
-
 	// view controls
 	mChkUseTimeProp = new wxCheckBox( this, ID_chkUseTimeProp, "Use Time Proportions", wxPoint( 20, 10 ), wxSize( 120, 20 ) );
 	mChkShowTransInt = new wxCheckBox( this, ID_chkShowTransInt, "Show Transition Interval", wxPoint( 160, 10 ), wxSize( 120, 20 ) );

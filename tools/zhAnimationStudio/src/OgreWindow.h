@@ -53,9 +53,19 @@ public:
 	void showSkybox( bool show = true );
 
 	/**
-	* Toggles rendering of 3D axes on specified bone.
+	* Toggles rendering of coordinate system axes on all bones.
 	*/
-	void show3DAxesOnBone( const Ogre::String& boneName, bool show = true );
+	void showCoordAxesOnBones( bool show = true );
+
+	/**
+	* Toggles rendering of coordinate system axes on specified bone.
+	*/
+	void showCoordAxesOnBone( const Ogre::String& boneName, bool show = true );
+
+	/**
+	* Sets a new skeleton to be rendered in the viewport.
+	*/
+	void setRenderSkeleton( zh::Skeleton* skel );
 
 	/**
 	* Creates a point set for rendering.

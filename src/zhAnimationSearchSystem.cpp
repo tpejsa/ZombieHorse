@@ -98,7 +98,7 @@ AnimationIndexPtr AnimationSearchSystem::buildIndex( unsigned long id, const std
 
 	// create empty anim. index
 	AnimationIndexPtr anim_index = AnimationIndexPtr::DynamicCast<Resource>( aimgr->createResource( id, name ) );
-	anim_index->setModel(skel);
+	anim_index->setSkeleton(skel);
 
 	// get anim. labels
 	std::vector<std::string> labels;

@@ -45,7 +45,7 @@ class DefineAnimParamDialog : public wxDialog
 
 public:
 
-	DefineAnimParamDialog( wxWindow* parent, wxWindowID id, Model* mdl, AnimationSpace* animSpace );
+	DefineAnimParamDialog( wxWindow* parent, wxWindowID id, zh::Skeleton* skel, AnimationSpace* animSpace );
 
 	~DefineAnimParamDialog();
 
@@ -92,7 +92,7 @@ private:
 	std::string _generateParamName() const;
 	void _applyAnim();
 
-	Model* mMdl;
+	zh::Skeleton* mSkel;
 	AnimationSpace* mAnimSpace;
 	std::vector<AnimationParamSpec> mParamSpecs;
 	unsigned int mCurParam;

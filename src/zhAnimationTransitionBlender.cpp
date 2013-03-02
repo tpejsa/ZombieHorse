@@ -437,7 +437,7 @@ void AnimationTransitionBlender::_clone( AnimationNode* clonePtr, bool shareData
 		clone->mDefaultNode = clone->getAnimationTree()->getNode( mDefaultNode->getId() );
 }
 
-void AnimationTransitionBlender::_update( float dt )
+void AnimationTransitionBlender::_updateNode( float dt )
 {
 	/*
 
@@ -580,7 +580,7 @@ void AnimationTransitionBlender::_update( float dt )
 		mTransitionQueue.pop();
 
 		// update again in case we've already entered another transition
-		_update(0);
+		_updateNode(0);
 	}
 }
 

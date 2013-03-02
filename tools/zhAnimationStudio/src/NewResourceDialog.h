@@ -33,8 +33,7 @@ public:
 	enum ResourceType
 	{
 		ResourceType_AnimSet,
-		ResourceType_AnimIndex,
-		ResourceType_AnimTree
+		ResourceType_AnimIndex
 	};
 
 	NewResourceDialog( wxWindow* parent, wxWindowID id, ResourceType resType );

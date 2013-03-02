@@ -34,7 +34,7 @@ MatchGraphView::MatchGraphView( wxWindow* parent, wxWindowID id, MatchGraph* mat
 {
 	zhAssert( matches != NULL && matches->getNumNodes() != 0 );
 
-	Character* ch = gApp->getCurrentCharacter();
+	/*Character* ch = gApp->getCurrentCharacter();
 	Model* mdl = ch->getModelController()->getModel();
 
 	// create temp. anim. set for search results
@@ -96,7 +96,7 @@ MatchGraphView::MatchGraphView( wxWindow* parent, wxWindowID id, MatchGraph* mat
 	ch->getAnimationController()->addAnimationTree(atree_int);
 	gApp->selectAnimationTree(zhIntAnimTree_Name);
 
-	_initView();
+	_initView();*/
 }
 
 unsigned int MatchGraphView::getZoom() const
@@ -117,7 +117,7 @@ void MatchGraphView::redraw()
 	
 void MatchGraphView::render( wxDC& dc )
 {
-	Character* ch = gApp->getCurrentCharacter();
+	/*Character* ch = gApp->getCurrentCharacter();
 
 	// clear background
 	dc.SetBackground( *wxWHITE_BRUSH );
@@ -198,7 +198,7 @@ void MatchGraphView::render( wxDC& dc )
 				dc.DrawText( label, ( lx1 + lx2 )/2 + 5, ( ly1 + ly2 )/2 );
 			}
 		}
-	}
+	}*/
 }
 
 void MatchGraphView::OnLeftDown( wxMouseEvent& evt )
@@ -207,7 +207,7 @@ void MatchGraphView::OnLeftDown( wxMouseEvent& evt )
 
 void MatchGraphView::OnLeftUp( wxMouseEvent& evt )
 {
-	// if clicked on node label, select that node
+	/*// if clicked on node label, select that node
 	for( std::map<MatchGraph::Node*, wxRect>::const_iterator rect_i = mNodeRect.begin();
 		rect_i != mNodeRect.end(); ++rect_i )
 	{
@@ -235,7 +235,7 @@ void MatchGraphView::OnLeftUp( wxMouseEvent& evt )
 		gApp->stopAnimation();
 
 		redraw();
-	}
+	}*/
 }
 
 void MatchGraphView::OnKeyDown( wxKeyEvent& evt )
@@ -258,7 +258,7 @@ void MatchGraphView::OnPaint( wxPaintEvent& evt )
 
 void MatchGraphView::OnClose( wxCloseEvent& evt )
 {
-	Character* ch = gApp->getCurrentCharacter();
+	/*Character* ch = gApp->getCurrentCharacter();
 	Model* mdl = ch->getModelController()->getModel();
 
 	// remove nodes from internal anim. tree
@@ -270,7 +270,7 @@ void MatchGraphView::OnClose( wxCloseEvent& evt )
 	gApp->selectAnimationTree(zhIntAnimTree_Name);
 
 	// delete temp. anim. set
-	zhAnimationSystem->getAnimationManager()->deleteResource( mTempAnimSet->getId() );
+	zhAnimationSystem->getAnimationManager()->deleteResource( mTempAnimSet->getId() );*/
 }
 
 void MatchGraphView::_initView()

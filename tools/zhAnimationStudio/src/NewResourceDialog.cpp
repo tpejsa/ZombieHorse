@@ -33,17 +33,12 @@ NewResourceDialog::NewResourceDialog( wxWindow* parent, wxWindowID id, ResourceT
 	if( resType == ResourceType_AnimSet )
 	{
 		res_mgr = zhAnimationSystem->getAnimationManager();
-		name_str = "AS_" + gApp->getCurrentCharacter()->getId() + toString<unsigned int>( res_mgr->getNumResources() );
+		name_str = "AS_" + zhAnimationSystem->getOutputSkeleton()->getName() + toString<unsigned int>( res_mgr->getNumResources() );
 	}
-	else if( resType == ResourceType_AnimIndex )
+	else // if( resType == ResourceType_AnimIndex )
 	{
 		res_mgr = zhAnimationSearchSystem->getAnimationIndexManager();
-		name_str = "AI_" + gApp->getCurrentCharacter()->getId() + toString<unsigned int>( res_mgr->getNumResources() );
-	}
-	else // if( resType == ResourceType_AnimTree )
-	{
-		res_mgr = zhAnimationSystem->getAnimationTreeManager();
-		name_str = "AT_" + gApp->getCurrentCharacter()->getId() + toString<unsigned int>( res_mgr->getNumResources() );
+		name_str = "AI_" + zhAnimationSystem->getOutputSkeleton()->getName() + toString<unsigned int>( res_mgr->getNumResources() );
 	}
 
 	// get res. directories for this res. type

@@ -22,7 +22,7 @@ SOFTWARE.
 
 #include "zhAnimationNode.h"
 #include "zhLogger.h"
-#include "zhModel.h"
+#include "zhSkeleton.h"
 #include "zhAnimationTree.h"
 
 namespace zh
@@ -441,7 +441,7 @@ void AnimationNode::update( float dt )
 	if( mPaused )
 		dt = 0;
 
-	_update( dt * getPlayRate() );
+	_updateNode( dt * getPlayRate() );
 
 	// store elapsed time
 	mDt = dt;
@@ -539,7 +539,7 @@ Skeleton::Situation AnimationNode::_getRealignedOrigin( const Skeleton::Situatio
 	return orig;
 }
 
-void AnimationNode::_update( float dt )
+void AnimationNode::_updateNode( float dt )
 {
 	// update child nodes
 	ChildIterator ci = getChildIterator();
