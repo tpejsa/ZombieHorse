@@ -195,7 +195,7 @@ void OgreWindow::setRenderSkeleton( zh::Skeleton* skel )
 
 void OgreWindow::updateRenderSkeletonPose( zh::Skeleton* skel )
 {
-	if( skel == NULL ) return;
+	if( skel == NULL || mRenderSkel == NULL ) return;
 	Ogre::SceneManager* scenemgr = gApp->getSceneManager();
 
 	zh::Skeleton::BoneConstIterator bone_i = skel->getBoneConstIterator();

@@ -147,7 +147,10 @@ bool AnimationStudioApp::OnInit()
 	// initialize OGRE and ZombieHorse
 	if( !init( mFrmMain->getOgreWindow() ) )
 		return false;
-
+	//
+	//Testing load
+	//zhAnimationSystem->loadAnimationSet("141_01.bvh");
+	//
 	return true;
 }
 
@@ -202,7 +205,9 @@ bool AnimationStudioApp::init( wxWindow* wnd )
 		if( path.substr(path.size()-4) ==  ".bvh" || path.substr(path.size()-4) ==  ".zha" )
 			zhAnimationSystem->loadAnimationSet(path);
 	}
-
+	//Testing!!!!!
+	selectSkeleton(zhAnimationSystem->getOutputSkeleton()->getName());
+	//
 	mFrmMain->getProjectViewWindow()->refresh();
 
 	return true;
