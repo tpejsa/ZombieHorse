@@ -203,6 +203,10 @@ bool AnimationStudioApp::init( wxWindow* wnd )
 			zhAnimationSystem->loadAnimationSet(path);
 	}
 
+	// Set default output skeleotn
+	zh::Skeleton* out_skel = zhAnimationSystem->getOutputSkeleton();
+	if( out_skel != NULL )
+		mFrmMain->getOgreWindow()->setRenderSkeleton(out_skel);
 	mFrmMain->getProjectViewWindow()->refresh();
 
 	return true;
@@ -242,8 +246,8 @@ bool AnimationStudioApp::createCamera()
 	mCam = mSceneMgr->createCamera( "MainCam" );
 	mCam->setPosition( zhCamera_Pos );
 	mCam->lookAt( zhCamera_Focus );
-	mCam->setNearClipDistance(0.05f);
-	mCam->setFarClipDistance(5000.f);
+	mCam->setNearClipDistance(0.1f);
+	mCam->setFarClipDistance(30000.f);
 	mCam->setAutoAspectRatio(true);
 
 	return true;
@@ -299,51 +303,10 @@ bool AnimationStudioApp::loadResourceLocations()
 
 bool AnimationStudioApp::createScene()
 {
-	// setup background
-	mSceneMgr->setSkyBox( true, "Samples/VisageSkyBox", 2000.f );
+	mFrmMain->getOgreWindow()->showGround();
+	mFrmMain->getOgreWindow()->showSkybox();
 
-	// setup ground
-	ManualObject* ground = mSceneMgr->createManualObject( "Ground" );
-	ground->begin( "Samples/VisageGround", RenderOperation::OT_TRIANGLE_LIST );
-	for( unsigned int i = 0; i < zhGround_Size; ++i )
-	{
-		for( unsigned int j = 0; j < zhGround_Size; ++j )
-		{
-			ground->position( -zhGround_Size/2 * zhGround_TileSize + j * zhGround_TileSize,
-				0,
-				zhGround_Size/2 * zhGround_TileSize - i * zhGround_TileSize );
-			ground->textureCoord(0,0);
-			
-			ground->position( -zhGround_Size/2 * zhGround_TileSize + (j+1) * zhGround_TileSize,
-				0,
-				zhGround_Size/2 * zhGround_TileSize - (i+1) * zhGround_TileSize );
-			ground->textureCoord(1,1);
-			
-			ground->position( -zhGround_Size/2 * zhGround_TileSize + j * zhGround_TileSize,
-				0,
-				zhGround_Size/2 * zhGround_TileSize - (i+1) * zhGround_TileSize );
-			ground->textureCoord(0,1);
-
-			ground->position( -zhGround_Size/2 * zhGround_TileSize + j * zhGround_TileSize,
-				0,
-				zhGround_Size/2 * zhGround_TileSize - i * zhGround_TileSize );
-			ground->textureCoord(0,0);
-			
-			ground->position( -zhGround_Size/2 * zhGround_TileSize + (j+1) * zhGround_TileSize,
-				0,
-				zhGround_Size/2 * zhGround_TileSize - i * zhGround_TileSize );
-			ground->textureCoord(1,0);
-			
-			ground->position( -zhGround_Size/2 * zhGround_TileSize + (j+1) * zhGround_TileSize,
-				0,
-				zhGround_Size/2 * zhGround_TileSize - (i+1) * zhGround_TileSize );
-			ground->textureCoord(1,1);
-		}
-	}
-	ground->end();
-	mSceneMgr->getRootSceneNode()->createChildSceneNode( "Ground" )->attachObject(ground);
-
-	// setup lights
+	// Setup lighting
 	mSceneMgr->setAmbientLight( ColourValue( 0.8f, 0.8f, 0.8f ) );
 	Light* sunlight = mSceneMgr->createLight( "Sunlight1" );
 	sunlight->setType( Light::LT_DIRECTIONAL );

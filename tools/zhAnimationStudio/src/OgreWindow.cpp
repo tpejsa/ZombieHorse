@@ -26,7 +26,7 @@ SOFTWARE.
 
 OgreWindow::OgreWindow( wxWindow *parent, wxWindowID id )
 : wxWindow( parent, id, parent->GetPosition(), parent->GetSize(), wxBORDER_SIMPLE, "OgreWindow" ),
-mRenderSkel(NULL), mFPS(0)
+mOutSkel(NULL), mRenderSkel(NULL), mFPS(0)
 {
 }
 
@@ -45,9 +45,53 @@ void OgreWindow::showSkeleton( bool show )
 
 void OgreWindow::showGround( bool show )
 {
-	Ogre::SceneNode* sn = gApp->getSceneManager()->getSceneNode( "Ground" );
-	if( sn != NULL )
-		sn->setVisible(show);
+	Ogre::SceneManager* scene_mgr = gApp->getSceneManager();
+	if( scene_mgr->hasSceneNode("Ground") )
+	{
+		scene_mgr->getSceneNode( "Ground" )->setVisible(show);
+		return;
+	}
+
+	// Setup ground
+	ManualObject* ground = scene_mgr->createManualObject( "Ground" );
+	ground->begin( "Samples/VisageGround", RenderOperation::OT_TRIANGLE_LIST );
+	for( unsigned int i = 0; i < zhGround_Size; ++i )
+	{
+		for( unsigned int j = 0; j < zhGround_Size; ++j )
+		{
+			ground->position( -zhGround_Size/2 * zhGround_TileSize + j * zhGround_TileSize,
+				0,
+				zhGround_Size/2 * zhGround_TileSize - i * zhGround_TileSize );
+			ground->textureCoord(0,0);
+			
+			ground->position( -zhGround_Size/2 * zhGround_TileSize + (j+1) * zhGround_TileSize,
+				0,
+				zhGround_Size/2 * zhGround_TileSize - (i+1) * zhGround_TileSize );
+			ground->textureCoord(1,1);
+			
+			ground->position( -zhGround_Size/2 * zhGround_TileSize + j * zhGround_TileSize,
+				0,
+				zhGround_Size/2 * zhGround_TileSize - (i+1) * zhGround_TileSize );
+			ground->textureCoord(0,1);
+
+			ground->position( -zhGround_Size/2 * zhGround_TileSize + j * zhGround_TileSize,
+				0,
+				zhGround_Size/2 * zhGround_TileSize - i * zhGround_TileSize );
+			ground->textureCoord(0,0);
+			
+			ground->position( -zhGround_Size/2 * zhGround_TileSize + (j+1) * zhGround_TileSize,
+				0,
+				zhGround_Size/2 * zhGround_TileSize - i * zhGround_TileSize );
+			ground->textureCoord(1,0);
+			
+			ground->position( -zhGround_Size/2 * zhGround_TileSize + (j+1) * zhGround_TileSize,
+				0,
+				zhGround_Size/2 * zhGround_TileSize - (i+1) * zhGround_TileSize );
+			ground->textureCoord(1,1);
+		}
+	}
+	ground->end();
+	scene_mgr->getRootSceneNode()->createChildSceneNode( "Ground" )->attachObject(ground);
 }
 
 void OgreWindow::showSkybox( bool show )
@@ -71,16 +115,16 @@ void OgreWindow::showCoordAxesOnBones( bool show )
 
 void OgreWindow::showCoordAxesOnBone( const Ogre::String& boneName, bool show )
 {
-	Ogre::SceneManager* scenemgr = gApp->getSceneManager();
+	Ogre::SceneManager* scene_mgr = gApp->getSceneManager();
 	Ogre::SkeletonInstance* oskel = NULL;
 
-	if( !show || scenemgr->hasManualObject( "AxisSystem" ) )
+	if( !show || scene_mgr->hasManualObject( "AxisSystem" ) )
 	{
 		// delete existing axes
-		if( scenemgr->hasManualObject( "AxisSystem" ) )
+		if( scene_mgr->hasManualObject( "AxisSystem" ) )
 		{
-			scenemgr->destroySceneNode( "AxisSystem" );
-			scenemgr->destroyManualObject( "AxisSystem" );
+			scene_mgr->destroySceneNode( "AxisSystem" );
+			scene_mgr->destroyManualObject( "AxisSystem" );
 		}
 
 		if( !show )
@@ -108,8 +152,8 @@ void OgreWindow::showCoordAxesOnBone( const Ogre::String& boneName, bool show )
 	zhAssert( oskel != NULL );
 
 	// create axes in the scene
-	ManualObject* axesobj = scenemgr->createManualObject( "AxisSystem" );
-	SceneNode* axesnode = scenemgr->getRootSceneNode()->createChildSceneNode( "AxisSystem" );
+	ManualObject* axesobj = scene_mgr->createManualObject( "AxisSystem" );
+	SceneNode* axesnode = scene_mgr->getRootSceneNode()->createChildSceneNode( "AxisSystem" );
 
 	// create material for the axes
 	MaterialPtr axesmat = MaterialManager::getSingleton().getByName( "AxisSystemMat" );
@@ -154,13 +198,14 @@ void OgreWindow::showCoordAxesOnBone( const Ogre::String& boneName, bool show )
 void OgreWindow::setRenderSkeleton( zh::Skeleton* skel )
 {
 	if( skel == NULL ) return;
-	Ogre::SceneManager* scenemgr = gApp->getSceneManager();
+	mOutSkel = skel;
+	Ogre::SceneManager* scene_mgr = gApp->getSceneManager();
 
 	if( mRenderSkel != NULL )
 	{
 		// Delete existing skeleton
-		scenemgr->getRootSceneNode()->removeAndDestroyChild( mRenderSkel->getName() );
-		scenemgr->destroyAllManualObjects();
+		scene_mgr->getRootSceneNode()->removeAndDestroyChild( mRenderSkel->getName() );
+		scene_mgr->destroyAllManualObjects();
 	}
 
 	MaterialPtr bone_mat = MaterialManager::getSingleton().getByName( "BoneMat" );
@@ -190,11 +235,12 @@ void OgreWindow::setRenderSkeleton( zh::Skeleton* skel )
 	rHip->addChild(rKnee);
 	rKnee->setInitialPosition( zh::Vector3(0,-30,0) );
 	*/
-	_createRenderSkeleton( skel->getRoot(), scenemgr->getRootSceneNode(), NULL );
+	_createRenderSkeleton( skel->getRoot(), scene_mgr->getRootSceneNode(), NULL );
 }
 
 void OgreWindow::updateRenderSkeletonPose( zh::Skeleton* skel )
 {
+	zhAssert( mOutSkel == skel );
 	if( skel == NULL ) return;
 	Ogre::SceneManager* scenemgr = gApp->getSceneManager();
 

@@ -137,6 +137,7 @@ private:
 	void _createRenderSkeleton( zh::Bone* bone, Ogre::SceneNode* renderParent, Ogre::SceneNode* parentObj );
 	ManualObject* _createBox( const Ogre::String& name, const Ogre::String& matName, float size );
 
+	zh::Skeleton* mOutSkel; // ZombieHorse output skeleton
 	Ogre::SceneNode* mRenderSkel;
 	Ogre::Timer mFPSTimer; ///< Timer (for computing FPS).
 	float mFPS; ///< FPS count.

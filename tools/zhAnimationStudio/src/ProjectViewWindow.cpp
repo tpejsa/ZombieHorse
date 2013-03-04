@@ -33,6 +33,11 @@ class wxTreeProjectData : public wxTreeItemData
 {
 };
 
+class wxTreeSkeletonsData : public wxTreeItemData
+{
+};
+
+
 class wxTreeSkeletonData : public wxTreeItemData
 {
 
@@ -140,12 +145,14 @@ void ProjectViewWindow::refresh()
 	wxTreeItemId trc_root = trcProjTree->AddRoot( "Project Files", -1, -1, new wxTreeProjectData() );
 
 	// add skeletons
+	wxTreeItemId trc_skels = trcProjTree->AppendItem( trc_root, "Skeletons", -1, -1,
+		new wxTreeSkeletonsData() );
 	AnimationSystem::SkeletonConstIterator skel_i = zhAnimationSystem->getSkeletonConstIterator();
 	while( !skel_i.end() )
 	{
 		zh::Skeleton* skel = skel_i.next();
 
-		wxTreeItemId trc_ch = trcProjTree->AppendItem( trc_root, skel->getName(), -1, -1,
+		wxTreeItemId trc_ch = trcProjTree->AppendItem( trc_skels, skel->getName(), -1, -1,
 			new wxTreeSkeletonData(skel) );
 	}
 
@@ -220,6 +227,7 @@ void ProjectViewWindow::OnRightClick_ProjTree( wxTreeEvent& evt )
 		return;
 
 	wxTreeProjectData* proj_data;
+	wxTreeSkeletonsData* chars_data;
 	wxTreeSkeletonData* char_data;
 	wxTreeAnimIndexesData* animindexes_data;
 	wxTreeAnimIndexData* animindex_data;
@@ -234,6 +242,10 @@ void ProjectViewWindow::OnRightClick_ProjTree( wxTreeEvent& evt )
 	if( ( proj_data = dynamic_cast<wxTreeProjectData*>(base_data) ) != NULL )
 	{
 		// display Project popup menu
+	}
+	else if( ( char_data = dynamic_cast<wxTreeSkeletonData*>(base_data) ) != NULL )
+	{
+		// display Character popup menu
 	}
 	else if( ( char_data = dynamic_cast<wxTreeSkeletonData*>(base_data) ) != NULL )
 	{

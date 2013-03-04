@@ -170,6 +170,8 @@ AnimationSetPtr AnimationSystem::loadAnimationSet( const std::string& path, cons
 			"ERROR: Failed to load animation set (%d, %s) from path %s.",
 			animset_id, animset_name.c_str(), path.c_str() );
 		anim_mgr->deleteResource(animset_id);
+		
+		return NULL;
 	}
 
 	// Add animation nodes to tree
