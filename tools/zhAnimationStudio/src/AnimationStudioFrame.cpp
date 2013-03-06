@@ -24,6 +24,7 @@ SOFTWARE.
 #include "AnimationStudioApp.h"
 #include "TimelineWindow.h"
 #include "ProjectViewWindow.h"
+#include "MotionVisualizationWindow.h"
 #include "OgreWindow.h"
 #include "NewResourceDialog.h"
 #include "BuildMotionGraphDialog.h"
@@ -38,7 +39,7 @@ AnimationStudioFrame::AnimationStudioFrame( wxWindowID id, const wxString &title
 : wxFrame( NULL, id, title, pos, size, wxDEFAULT_FRAME_STYLE, "frmAnimationStudio" ),
 mbMain(NULL), mTbAnnots(NULL), mTbPlayer(NULL),
 mSelectMode(false), mSelectStart(0), mSelectEnd(-1000),
-mWndOgre(NULL), mWndTimeline(NULL), mWndProjectView(NULL)
+mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 {
 	// init AUI manager
 	mAuiMgr.SetManagedWindow(this);
@@ -46,6 +47,8 @@ mWndOgre(NULL), mWndTimeline(NULL), mWndProjectView(NULL)
 	// load bitmaps
 	mBitmaps["ID_bmpPlay"] = new wxBitmap( "ID_bmpPlay", wxBITMAP_TYPE_BMP_RESOURCE );
 	mBitmaps["ID_bmpPlayDisabled"] = new wxBitmap( "ID_bmpPlayDisabled", wxBITMAP_TYPE_BMP_RESOURCE );
+	mBitmaps["ID_bmpPlaySequence"] = new wxBitmap( "ID_bmpPlaySequence", wxBITMAP_TYPE_BMP_RESOURCE );
+	mBitmaps["ID_bmpPlaySequenceDisabled"] = new wxBitmap( "ID_bmpPlaySequenceDisabled", wxBITMAP_TYPE_BMP_RESOURCE );
 	mBitmaps["ID_bmpPause"] = new wxBitmap( "ID_bmpPause", wxBITMAP_TYPE_BMP_RESOURCE );
 	mBitmaps["ID_bmpStop"] = new wxBitmap( "ID_bmpStop", wxBITMAP_TYPE_BMP_RESOURCE );
 	mBitmaps["ID_bmpStopDisabled"] = new wxBitmap( "ID_bmpStopDisabled", wxBITMAP_TYPE_BMP_RESOURCE );
@@ -66,8 +69,9 @@ mWndOgre(NULL), mWndTimeline(NULL), mWndProjectView(NULL)
 
 	// create application windows
 	mWndOgre = new OgreWindow( this, ID_wndOgre );
-	mWndTimeline = new TimelineWindow( this, ID_wndTimeline );
+	//mWndTimeline = new TimelineWindow( this, ID_wndTimeline );
 	mWndProjectView = new ProjectViewWindow( this, ID_wndProjectView );
+	mWndMotionVis = new MotionVisualizationWindow( this, ID_wndMotionVis );
 
 	//
 	// Create main menu:
@@ -121,7 +125,7 @@ mWndOgre(NULL), mWndTimeline(NULL), mWndProjectView(NULL)
 	this->SetMenuBar(mbMain);
 
 	// create annotations toolbar
-	mTbAnnots = new wxToolBar( this, ID_tbAnnots, wxDefaultPosition, wxDefaultSize,
+	/*mTbAnnots = new wxToolBar( this, ID_tbAnnots, wxDefaultPosition, wxDefaultSize,
 		wxNO_BORDER | wxTB_HORIZONTAL | wxTB_FLAT, "tbAnnots" );
 	mTbAnnots->AddCheckTool( ID_btnAnnotStart, "btnAnnotStart",
 		*mBitmaps["ID_bmpAnnotStart"], *mBitmaps["ID_bmpAnnotStartDisabled"],
@@ -132,25 +136,36 @@ mWndOgre(NULL), mWndTimeline(NULL), mWndProjectView(NULL)
 	mTbAnnots->AddTool( ID_btnClearAnnots, "btnClearAnnots",
 		*mBitmaps["ID_bmpClearAnnots"], *mBitmaps["ID_bmpClearAnnotsDisabled"],
 		wxITEM_NORMAL, "Clear Annotations" );
-	mTbAnnots->Realize();
+	mTbAnnots->Realize();*/
 
 	// create player toolbar
 	mTbPlayer = new wxToolBar( this, ID_tbPlayer, wxDefaultPosition, wxDefaultSize,
 		wxNO_BORDER | wxTB_HORIZONTAL | wxTB_FLAT, "tbPlayer" );
 	mTbPlayer->AddCheckTool( ID_btnPlay, "btnPlay",
 		*mBitmaps["ID_bmpPlay"], *mBitmaps["ID_bmpPlayDisabled"],
-		"Play Animations" );
+		"Play Current Animation" );
+	mTbPlayer->AddTool( ID_btnPlaySequence, "Play Sequence",
+		*mBitmaps["ID_bmpPlaySequence"], *mBitmaps["ID_bmpPlaySequenceDisabled"],
+		wxITEM_NORMAL, "Play Animation Sequence" );
 	mTbPlayer->AddTool( ID_btnStop, "Stop",
 		*mBitmaps["ID_bmpStop"], *mBitmaps["ID_bmpStopDisabled"],
 		wxITEM_NORMAL, "Stop Animation" );
-	mTbPlayer->AddControl( new wxTextCtrl( mTbPlayer, ID_txtParams,
+	/*mTbPlayer->AddControl( new wxTextCtrl( mTbPlayer, ID_txtParams,
 		wxEmptyString, wxDefaultPosition, wxSize( 80, 24 ) )
-		);
+		);*/
 	mTbPlayer->AddSeparator();
 	mTbPlayer->AddControl( new wxStaticText( mTbPlayer, ID_stxPlayTime, "00.00" ) );
 	mTbPlayer->AddControl( new wxStaticText( mTbPlayer, -1, "/" ) );
 	mTbPlayer->AddControl( new wxStaticText( mTbPlayer, ID_stxPlayLength, "00.00" ) );
 	mTbPlayer->AddControl( new wxStaticText( mTbPlayer, -1, "s" ) );
+	mTbPlayer->AddControl( new wxSlider( mTbPlayer, ID_slPlaySlider, 0, 0, 1000, wxDefaultPosition, wxSize( 480, 24 ) ) );
+	mTbPlayer->AddSeparator();
+	mTbPlayer->AddControl( new wxTextCtrl( mTbPlayer, ID_txtFrameRate,
+		"0", wxDefaultPosition, wxSize( 80, 24 ) )
+		);
+	mTbPlayer->AddControl( new wxStaticText( mTbPlayer, -1, "/" ) );
+	mTbPlayer->AddControl( new wxStaticText( mTbPlayer, ID_stxOrigFrameRate, "0" ) );
+	mTbPlayer->AddControl( new wxStaticText( mTbPlayer, -1, "Hz" ) );
 	mTbPlayer->AddControl( new wxSlider( mTbPlayer, ID_slPlaySlider, 0, 0, 1000, wxDefaultPosition, wxSize( 480, 24 ) ) );
 	mTbPlayer->AddSeparator();
 	mTbPlayer->AddCheckTool( ID_btnSelect, "btnSelect",
@@ -163,7 +178,7 @@ mWndOgre(NULL), mWndTimeline(NULL), mWndProjectView(NULL)
 
 	// TODO: also add toolbar items for: see current anim. framerate, set desired framerate
 
-	// add mWndOgre to AUI manager
+	// Add mWndOgre to AUI manager
 	wxAuiPaneInfo wndOgre_pi;
 	wndOgre_pi.CentrePane();
 	wndOgre_pi.Dock();
@@ -171,7 +186,7 @@ mWndOgre(NULL), mWndTimeline(NULL), mWndProjectView(NULL)
 	wndOgre_pi.CloseButton(false);
 	mAuiMgr.AddPane( mWndOgre, wndOgre_pi );
 
-	// add mWndTimeline to AUI manager
+	// Add mWndTimeline to AUI manager
 	/*mWndTimeline->SetSize( 272, size.GetHeight() );
 	wxAuiPaneInfo wndTimeline_pi;
 	wndTimeline_pi.Top();
@@ -181,29 +196,38 @@ mWndOgre(NULL), mWndTimeline(NULL), mWndProjectView(NULL)
 	wndTimeline_pi.Show(true);
 	mAuiMgr.AddPane( mWndTimeline, wndTimeline_pi );*/
 
-	// add mWndProjectView to AUI manager
+	// Add mWndProjectView to AUI manager
 	mWndProjectView->SetSize( 272, size.GetHeight() );
 	wxAuiPaneInfo wndProjectView_pi;
 	wndProjectView_pi.Left();
 	wndProjectView_pi.Floatable();
-	wndProjectView_pi.CloseButton();
+	wndProjectView_pi.CloseButton(false);
 	wndProjectView_pi.Caption( "Project View" );
 	mAuiMgr.AddPane( mWndProjectView, wndProjectView_pi );
 
+	// Add mWndMotionVis to AUI manager
+	mWndMotionVis->SetSize( 272, size.GetHeight() );
+	wxAuiPaneInfo wndMotionVis_pi;
+	wndMotionVis_pi.Left();
+	wndMotionVis_pi.Floatable();
+	wndMotionVis_pi.CloseButton(false);
+	wndMotionVis_pi.Caption( "Motion Visualization" );
+	mAuiMgr.AddPane( mWndMotionVis, wndMotionVis_pi );
+
 	// add tbAnnots to AUI manager
-	wxAuiPaneInfo tbAnnots_pi;
+	/*wxAuiPaneInfo tbAnnots_pi;
 	tbAnnots_pi.ToolbarPane();
 	tbAnnots_pi.Top();
 	tbAnnots_pi.Floatable();
 	tbAnnots_pi.CloseButton();
-	mAuiMgr.AddPane( mTbAnnots, tbAnnots_pi );
+	mAuiMgr.AddPane( mTbAnnots, tbAnnots_pi );*/
 
 	// add tbPlayer to AUI manager
 	wxAuiPaneInfo tbPlayer_pi;
 	tbPlayer_pi.ToolbarPane();
 	tbPlayer_pi.Top();
 	tbPlayer_pi.Floatable();
-	tbPlayer_pi.CloseButton();
+	tbPlayer_pi.CloseButton(false);
 	mAuiMgr.AddPane( mTbPlayer, tbPlayer_pi );
 
 	// update AUI manager
@@ -228,6 +252,11 @@ ProjectViewWindow* AnimationStudioFrame::getProjectViewWindow() const
 	return mWndProjectView;
 }
 
+MotionVisualizationWindow* AnimationStudioFrame::getMotionVisualizationWindow() const
+{
+	return mWndMotionVis;
+}
+
 bool AnimationStudioFrame::hasSelection() const
 {
 	return zhAnimationSystem->getCurrentAnimation() != NULL &&
@@ -241,6 +270,12 @@ AnimationSegment AnimationStudioFrame::getSelection() const
 	zh::Animation* anim = zhAnimationSystem->getCurrentAnimation();
 
 	return AnimationSegment( anim, mSelectStart * anim->getLength(), mSelectEnd * anim->getLength() );
+}
+
+void AnimationStudioFrame::refresh()
+{
+	mWndProjectView->refresh();
+	mWndMotionVis->refresh();
 }
 
 void AnimationStudioFrame::OnMenu_ViewShowSkel( wxCommandEvent& evt )
@@ -414,8 +449,7 @@ void AnimationStudioFrame::OnMenu_ToolsBuildAnimIndex( wxCommandEvent& evt )
 	gApp->addAnimationIndex( gApp->getCurrentCharacter()->getId(), anim_index );
 
 	// refresh controls
-	_refreshComboBox_TargetAnims();
-	mWndProjectView->refresh();*/
+	refresh();*/
 }
 
 void AnimationStudioFrame::OnMenu_ToolsViewMatchWeb( wxCommandEvent& evt )
@@ -608,8 +642,7 @@ void AnimationStudioFrame::OnMenu_ToolsSearchAnimIndex( wxCommandEvent& evt )
 	// TODO: anim. set modified
 
 	// refresh controls
-	_refreshComboBox_TargetAnims();
-	mWndProjectView->refresh();*/
+	refresh();*/
 }
 
 void AnimationStudioFrame::OnMenu_ToolsBuildMotionGraph( wxCommandEvent& evt )
@@ -685,8 +718,8 @@ void AnimationStudioFrame::OnMenu_ToolsCreateAnimFromSeg( wxCommandEvent& evt )
 		toString<float>(anim_seg.getEndTime()) + "]", anim_seg.getAnimation()->getName(),
 		anim_seg.getStartTime(), anim_seg.getLength() );
 
-	// refresh controls
-	mWndProjectView->refresh();
+	// Refresh controls
+	refresh();
 }
 
 void AnimationStudioFrame::OnMenu_ToolsBuildAnimSpace( wxCommandEvent& evt )
@@ -694,8 +727,7 @@ void AnimationStudioFrame::OnMenu_ToolsBuildAnimSpace( wxCommandEvent& evt )
 	/*// TODO: implement this
 
 	// refresh controls
-	_refreshComboBox_TargetAnims();
-	mWndProjectView->refresh();*/
+	refresh();*/
 }
 
 void AnimationStudioFrame::OnMenu_ToolsBuildTransitions( wxCommandEvent& evt )
@@ -827,12 +859,31 @@ void AnimationStudioFrame::OnTool_Play( wxCommandEvent& evt )
 		return;
 	}
 
+	wxTextCtrl* txt_framerate = static_cast<wxTextCtrl*>( FindWindowById( ID_txtFrameRate, mTbPlayer ) );
+	int framerate = fromString<int>( txt_framerate->GetValue().To8BitData() );
+	if( framerate <= 0 ) return;
+	zhAnimationSystem->setAnimationRate( framerate/anim->getFrameRate() );
 	zhAnimationSystem->playAnimationNow( anim->getName() );
+}
+
+void AnimationStudioFrame::OnTool_PlaySequence( wxCommandEvent& evt )
+{
+	// TODO: pop dialog for choosing the clips to play
 }
 
 void AnimationStudioFrame::OnTool_Stop( wxCommandEvent& evt )
 {
 	zhAnimationSystem->stopAnimation();
+}
+
+void AnimationStudioFrame::OnScroll_PlaySlider( wxScrollEvent& evt )
+{
+	zhAnimationSystem->setAnimationTime( evt.GetInt()/1000.f *
+		zhAnimationSystem->getAnimationLength() );
+}
+
+void AnimationStudioFrame::OnTextEnter_FrameRate( wxCommandEvent& evt )
+{
 }
 
 void AnimationStudioFrame::OnTool_Select( wxCommandEvent& evt )
@@ -860,12 +911,6 @@ void AnimationStudioFrame::OnTool_Deselect( wxCommandEvent& evt )
 	mSelectEnd = -1000.f;
 }
 
-void AnimationStudioFrame::OnScroll_PlaySlider( wxScrollEvent& evt )
-{
-	zhAnimationSystem->setAnimationTime( evt.GetInt()/1000.f *
-		zhAnimationSystem->getAnimationLength() );
-}
-
 void AnimationStudioFrame::OnIdle( wxIdleEvent& evt )
 {
 	zh::Animation* anim = zhAnimationSystem->getCurrentAnimation();
@@ -874,18 +919,26 @@ void AnimationStudioFrame::OnIdle( wxIdleEvent& evt )
 	
 	float play_time = zhAnimationSystem->getAnimationTime(),
 		play_length = zhAnimationSystem->getAnimationLength();
+	int framerate = anim->getFrameRate();
 	char play_time_str[100];
 	char play_length_str[100];
+	char framerate_str[100];
 	sprintf( play_time_str, "%.2f", play_time );
 	sprintf( play_length_str, "%.2f", play_length );
+	sprintf( framerate_str, "%d", framerate );
 
-	// update play time display
+	// Update play time display
 	wxStaticText* stx_playtime = static_cast<wxStaticText*>( FindWindowById( ID_stxPlayTime, mTbPlayer ) );
 	wxStaticText* stx_playlength = static_cast<wxStaticText*>( FindWindowById( ID_stxPlayLength, mTbPlayer ) );
 	stx_playtime->SetLabel(play_time_str);
 	stx_playlength->SetLabel(play_length_str);
 
-	// update play slider
+	// Update play rate display
+	wxTextCtrl* txt_framerate = static_cast<wxTextCtrl*>( FindWindowById( ID_txtFrameRate, mTbPlayer ) );
+	wxStaticText* stx_origfr = static_cast<wxStaticText*>( FindWindowById( ID_stxOrigFrameRate, mTbPlayer ) );
+	stx_origfr->SetLabel(framerate_str);
+
+	// Update play slider
 	wxSlider* sl_play = static_cast<wxSlider*>( FindWindowById( ID_slPlaySlider, mTbPlayer ) );
 	sl_play->SetValue( zhAnimationSystem->getAnimationTime() /
 		zhAnimationSystem->getAnimationLength() * 1000.f );
@@ -916,7 +969,9 @@ BEGIN_EVENT_TABLE( AnimationStudioFrame, wxFrame )
 	EVT_COMBOBOX( ID_cbAnnots, AnimationStudioFrame::OnComboBox_Annots )
 	EVT_TOOL( ID_btnClearAnnots, AnimationStudioFrame::OnTool_ClearAnnots )
 	EVT_TOOL( ID_btnPlay, AnimationStudioFrame::OnTool_Play )
+	EVT_TOOL( ID_btnPlaySequence, AnimationStudioFrame::OnTool_PlaySequence )
 	EVT_TOOL( ID_btnStop, AnimationStudioFrame::OnTool_Stop )
+	EVT_TEXT_ENTER( ID_txtFrameRate, AnimationStudioFrame::OnTextEnter_FrameRate )
 	EVT_COMMAND_SCROLL( ID_slPlaySlider, AnimationStudioFrame::OnScroll_PlaySlider )
 	EVT_TOOL( ID_btnSelect, AnimationStudioFrame::OnTool_Select )
 	EVT_TOOL( ID_btnDeselect, AnimationStudioFrame::OnTool_Deselect )

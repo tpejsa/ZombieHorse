@@ -26,6 +26,8 @@ ID_icoAnimationStudio                 ICON           "AnimationStudio.ico"
 // Windows bitmaps
 ID_bmpPlay                            BITMAP         "Play.bmp"
 ID_bmpPlayDisabled                    BITMAP         "PlayDisabled.bmp"
+ID_bmpPlaySequence                    BITMAP         "PlaySequence.bmp"
+ID_bmpPlaySequenceDisabled            BITMAP         "PlaySequenceDisabled.bmp"
 ID_bmpPause                           BITMAP         "Pause.bmp"
 ID_bmpStop                            BITMAP         "Stop.bmp"
 ID_bmpStopDisabled                    BITMAP         "StopDisabled.bmp"

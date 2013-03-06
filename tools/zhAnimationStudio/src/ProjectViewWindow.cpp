@@ -129,17 +129,16 @@ ProjectViewWindow::ProjectViewWindow( wxWindow* parent, wxWindowID id )
 {
 	trcProjTree = new wxTreeCtrl( this, ID_trcProjTree, wxDefaultPosition, GetSize(),
 		wxTR_HAS_BUTTONS | wxTR_SINGLE );
+	
 	refresh();
 }
 
 void ProjectViewWindow::refresh()
 {
-	// refresh project tree view
+	// Refresh project tree view
 
-	// clear current view
+	// Clear current view
 	trcProjTree->DeleteAllItems();
-
-	wxTreeItemId trc_curch;
 
 	// add root
 	wxTreeItemId trc_root = trcProjTree->AddRoot( "Project Files", -1, -1, new wxTreeProjectData() );
@@ -203,10 +202,9 @@ void ProjectViewWindow::refresh()
 		}*/
 	}
 
-	// expand subtree
 	trcProjTree->Expand(trc_root);
-	if( trc_curch.IsOk() )
-		trcProjTree->Expand(trc_curch);
+	trcProjTree->Expand(trc_skels);
+	trcProjTree->Expand(trc_anims);
 }
 
 bool ProjectViewWindow::Show( bool show )
@@ -448,9 +446,9 @@ void ProjectViewWindow::OnMenu_AnimSpaceSelect( wxCommandEvent& evt )
 			pts.push_back( zhOgreVector3(ptpos) );
 		}
 
-		gApp->getAppFrame()->getOgreWindow()->deletePointSet( "BaseSamples" );
-		gApp->getAppFrame()->getOgreWindow()->createPointSet( "BaseSamples", pts, Ogre::ColourValue( 1, 0, 1 ), 12 );
-		gApp->getAppFrame()->getOgreWindow()->showPointSet( "BaseSamples" );
+		gApp->getAppFrame()->getOgreWindow()->deletePrettyObject( "BaseSamples" );
+		gApp->getAppFrame()->getOgreWindow()->createPrettyObject( "BaseSamples", pts, Ogre::ColourValue( 1, 0, 1 ), 12 );
+		gApp->getAppFrame()->getOgreWindow()->showPrettyObject( "BaseSamples" );
 		pts.clear();
 
 		for( unsigned int si = 0; si < animparam->getNumSamples(); ++si )
@@ -466,9 +464,9 @@ void ProjectViewWindow::OnMenu_AnimSpaceSelect( wxCommandEvent& evt )
 			pts.push_back( zhOgreVector3(ptpos) );
 		}
 
-		gApp->getAppFrame()->getOgreWindow()->deletePointSet( "DenseSamples" );
-		gApp->getAppFrame()->getOgreWindow()->createPointSet( "DenseSamples", pts, Ogre::ColourValue( 0, 1, 0 ), 5 );
-		gApp->getAppFrame()->getOgreWindow()->showPointSet( "DenseSamples" );
+		gApp->getAppFrame()->getOgreWindow()->deletePrettyObject( "DenseSamples" );
+		gApp->getAppFrame()->getOgreWindow()->createPrettyObject( "DenseSamples", pts, Ogre::ColourValue( 0, 1, 0 ), 5 );
+		gApp->getAppFrame()->getOgreWindow()->showPrettyObject( "DenseSamples" );
 		pts.clear();
 
 		zh::Vector3 ptpos;
@@ -478,9 +476,9 @@ void ProjectViewWindow::OnMenu_AnimSpaceSelect( wxCommandEvent& evt )
 		ptpos = bpos + ptpos;
 		pts.push_back( zhOgreVector3(ptpos) );
 
-		gApp->getAppFrame()->getOgreWindow()->deletePointSet( "TargetPoint" );
-		gApp->getAppFrame()->getOgreWindow()->createPointSet( "TargetPoint", pts, Ogre::ColourValue( 1, 0, 0 ), 12 );
-		gApp->getAppFrame()->getOgreWindow()->showPointSet( "TargetPoint" );
+		gApp->getAppFrame()->getOgreWindow()->deletePrettyObject( "TargetPoint" );
+		gApp->getAppFrame()->getOgreWindow()->createPrettyObject( "TargetPoint", pts, Ogre::ColourValue( 1, 0, 0 ), 12 );
+		gApp->getAppFrame()->getOgreWindow()->showPrettyObject( "TargetPoint" );
 		pts.clear();
 	}
 

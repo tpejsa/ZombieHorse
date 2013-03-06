@@ -167,6 +167,13 @@ public:
 		const std::set<unsigned short> boneMask = EmptyBoneMask ) const;
 
 	/**
+	* Computes the axis-aligned bounding box of the root motion path in this
+	* animation clip.
+	*/
+	void computeAnimationBounds( float& minX, float& maxX, float& minY, float& maxY,
+		float& minZ, float& maxZ ) const;
+
+	/**
 	* Gets the container of transition annotations.
 	*/
 	TransitionAnnotationContainer* getTransitionAnnotations() const;

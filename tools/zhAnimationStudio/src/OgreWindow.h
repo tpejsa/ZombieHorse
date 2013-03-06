@@ -73,37 +73,45 @@ public:
 	void updateRenderSkeletonPose( zh::Skeleton* skel );
 
 	/**
-	* Creates a point set for rendering.
+	* Creates a pretty object that can be used for visualizing things.
 	*
-	* @param name Point set name.
-	* @param points Vector containing positions of points in the set.
-	* @param pColor Point color.
-	* @param pSize Point size (in screen pixels).
+	* @param name Object name.
+	* @param objType Object type (point set, polyline...)
+	* @param points Vector containing positions of points that define the object.
+	* @param pColor Object color.
+	* @param pSize Point size / line thickness (in screen pixels).
+	* @param By default the object is rendered as overlay, but you can specify
+	* a different render group if desired.
+	* @param attachToNode Scene node to which the object should be attached.
+	* A new scene node will be created if none is specified.
 	*/
-	void createPointSet( const Ogre::String& name, const std::vector<Ogre::Vector3>& points,
-		const Ogre::ColourValue& pColor, int pSize = 1 );
+	void createPrettyObject( const Ogre::String& name,
+		Ogre::RenderOperation::OperationType objType, const std::vector<Ogre::Vector3>& points,
+		const Ogre::ColourValue& pColor, int pSize = 1,
+		Ogre::uint8 renderGroup = RENDER_QUEUE_OVERLAY,
+		const Ogre::String& attachToNode = "" );
 
 	/**
-	* Deletes a point set.
+	* Deletes a pretty object.
 	*
-	* @param name Point set name.
+	* @param name Object name.
 	*/
-	void deletePointSet( const Ogre::String& name );
+	void deletePrettyObject( const Ogre::String& name );
 
 	/**
-	* Checks if a point set exists.
+	* Checks if a pretty object exists.
 	*
-	* @param name Point set name.
+	* @param name Object name.
 	* @return true if the point set exists, false otherwise.
 	*/
-	bool hasPointSet( const Ogre::String& name ) const;
+	bool hasPrettyObject( const Ogre::String& name ) const;
 
 	/**
-	* Toggles rendering of a point set.
+	* Toggles rendering of a pretty object.
 	*
-	* @param name Point set name.
+	* @param name Object name.
 	*/
-	void showPointSet( const Ogre::String& name, bool show = true );
+	void showPrettyObject( const Ogre::String& name, bool show = true );
 
 	/**
 	* OGRE calls this method at the beginning of a new frame.
@@ -139,6 +147,7 @@ private:
 
 	zh::Skeleton* mOutSkel; // ZombieHorse output skeleton
 	Ogre::SceneNode* mRenderSkel;
+	Ogre::Vector3 mCamFocus;
 	Ogre::Timer mFPSTimer; ///< Timer (for computing FPS).
 	float mFPS; ///< FPS count.
 

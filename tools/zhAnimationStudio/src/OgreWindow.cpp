@@ -26,7 +26,7 @@ SOFTWARE.
 
 OgreWindow::OgreWindow( wxWindow *parent, wxWindowID id )
 : wxWindow( parent, id, parent->GetPosition(), parent->GetSize(), wxBORDER_SIMPLE, "OgreWindow" ),
-mOutSkel(NULL), mRenderSkel(NULL), mFPS(0)
+mOutSkel(NULL), mRenderSkel(NULL), mCamFocus(zhCamera_Focus), mFPS(0)
 {
 }
 
@@ -198,6 +198,7 @@ void OgreWindow::showCoordAxesOnBone( const Ogre::String& boneName, bool show )
 void OgreWindow::setRenderSkeleton( zh::Skeleton* skel )
 {
 	if( skel == NULL ) return;
+	skel->resetToInitialPose(); // skeleton needs to be in initial pose
 	mOutSkel = skel;
 	Ogre::SceneManager* scene_mgr = gApp->getSceneManager();
 
@@ -225,7 +226,7 @@ void OgreWindow::setRenderSkeleton( zh::Skeleton* skel )
 	zh::Bone* rHip = skel->createBone(2,"rHip");
 	zh::Bone* lKnee = skel->createBone(3,"lKnee");
 	zh::Bone* rKnee = skel->createBone(4,"rKnee");
-	pelvis->setInitialPosition( zh::Vector3(0,75,0) );
+	pelvis->setInitialPosition( zh::Vector3(0,0,0) );
 	pelvis->addChild(lHip);
 	lHip->setInitialPosition( zh::Vector3(15,-15,0) );
 	pelvis->addChild(rHip);
@@ -242,32 +243,40 @@ void OgreWindow::updateRenderSkeletonPose( zh::Skeleton* skel )
 {
 	zhAssert( mOutSkel == skel );
 	if( skel == NULL ) return;
-	Ogre::SceneManager* scenemgr = gApp->getSceneManager();
+	Ogre::SceneManager* scene_mgr = gApp->getSceneManager();
 
-	zh::Skeleton::BoneConstIterator bone_i = skel->getBoneConstIterator();
+	zh::Skeleton::BoneConstIterator bone_ci = skel->getBoneConstIterator();
+	while( bone_ci.hasMore() )
+	{
+		zh::Bone* bone = bone_ci.next();
+		Ogre::SceneNode* rbone = scene_mgr->getSceneNode(bone->getName());
+		if(rbone == NULL ) continue;
+
+		rbone->setPosition( zhOgreVector3(bone->getPosition()) );
+		rbone->setOrientation( zhOgreQuat(bone->getOrientation()) );
+	}
+
+	// Make sure skeleton's feet are touching the ground
+	zh::Skeleton::BoneIterator bone_i = skel->getBoneIterator();
+	float feet_height = FLT_MAX;
 	while( bone_i.hasMore() )
 	{
 		zh::Bone* bone = bone_i.next();
-		Ogre::SceneNode* rbone = scenemgr->getSceneNode(bone->getName());
-		if(rbone == NULL ) continue;
-
-		rbone->setPosition( zhOgreVector3(bone->getOrientation()) );
-		rbone->setOrientation( zhOgreQuat(bone->getOrientation()) );
+		if( bone->getWorldPosition().y < feet_height )
+			feet_height = bone->getWorldPosition().y;
 	}
+	scene_mgr->getSceneNode( skel->getRoot()->getName() )->translate(0,-feet_height,0);
 }
 
-void OgreWindow::createPointSet( const Ogre::String& name, const std::vector<Ogre::Vector3>& points,
-								const Ogre::ColourValue& pColor, int pSize )
+void OgreWindow::createPrettyObject( const Ogre::String& name,
+	Ogre::RenderOperation::OperationType objType, const std::vector<Ogre::Vector3>& points,
+	const Ogre::ColourValue& pColor, int pSize,
+	Ogre::uint8 renderGroup, const Ogre::String& attachToNode )
 {
-	Ogre::SceneManager* scenemgr = gApp->getSceneManager();
-	
-	zhAssert( !scenemgr->hasEntity(name) );
+	Ogre::SceneManager* scene_mgr = gApp->getSceneManager();
+	zhAssert( !scene_mgr->hasEntity(name) );
 
-	// create the point set in the scene
-	ManualObject* psobj = scenemgr->createManualObject(name);
-	SceneNode* psnode = scenemgr->getRootSceneNode()->createChildSceneNode(name);
-
-	// create material for the point set
+	// create material for the pretty object
 	MaterialPtr psmat = MaterialManager::getSingleton().create( name, "General" );
 	psmat->setReceiveShadows(false);
 	psmat->getTechnique(0)->setLightingEnabled(false);
@@ -275,45 +284,50 @@ void OgreWindow::createPointSet( const Ogre::String& name, const std::vector<Ogr
 	psmat->getTechnique(0)->setDepthWriteEnabled(false);
 	psmat->getTechnique(0)->setPointSize(pSize);
 	
-	// create geometry for the point set
-	psobj->begin( name, Ogre::RenderOperation::OT_POINT_LIST );
+	// create the pretty object in the scene
+	ManualObject* psobj = scene_mgr->createManualObject(name);
+	psobj->begin( name, objType );
 	for( unsigned int pti = 0; pti < points.size(); ++pti )
 	{
 		psobj->position( points[pti] );
 		psobj->colour(pColor);
 	}
 	psobj->end();
+	psobj->setRenderQueueGroup(renderGroup);
 
+	// Place the pretty object in the scene
+	SceneNode* psnode = attachToNode != "" && scene_mgr->hasSceneNode(attachToNode) ?
+		scene_mgr->getSceneNode(attachToNode)
+		: scene_mgr->getRootSceneNode()->createChildSceneNode(name);
 	psnode->attachObject(psobj);
-	psobj->setRenderQueueGroup(RENDER_QUEUE_OVERLAY);
 }
 
-void OgreWindow::deletePointSet( const Ogre::String& name )
+void OgreWindow::deletePrettyObject( const Ogre::String& name )
 {
 	Ogre::SceneManager* scenemgr = gApp->getSceneManager();
 
 	if( scenemgr->hasManualObject(name) )
 	{
-		scenemgr->destroySceneNode(name);
+		if( scenemgr->hasSceneNode(name) )
+			scenemgr->destroySceneNode(name);
 		scenemgr->destroyManualObject(name);
 		MaterialManager::getSingleton().remove(name);
 	}
 }
 
-bool OgreWindow::hasPointSet( const Ogre::String& name ) const
+bool OgreWindow::hasPrettyObject( const Ogre::String& name ) const
 {
 	Ogre::SceneManager* scenemgr = gApp->getSceneManager();
 
 	return scenemgr->hasManualObject(name);
 }
 
-void OgreWindow::showPointSet( const Ogre::String& name, bool show )
+void OgreWindow::showPrettyObject( const Ogre::String& name, bool show )
 {
 	Ogre::SceneManager* scenemgr = gApp->getSceneManager();
-
 	zhAssert( scenemgr->hasManualObject(name) );
 
-	scenemgr->getSceneNode(name)->setVisible(show);
+	scenemgr->getManualObject(name)->getParentSceneNode()->setVisible(show);
 }
 
 bool OgreWindow::frameStarted( const FrameEvent& evt )
@@ -365,13 +379,15 @@ bool OgreWindow::frameEnded( const FrameEvent& evt )
 void OgreWindow::OnMouseMove( wxMouseEvent& evt )
 {
 	static long x0 = -1, y0 = -1;
-	long x, y, dx = 0, dy = 0;
-	int w, h;
 
-	if( evt.LeftIsDown() )
+	float off_x, off_y;
+	if( evt.LeftIsDown() || evt.RightIsDown() )
 	{
-		// calculate mouse offset and rotate camera
+		// Compute mouse offset
 
+		long x, y, dx = 0, dy = 0;
+		int w, h;
+		this->GetSize( &w, &h );
 		x = evt.GetX();
 		y = evt.GetY();
 
@@ -381,17 +397,31 @@ void OgreWindow::OnMouseMove( wxMouseEvent& evt )
 			dy = y - y0;
 		}
 
-		this->GetSize( &w, &h );
-
-		Ogre::Vector3 cam_pos = gApp->getCamera()->getPosition();
-		cam_pos = Ogre::Quaternion( Radian( ((float)dx) / w * Math::PI * zhCamera_RotSpeed ), Ogre::Vector3::UNIT_Y ) * cam_pos;
-		cam_pos = Ogre::Quaternion( - Radian( ((float)dy) / h * Math::PI * zhCamera_RotSpeed ),
-			Ogre::Vector3::UNIT_Y.crossProduct( gApp->getCamera()->getDirection() ) ) * cam_pos;
-		gApp->getCamera()->setPosition( cam_pos );
-		gApp->getCamera()->lookAt( zhCamera_Focus );
-
+		off_x = ((float)dx)/w;
+		off_y = ((float)dy)/w;
 		x0 = x;
 		y0 = y;
+	}
+
+	if( evt.LeftIsDown() )
+	{
+		// Rotate camera
+		Ogre::Vector3 cam_pos = gApp->getCamera()->getPosition();
+		cam_pos = Ogre::Quaternion( Radian( off_x * Math::PI * zhCamera_RotSpeed ), Ogre::Vector3::UNIT_Y ) * cam_pos;
+		cam_pos = Ogre::Quaternion( - Radian( off_y * Math::PI * zhCamera_RotSpeed ),
+			Ogre::Vector3::UNIT_Y.crossProduct( gApp->getCamera()->getDirection() ) ) * cam_pos;
+		gApp->getCamera()->setPosition(cam_pos);
+		gApp->getCamera()->lookAt(mCamFocus);
+	}
+	else if( evt.RightIsDown() )
+	{
+		// Pan camera
+		Ogre::Vector3 cam_pos = gApp->getCamera()->getPosition();
+		Ogre::Vector3 off = gApp->getCamera()->getOrientation() * ( Ogre::Vector3(off_x,-off_y,0) * zhCamera_TransSpeed );
+		cam_pos += off;
+		mCamFocus += off;
+		gApp->getCamera()->setPosition(cam_pos);
+		gApp->getCamera()->lookAt(mCamFocus);
 	}
 	else
 	{
@@ -404,8 +434,8 @@ void OgreWindow::OnMouseWheel( wxMouseEvent& evt )
 {
 	Ogre::Vector3 cam_pos = gApp->getCamera()->getPosition();
 	cam_pos = cam_pos + gApp->getCamera()->getDirection().normalisedCopy() * evt.GetWheelRotation() / 10.f;
-	gApp->getCamera()->setPosition( cam_pos );
-	gApp->getCamera()->lookAt( zhCamera_Focus );
+	gApp->getCamera()->setPosition(cam_pos);
+	gApp->getCamera()->lookAt(mCamFocus);
 }
 
 void OgreWindow::OnSize( wxSizeEvent& evt )

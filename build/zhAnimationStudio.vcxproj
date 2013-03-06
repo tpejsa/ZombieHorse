@@ -25,6 +25,7 @@
     <ClInclude Include="..\tools\zhAnimationStudio\src\MatchWebViewDialog.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\MotionGraphView.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\MotionGraphViewDialog.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\MotionVisualizationWindow.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\NewResourceDialog.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\OgreWindow.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\PlaySlider.h" />
@@ -48,6 +49,7 @@
     <ClCompile Include="..\tools\zhAnimationStudio\src\MatchWebViewDialog.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\MotionGraphView.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\MotionGraphViewDialog.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\MotionVisualizationWindow.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\NewResourceDialog.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\OgreWindow.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\PlaySlider.cpp" />
@@ -70,6 +72,7 @@
     <None Include="..\tools\zhAnimationStudio\res\Pause.bmp" />
     <None Include="..\tools\zhAnimationStudio\res\Play.bmp" />
     <None Include="..\tools\zhAnimationStudio\res\PlayDisabled.bmp" />
+    <None Include="..\tools\zhAnimationStudio\res\PlaySequence.bmp" />
     <None Include="..\tools\zhAnimationStudio\res\Select.bmp" />
     <None Include="..\tools\zhAnimationStudio\res\SelectDisabled.bmp" />
     <None Include="..\tools\zhAnimationStudio\res\Stop.bmp" />

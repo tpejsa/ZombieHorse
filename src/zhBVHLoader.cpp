@@ -65,7 +65,7 @@ namespace zh
 		}
 		zh::Bone* ConvertToBones(Skeleton* skel){
 			zh::Bone* parent = skel->createBone(jointID,boost::lexical_cast<string>(jointID) + name);
-			parent -> setInitialPosition(zh::Vector3(offsets[0] * 100,offsets[1]*100,offsets[2]*100));
+			parent -> setInitialPosition(zh::Vector3(offsets[0],offsets[1],offsets[2]));
 			for(int i = 0;i < children.size();++i){
 				zh::Bone* tmp = children[i] -> ConvertToBones(skel);
 				parent -> addChild(tmp);

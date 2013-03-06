@@ -79,7 +79,8 @@ void AnimationStudioApp::removeSkeleton( const string& name )
 {
 	// TODO: remove skeleton
 
-	mFrmMain->getProjectViewWindow()->refresh();
+	// Update window contents
+	mFrmMain->refresh();
 }
 
 /*void AnimationStudioApp::applyAnimation( const std::string& animSetName, const std::string& animName, float time )
@@ -113,6 +114,74 @@ void AnimationStudioApp::resize( unsigned int width, unsigned int height )
 {
 	if( mRenderWnd )
 		mRenderWnd->windowMovedOrResized();
+}
+
+void AnimationStudioApp::displayJointMarkers( const std::set<std::string>& boneNames, bool enable )
+{
+	zh::Skeleton* skel = zhAnimationSystem->getOutputSkeleton();
+	if( skel == NULL )
+		return;
+	std::set<std::string> bone_names = boneNames;
+	
+	if( bone_names.empty() )
+	{
+		zh::Skeleton::BoneConstIterator bone_i = skel->getBoneConstIterator();
+		while( bone_i.hasMore() )
+			bone_names.insert( bone_i.next()->getName() );
+	}
+
+	if(!enable)
+	{
+		std::set<std::string> results;
+		std::set_difference( mJointsWithMarkers.begin(), mJointsWithMarkers.end(),
+			bone_names.begin(), bone_names.end(), std::inserter( results, results.end() ) );
+		mJointsWithMarkers = results;
+
+		for( std::set<std::string>::const_iterator jmi = boneNames.begin();
+			jmi != boneNames.end(); ++jmi )
+			mFrmMain->getOgreWindow()->deletePrettyObject("Marker"+*jmi);
+	}
+	else
+	{
+		std::set_union( mJointsWithMarkers.begin(), mJointsWithMarkers.end(),
+			bone_names.begin(), bone_names.end(),
+			std::inserter( mJointsWithMarkers, mJointsWithMarkers.end() ) );
+		std::vector<Ogre::Vector3> pts;
+		pts.push_back(Ogre::Vector3(0,0,0));
+
+		for( std::set<std::string>::const_iterator jmi = bone_names.begin();
+			jmi != bone_names.end(); ++jmi )
+		{
+			mFrmMain->getOgreWindow()->createPrettyObject(
+				"Marker"+*jmi, Ogre::RenderOperation::OT_POINT_LIST, pts,
+				zhSkeleton_MarkerColor, zhSkeleton_MarkerSize, RENDER_QUEUE_OVERLAY, *jmi );
+		}
+	}
+}
+
+void AnimationStudioApp::displayJointMarker( const std::string& boneName, bool enable )
+{
+	std::set<std::string> bone_names;
+	bone_names.insert(boneName);
+	displayJointMarkers( bone_names, enable );
+}
+
+bool AnimationStudioApp::hasJointMarker( const std::string& boneName ) const
+{
+	return mJointsWithMarkers.count(boneName) > 0;
+}
+
+void AnimationStudioApp::traceJointPaths( const std::set<std::string>& boneNames, bool enable )
+{
+}
+
+void AnimationStudioApp::traceJointPath( const std::string& boneName, bool enable )
+{
+}
+
+bool AnimationStudioApp::hasJointTrace( const std::string& boneName ) const
+{
+	return mTracedJoints.count(boneName) > 0;
 }
 
 bool AnimationStudioApp::frameStarted( const FrameEvent& evt )
@@ -203,11 +272,14 @@ bool AnimationStudioApp::init( wxWindow* wnd )
 			zhAnimationSystem->loadAnimationSet(path);
 	}
 
-	// Set default output skeleotn
+	// Set default output skeleton
 	zh::Skeleton* out_skel = zhAnimationSystem->getOutputSkeleton();
 	if( out_skel != NULL )
 		mFrmMain->getOgreWindow()->setRenderSkeleton(out_skel);
-	mFrmMain->getProjectViewWindow()->refresh();
+	//displayJointMarkers( std::set<std::string>() );
+
+	// Update window contents
+	mFrmMain->refresh();
 
 	return true;
 }
@@ -246,8 +318,8 @@ bool AnimationStudioApp::createCamera()
 	mCam = mSceneMgr->createCamera( "MainCam" );
 	mCam->setPosition( zhCamera_Pos );
 	mCam->lookAt( zhCamera_Focus );
-	mCam->setNearClipDistance(0.1f);
-	mCam->setFarClipDistance(30000.f);
+	mCam->setNearClipDistance(0.01f);
+	mCam->setFarClipDistance(3000.f);
 	mCam->setAutoAspectRatio(true);
 
 	return true;

@@ -189,6 +189,36 @@ void Animation::apply( Skeleton* skel, float time, float weight, float scale,
 	}
 }
 
+void Animation::computeAnimationBounds( float& minX, float& maxX, float& minY, float& maxY,
+	float& minZ, float& maxZ ) const
+{
+	BoneAnimationTrack* root_tr = getBoneTrack(0);
+	if( root_tr == NULL )
+		return;
+
+	minX = minY = minZ = FLT_MAX;
+	maxX = maxY = maxZ = -FLT_MAX;
+	AnimationTrack::KeyFrameConstIterator kfi = root_tr->getKeyFrameConstIterator();
+	while( kfi.hasMore() )
+	{
+		TransformKeyFrame* tkf = static_cast<TransformKeyFrame*>(kfi.next());
+
+		Vector3 trans = tkf->getTranslation();
+		if( trans.x < minX )
+			minX = trans.x;
+		if( trans.x > maxX )
+			maxX = trans.x;
+		if( trans.y < minY )
+			minY = trans.y;
+		if( trans.y > maxY )
+			maxY = trans.y;
+		if( trans.z < minZ )
+			minZ = trans.z;
+		if( trans.z > maxZ )
+			maxZ = trans.z;
+	}
+}
+
 TransitionAnnotationContainer* Animation::getTransitionAnnotations() const
 {
 	return mTransAnnots;

@@ -29,9 +29,9 @@ SOFTWARE.
 
 class AnimationStudioApp;
 class OgreWindow;
-class TimelineWindow;
+//class TimelineWindow;
 class ProjectViewWindow;
-class PropertiesWindow;
+class MotionVisualizationWindow;
 class AnimTreeWindow;
 
 enum
@@ -68,16 +68,20 @@ enum
 	ID_btnClearAnnots,
 	ID_tbPlayer,
 	ID_btnPlay,
+	ID_btnPlaySequence,
 	ID_btnStop,
 	ID_txtParams,
 	ID_stxPlayTime,
 	ID_stxPlayLength,
 	ID_slPlaySlider,
+	ID_txtFrameRate,
+	ID_stxOrigFrameRate,
 	ID_btnSelect,
 	ID_btnDeselect,
 	ID_wndOgre,
-	ID_wndTimeline,
-	ID_wndProjectView
+	//ID_wndTimeline,
+	ID_wndProjectView,
+	ID_wndMotionVis
 };
 
 /**
@@ -106,12 +110,17 @@ public:
 	/**
 	* Gets a pointer to the timeline window.
 	*/
-	TimelineWindow* getTimelineWindow() const;
+	//TimelineWindow* getTimelineWindow() const;
 
 	/**
 	* Gets a pointer to the project view window.
 	*/
 	ProjectViewWindow* getProjectViewWindow() const;
+
+	/**
+	* Gets a pointer to the motion visualization window.
+	*/
+	MotionVisualizationWindow* getMotionVisualizationWindow() const;
 
 	/**
 	* true if an animation segment is selected,
@@ -123,6 +132,11 @@ public:
 	* Gets the currently selected animation segment.
 	*/
 	AnimationSegment getSelection() const;
+
+	/**
+	* Refreshes contents of all windows.
+	*/
+	void refresh();
 
 	void OnMenu_ViewShowSkel( wxCommandEvent& evt );
 	void OnMenu_ViewShowGround( wxCommandEvent& evt );
@@ -148,8 +162,10 @@ public:
 	void OnComboBox_Annots( wxCommandEvent& evt );
 	void OnTool_ClearAnnots( wxCommandEvent& evt );
 	void OnTool_Play( wxCommandEvent& evt );
+	void OnTool_PlaySequence( wxCommandEvent& evt );
 	void OnTool_Stop( wxCommandEvent& evt );
 	void OnScroll_PlaySlider( wxScrollEvent& evt );
+	void OnTextEnter_FrameRate( wxCommandEvent& evt );
 	void OnTool_Select( wxCommandEvent& evt );
 	void OnTool_Deselect( wxCommandEvent& evt );
 	void OnIdle( wxIdleEvent& evt );
@@ -157,8 +173,6 @@ public:
 	DECLARE_EVENT_TABLE()
 
 protected:
-
-	void _refreshComboBox_TargetAnims();
 
 	wxAuiManager mAuiMgr;
 	std::map<std::string, wxBitmap*> mBitmaps;
@@ -170,9 +184,9 @@ protected:
 	float mSelectStart, mSelectEnd;
 
 	OgreWindow* mWndOgre;
-	TimelineWindow* mWndTimeline;
+	//TimelineWindow* mWndTimeline;
 	ProjectViewWindow* mWndProjectView;
-
+	MotionVisualizationWindow* mWndMotionVis;
 };
 
 #endif // __AnimationStudioFrame_h__

@@ -33,6 +33,7 @@ namespace zh
 /**
 * @brief Skeletal animation state class.
 * Holds skeletal pose configuration before it is passed to the renderer.
+* Root bone always has zero ID.
 */
 class zhDeclSpec Skeleton
 {

@@ -20,40 +20,46 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __AnimationStudio_h__
-#define __AnimationStudio_h__
+#ifndef __MotionVisualizationWindow_h__
+#define __MotionVisualizationWindow_h__
 
-#include "zh.h"
+#include "AnimationStudio.h"
+#include <wx/checklst.h>
 
-#include <wx/wx.h>
-#include <wx/sizer.h>
-#include <wx/grid.h>
-#include <wx/dir.h>
-#include <wx/propgrid/propgrid.h>
+enum
+{
+	ID_clbJointMarkers,
+	ID_clbJointTraces
+};
 
-#include "ogre.h"
+/**
+* Project resources view and management window.
+*/
+class MotionVisualizationWindow : public wxWindow
+{
 
-#define zhGround_Size 100
-#define zhGround_TileSize 10.f
+public:
 
-#define zhSkeleton_BoneSize 0.2f
-#define zhSkeleton_BoneColor Ogre::ColourValue(0,0.6f,0.2f)
-#define zhSkeleton_MarkerSize 12.f
-#define zhSkeleton_MarkerColor Ogre::ColourValue(0.6f,0.1f,0.4f)
-#define zhSkeleton_PathColor Ogre::ColourValue(0.6f,0.1f,0.1f)
+	/**
+	* Constructor.
+	*/
+	MotionVisualizationWindow( wxWindow *parent, wxWindowID id );
 
-#define zhCamera_Pos Ogre::Vector3( 20.f, 20.f, 20.f )
-#define zhCamera_Focus Ogre::Vector3( 0.f, 5.f, 0.f )
-#define zhCamera_TransSpeed 20.f
-#define zhCamera_RotSpeed 1
+	/**
+	* Updates the motion visualization window contents.
+	*/
+	void refresh();
 
-#define zhOgreVector3(v) Ogre::Vector3( (v).x, (v).y, (v).z )
-#define zhOgreQuat(q) Ogre::Quaternion( (q).w, (q).x, (q).y, (q).z )
-#define zhVector3(v) zh::Vector3( (v).x, (v).y, (v).z )
-#define zhQuat(q) zh::Quat( (q).w, (q).x, (q).y, (q).z )
+	void OnCheckListBox_JointMarkers( wxCommandEvent& evt );
+	void OnCheckListBox_JointTraces( wxCommandEvent& evt );
+	void OnSize( wxSizeEvent& evt );
 
-using namespace std;
-using namespace Ogre;
-using namespace zh;
+	DECLARE_EVENT_TABLE()
 
-#endif // __AnimationStudio_h__
+private:
+	
+	wxCheckListBox* mClbJointMarkers;
+	wxCheckListBox* mClbJointTraces;
+};
+
+#endif // __MotionVisualizationWindow_h__

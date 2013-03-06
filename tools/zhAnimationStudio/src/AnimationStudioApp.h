@@ -98,6 +98,42 @@ public:
 	void setAnimationEnabled( bool enabled = true ) { mAnimEnabled = enabled; }
 
 	/**
+	* Displays visual markers on specified skeleton joints.
+	*
+	* @remark Specify empty set to display markers on ALL joints.
+	*/
+	void displayJointMarkers( const std::set<std::string>& boneNames, bool enable = true );
+
+	/**
+	* Displays a visual marker on a single skeleton joint.
+	*/
+	void displayJointMarker( const std::string& boneName, bool enable = true );
+
+	/**
+	* Returns true if there is a marker on the specified joint,
+	* false otherwise.
+	*/
+	bool hasJointMarker( const std::string& boneName ) const;
+
+	/**
+	* Enables tracing of motion paths of specified skeleton joint markers.
+	*
+	* @remark Specify empty set to display traces on ALL joints.
+	*/
+	void traceJointPaths( const std::set<std::string>& boneNames, bool enable = true );
+
+	/**
+	* Enables tracing of the motion path of a single skeleton joint marker.
+	*/
+	void traceJointPath( const std::string& boneName, bool enable = true );
+
+	/**
+	* Returns true if there is path trace on the specified joint,
+	* false otherwise.
+	*/
+	bool hasJointTrace( const std::string& boneName ) const;
+
+	/**
 	* OGRE calls this method at the beginning of a new frame.
 	*/
 	bool frameStarted( const FrameEvent& evt );
@@ -147,7 +183,11 @@ protected:
 	RenderWindow* mRenderWnd; ///< OGRE render window.
 
 	bool mAnimEnabled; ///< Updates to the animation system enabled/disabled.
-	
+
+	// Motion visualization
+	std::set<std::string> mJointsWithMarkers;
+	std::set<std::string> mTracedJoints;
+	std::map<std::string, std::vector<std::pair<float,zh::Vector3>>> mTracedJointPaths;
 };
 
 extern AnimationStudioApp* gApp;

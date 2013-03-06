@@ -69,7 +69,7 @@ public:
 	ProjectViewWindow( wxWindow *parent, wxWindowID id );
 
 	/**
-	* Refreshes the project view.
+	* Updates the project view contents.
 	*/
 	void refresh();
 
