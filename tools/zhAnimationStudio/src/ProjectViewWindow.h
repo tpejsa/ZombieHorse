@@ -76,6 +76,7 @@ public:
 	bool Show( bool show = true );
 
 	void OnSize( wxSizeEvent& evt );
+	void OnDblClick_ProjTree( wxTreeEvent& evt );
 	void OnRightClick_ProjTree( wxTreeEvent& evt );
 	void OnMenu_SkeletonSelect( wxCommandEvent& evt );
 	void OnMenu_SkeletonRemove( wxCommandEvent& evt );

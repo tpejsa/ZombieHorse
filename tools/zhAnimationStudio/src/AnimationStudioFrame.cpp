@@ -161,7 +161,7 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 	mTbPlayer->AddControl( new wxSlider( mTbPlayer, ID_slPlaySlider, 0, 0, 1000, wxDefaultPosition, wxSize( 480, 24 ) ) );
 	mTbPlayer->AddSeparator();
 	mTbPlayer->AddControl( new wxTextCtrl( mTbPlayer, ID_txtFrameRate,
-		"0", wxDefaultPosition, wxSize( 80, 24 ) )
+		"0", wxDefaultPosition, wxSize( 40, 24 ) )
 		);
 	mTbPlayer->AddControl( new wxStaticText( mTbPlayer, -1, "/" ) );
 	mTbPlayer->AddControl( new wxStaticText( mTbPlayer, ID_stxOrigFrameRate, "0" ) );
@@ -259,7 +259,7 @@ MotionVisualizationWindow* AnimationStudioFrame::getMotionVisualizationWindow() 
 
 bool AnimationStudioFrame::hasSelection() const
 {
-	return zhAnimationSystem->getCurrentAnimation() != NULL &&
+	return gApp->getCurrentAnimation() != NULL &&
 		!mSelectMode && mSelectStart <= mSelectEnd;
 }
 
@@ -267,7 +267,7 @@ AnimationSegment AnimationStudioFrame::getSelection() const
 {
 	zhAssert( hasSelection() );
 
-	zh::Animation* anim = zhAnimationSystem->getCurrentAnimation();
+	zh::Animation* anim = gApp->getCurrentAnimation();
 
 	return AnimationSegment( anim, mSelectStart * anim->getLength(), mSelectEnd * anim->getLength() );
 }
@@ -302,7 +302,7 @@ void AnimationStudioFrame::OnMenu_ToolsDetectPlantConstr( wxCommandEvent& evt )
 {
 	// TODO: choose correct skeleton for the currently selected motion!
 	zh::Skeleton* skel = zhAnimationSystem->getOutputSkeleton();
-	zh::Animation* anim = zhAnimationSystem->getCurrentAnimation();
+	zh::Animation* anim = gApp->getCurrentAnimation();
 
 	if( skel == NULL || anim == NULL )
 	{
@@ -338,7 +338,7 @@ void AnimationStudioFrame::OnMenu_ToolsFootskateCleanup( wxCommandEvent& evt )
 {
 	// TODO: choose correct skeleton for the currently selected motion!
 	zh::Skeleton* skel = zhAnimationSystem->getOutputSkeleton();
-	zh::Animation* anim = zhAnimationSystem->getCurrentAnimation();
+	zh::Animation* anim = gApp->getCurrentAnimation();
 
 	if( skel == NULL || anim == NULL )
 	{
@@ -851,7 +851,7 @@ void AnimationStudioFrame::OnTool_ClearAnnots( wxCommandEvent& evt )
 
 void AnimationStudioFrame::OnTool_Play( wxCommandEvent& evt )
 {
-	zh::Animation* anim = zhAnimationSystem->getCurrentAnimation();
+	zh::Animation* anim = gApp->getCurrentAnimation();
 	if( anim == NULL )
 	{
 		wxMessageBox( "No animation currently selected.",
@@ -859,11 +859,26 @@ void AnimationStudioFrame::OnTool_Play( wxCommandEvent& evt )
 		return;
 	}
 
-	wxTextCtrl* txt_framerate = static_cast<wxTextCtrl*>( FindWindowById( ID_txtFrameRate, mTbPlayer ) );
-	int framerate = fromString<int>( txt_framerate->GetValue().To8BitData() );
-	if( framerate <= 0 ) return;
-	zhAnimationSystem->setAnimationRate( framerate/anim->getFrameRate() );
-	zhAnimationSystem->playAnimationNow( anim->getName() );
+	if( evt.IsChecked() )
+	{
+		zhAnimationSystem->unpauseAnimation();
+
+		if( !zhAnimationSystem->isAnimationPlaying() )
+		{
+			// Start playing animation
+			wxTextCtrl* txt_framerate = static_cast<wxTextCtrl*>( FindWindowById( ID_txtFrameRate, mTbPlayer ) );
+			int framerate = fromString<int>( txt_framerate->GetValue().To8BitData() );
+			if( framerate <= 0 ) framerate = anim->getFrameRate();
+			zhAnimationSystem->setAnimationRate( anim->getFrameRate() > 0 ? framerate/anim->getFrameRate() : 1 );
+			zhAnimationSystem->playAnimationNow( anim->getFullName() );
+		}
+	}
+	else
+	{
+		if( zhAnimationSystem->isAnimationPlaying() )
+			// Pause currently playing animation
+			zhAnimationSystem->pauseAnimation();
+	}
 }
 
 void AnimationStudioFrame::OnTool_PlaySequence( wxCommandEvent& evt )
@@ -874,6 +889,8 @@ void AnimationStudioFrame::OnTool_PlaySequence( wxCommandEvent& evt )
 void AnimationStudioFrame::OnTool_Stop( wxCommandEvent& evt )
 {
 	zhAnimationSystem->stopAnimation();
+
+	mTbPlayer->ToggleTool( ID_btnPlay, false );
 }
 
 void AnimationStudioFrame::OnScroll_PlaySlider( wxScrollEvent& evt )
@@ -913,7 +930,7 @@ void AnimationStudioFrame::OnTool_Deselect( wxCommandEvent& evt )
 
 void AnimationStudioFrame::OnIdle( wxIdleEvent& evt )
 {
-	zh::Animation* anim = zhAnimationSystem->getCurrentAnimation();
+	zh::Animation* anim = gApp->getCurrentAnimation();
 	if( anim == NULL )
 		return;
 	

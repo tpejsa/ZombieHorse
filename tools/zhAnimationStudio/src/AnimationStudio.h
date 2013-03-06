@@ -33,8 +33,8 @@ SOFTWARE.
 
 #include "ogre.h"
 
-#define zhGround_Size 100
-#define zhGround_TileSize 10.f
+#define zhGround_Size 1000
+#define zhGround_TileSize 15.f
 
 #define zhSkeleton_BoneSize 0.2f
 #define zhSkeleton_BoneColor Ogre::ColourValue(0,0.6f,0.2f)
@@ -42,8 +42,8 @@ SOFTWARE.
 #define zhSkeleton_MarkerColor Ogre::ColourValue(0.6f,0.1f,0.4f)
 #define zhSkeleton_PathColor Ogre::ColourValue(0.6f,0.1f,0.1f)
 
-#define zhCamera_Pos Ogre::Vector3( 20.f, 20.f, 20.f )
-#define zhCamera_Focus Ogre::Vector3( 0.f, 5.f, 0.f )
+#define zhCamera_Pos Ogre::Vector3( 50.f, 50.f, 50.f )
+#define zhCamera_Focus Ogre::Vector3( 0.f, 12.f, 0.f )
 #define zhCamera_TransSpeed 20.f
 #define zhCamera_RotSpeed 1
 

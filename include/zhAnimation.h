@@ -78,6 +78,11 @@ public:
 	const std::string& getName() const;
 
 	/**
+	* Gets the fully qualified animation name.
+	*/
+	std::string getFullName() const;
+
+	/**
 	* Gets a pointer to the owning AnimationSet.
 	*/
 	AnimationSetPtr getAnimationSet() const;

@@ -34,7 +34,8 @@ SOFTWARE.
 AnimationStudioApp* gApp = NULL;
 
 AnimationStudioApp::AnimationStudioApp()
-: mOgreRoot(NULL), mCam(NULL), mSceneMgr(NULL), mRenderWnd(NULL), mAnimEnabled(true)
+: mOgreRoot(NULL), mCam(NULL), mSceneMgr(NULL), mRenderWnd(NULL),
+mCurAnim(NULL), mAnimEnabled(true)
 {
 }
 
@@ -70,7 +71,9 @@ zh::Skeleton* AnimationStudioApp::selectSkeleton( const string& name )
 	zhAnimationSystem->stopAnimation();
 	zhAnimationSystem->setOutputSkeleton(name);
 	zh::Skeleton* skel = zhAnimationSystem->getOutputSkeleton();
+
 	mFrmMain->getOgreWindow()->setRenderSkeleton(skel);
+	mFrmMain->refresh();
 
 	return skel;
 }
@@ -81,6 +84,30 @@ void AnimationStudioApp::removeSkeleton( const string& name )
 
 	// Update window contents
 	mFrmMain->refresh();
+}
+
+zh::Animation* AnimationStudioApp::selectAnimation( const string& anim )
+{
+	if( zhAnimationSystem->getOutputSkeleton() == NULL )
+	{
+		if( zhAnimationSystem->getNumSkeletons() > 0 )
+			selectSkeleton( zhAnimationSystem->getSkeletonConstIterator().next()->getName() );
+		else
+			return NULL;
+	}
+
+	mCurAnim = zhAnimationSystem->getAnimation(anim);
+	zhAnimationSystem->stopAnimation();
+}
+
+void AnimationStudioApp::deselectAnimation()
+{
+	mCurAnim = NULL;
+}
+
+zh::Animation* AnimationStudioApp::getCurrentAnimation() const
+{
+	return mCurAnim;
 }
 
 /*void AnimationStudioApp::applyAnimation( const std::string& animSetName, const std::string& animName, float time )

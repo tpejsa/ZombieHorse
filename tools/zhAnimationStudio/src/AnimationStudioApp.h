@@ -83,6 +83,26 @@ public:
 	void removeSkeleton( const string& name );
 
 	/**
+	* Selects the animation clip with the specified name
+	* for playback and editing.
+	*
+	* @param anim Fully qualified name of the animation.
+	* @return Pointer to the animation clip or NULL if no animation
+	* has been selected.
+	*/
+	zh::Animation* selectAnimation( const string& anim );
+
+	/**
+	* Deselect current animation.
+	*/
+	void deselectAnimation();
+
+	/**
+	* Gets a pointer to the currently selected animation clip.
+	*/
+	zh::Animation* getCurrentAnimation() const;
+
+	/**
 	* Resizes the render window.
 	*/
 	void resize( unsigned int width, unsigned int height );
@@ -182,6 +202,7 @@ protected:
 	SceneManager* mSceneMgr; ///< Scene manager.
 	RenderWindow* mRenderWnd; ///< OGRE render window.
 
+	zh::Animation* mCurAnim; ///< Currently selected animation.
 	bool mAnimEnabled; ///< Updates to the animation system enabled/disabled.
 
 	// Motion visualization

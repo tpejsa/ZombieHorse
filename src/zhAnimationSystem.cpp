@@ -191,6 +191,7 @@ AnimationSetPtr AnimationSystem::loadAnimationSet( const std::string& path, cons
 		AnimationSampler* node = static_cast<AnimationSampler*>(
 			mAnimTree->createNode( AnimationSampler::ClassId(), mAnimTree->getNumNodes(), node_name )
 			);
+		node->setAnimation( anim->getAnimationSet(), anim->getId() );
 		mAnimTree->getNode("Root")->addChild(node);
 	}
 	// TODO: Add nodes under correct retargetting node (specified by skel param.)
@@ -368,6 +369,23 @@ void AnimationSystem::playAnimation( const std::string& animName )
 
 void AnimationSystem::playAnimationNow( const std::string& animName )
 {
+	stopAnimation();
+	
+	if( !mAnimTree->hasNode(animName) )
+	{
+		zhLog( "AnimationSystem", "playAnimationNow",
+			"Unable to play animation %s, animation node does not exist.", animName.c_str() );
+		return;
+	}
+
+	// Play the animation
+	mAnimTree->setApplyMover(false);
+	AnimationTransitionBlender* root =
+		static_cast<AnimationTransitionBlender*>( mAnimTree->getRoot() );
+	root->addTransition(animName);
+	root->addTransition(animName);
+	root->setPlaying();
+
 	// TODO: clear animation queue and play the animation
 }
 
@@ -486,13 +504,13 @@ MemoryPool* AnimationSystem::getMemoryPool() const
 void AnimationSystem::ParseAnimationName( const std::string& fullName,
 	std::string& animSetName, std::string& animName )
 {
-	std::string::size_type dli = animName.find("::");
+	size_t dli = fullName.find("::");
 	if( dli == std::string::npos )
 		animSetName = animName = "";
 	else
 	{
-		std::string animset_name = animName.substr(0,dli);
-		std::string anim_name = animName.substr(dli+2);
+		animSetName = fullName.substr(0,dli);
+		animName = fullName.substr(dli+2);
 	}
 }
 

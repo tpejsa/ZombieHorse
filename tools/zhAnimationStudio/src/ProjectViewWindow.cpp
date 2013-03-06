@@ -217,10 +217,28 @@ void ProjectViewWindow::OnSize( wxSizeEvent& evt )
 	trcProjTree->SetSize( GetSize() );
 }
 
+void ProjectViewWindow::OnDblClick_ProjTree( wxTreeEvent& evt )
+{
+	wxTreeItemData* base_data = trcProjTree->GetItemData( evt.GetItem() );
+	if( base_data == NULL )
+		return;
+
+	wxTreeSkeletonData* char_data;
+	wxTreeAnimData* banim_data;
+
+	if( ( char_data = dynamic_cast<wxTreeSkeletonData*>(base_data) ) != NULL )
+	{
+		gApp->selectSkeleton( char_data->getSkeleton()->getName() );
+	}
+	else if( ( banim_data = dynamic_cast<wxTreeAnimData*>(base_data) ) != NULL )
+	{
+		gApp->selectAnimation( banim_data->getAnimation()->getFullName() );
+	}
+}
+
 void ProjectViewWindow::OnRightClick_ProjTree( wxTreeEvent& evt )
 {
 	wxTreeItemData* base_data = trcProjTree->GetItemData( evt.GetItem() );
-
 	if( base_data == NULL )
 		return;
 
@@ -241,9 +259,9 @@ void ProjectViewWindow::OnRightClick_ProjTree( wxTreeEvent& evt )
 	{
 		// display Project popup menu
 	}
-	else if( ( char_data = dynamic_cast<wxTreeSkeletonData*>(base_data) ) != NULL )
+	else if( ( chars_data = dynamic_cast<wxTreeSkeletonsData*>(base_data) ) != NULL )
 	{
-		// display Character popup menu
+		// display Characters popup menu
 	}
 	else if( ( char_data = dynamic_cast<wxTreeSkeletonData*>(base_data) ) != NULL )
 	{
@@ -329,7 +347,6 @@ void ProjectViewWindow::OnMenu_SkeletonSelect( wxCommandEvent& evt )
 	// and its resources
 	
 	gApp->selectSkeleton( skel_data->getSkeleton()->getName() );
-	refresh();
 }
 
 void ProjectViewWindow::OnMenu_SkeletonRemove( wxCommandEvent& evt )
@@ -386,9 +403,7 @@ void ProjectViewWindow::OnMenu_AnimSelect( wxCommandEvent& evt )
 		);
 	
 	zh::Animation* anim = banim_data->getAnimation();
-	if( zhAnimationSystem->getOutputSkeleton() == NULL && zhAnimationSystem->getNumSkeletons() > 0 )
-		gApp->selectSkeleton( zhAnimationSystem->getSkeletonConstIterator().next()->getName() );
-	zhAnimationSystem->playAnimationNow(anim->getName());
+	gApp->selectAnimation( anim->getFullName() );
 }
 
 void ProjectViewWindow::OnMenu_AnimRemove( wxCommandEvent& evt )
@@ -555,6 +570,7 @@ void ProjectViewWindow::OnMenu_AnimSpaceBuildBlendCurves( wxCommandEvent& evt )
 
 BEGIN_EVENT_TABLE( ProjectViewWindow, wxWindow )
 	EVT_SIZE( ProjectViewWindow::OnSize )
+	EVT_TREE_ITEM_ACTIVATED( ID_trcProjTree, ProjectViewWindow::OnDblClick_ProjTree )
 	EVT_TREE_ITEM_RIGHT_CLICK( ID_trcProjTree, ProjectViewWindow::OnRightClick_ProjTree )
 	EVT_MENU( ID_mnSkeletonSelect, ProjectViewWindow::OnMenu_SkeletonSelect )
 	EVT_MENU( ID_mnSkeletonRemove, ProjectViewWindow::OnMenu_SkeletonRemove )

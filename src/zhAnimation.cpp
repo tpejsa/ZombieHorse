@@ -59,6 +59,11 @@ const std::string& Animation::getName() const
 	return mName;
 }
 
+std::string Animation::getFullName() const
+{
+	return mAnimSet->getName() + "::" + mName;
+}
+
 AnimationSetPtr Animation::getAnimationSet() const
 {
 	return mAnimSet;
