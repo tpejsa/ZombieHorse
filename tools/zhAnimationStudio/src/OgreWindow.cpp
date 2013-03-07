@@ -206,7 +206,7 @@ void OgreWindow::setRenderSkeleton( zh::Skeleton* skel )
 	_createRenderSkeleton( skel->getRoot(), scene_mgr->getRootSceneNode(), NULL );
 
 	// Make sure skeleton's feet are touching the ground
-	zh::Skeleton::BoneIterator bone_i = skel->getBoneIterator();
+	/*zh::Skeleton::BoneIterator bone_i = skel->getBoneIterator();
 	float feet_height = FLT_MAX;
 	while( bone_i.hasMore() )
 	{
@@ -216,7 +216,7 @@ void OgreWindow::setRenderSkeleton( zh::Skeleton* skel )
 	}
 	scene_mgr->getSceneNode("Ground")->translate(0,feet_height,0);
 	gApp->getCamera()->setPosition( gApp->getCamera()->getPosition() + Ogre::Vector3(0,feet_height,0) );
-	mCamFocus += Ogre::Vector3(0,feet_height,0);
+	mCamFocus += Ogre::Vector3(0,feet_height,0);*/
 }
 
 void OgreWindow::updateRenderSkeletonPose( zh::Skeleton* skel )

@@ -65,7 +65,7 @@ float AnimationTransitionBlender::getPlayLength() const
 {
 	AnimationNode* cn = getCurrentNode();
 	if( cn == NULL )
-		return 0;
+		return mDefaultNode != NULL ? mDefaultNode->getPlayLength() : 0;
 
 	return cn->getPlayLength();
 }
@@ -448,16 +448,16 @@ void AnimationTransitionBlender::_updateNode( float dt )
 
 	*/
 
-	if( mCurrentNode == NULL )
-	{
-		return;
-	}
-
 	if( mTransitionQueue.empty() )
 	{
 		if( mDefaultNode != NULL )
 			// play default animation
 			addTransition(mDefaultNode);
+	}
+
+	if( mCurrentNode == NULL )
+	{
+		return;
 	}
 
 	// update the currently playing animation
@@ -576,7 +576,8 @@ void AnimationTransitionBlender::_updateNode( float dt )
 		// update transition queue
 		mCurrentNode = mNextNode;
 		mNextNode = NULL;
-		mTransitionQueue.push( mTransitionQueue.front() );
+		//mTransitionQueue.push( mTransitionQueue.front() );
+		// TODO: need a way to enable/disable transition queue looping
 		mTransitionQueue.pop();
 
 		// update again in case we've already entered another transition

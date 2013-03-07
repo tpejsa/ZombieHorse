@@ -36,7 +36,7 @@ void AnimSequenceWindow::getAnimSequence( std::vector<zh::Animation*>& anims ) c
 {
 	anims.clear();
 
-	for( int anim_i = 0; anim_i < mLbAnimSequence->GetCount(); ++anim_i )
+	for( unsigned int anim_i = 0; anim_i < mLbAnimSequence->GetCount(); ++anim_i )
 	{
 		std::string anim_name = mLbAnimSequence->GetString(anim_i).To8BitData();
 		if( zhAnimationSystem->hasAnimation(anim_name) )
@@ -51,7 +51,7 @@ void AnimSequenceWindow::clearAnimSequence()
 
 void AnimSequenceWindow::refresh()
 {
-	for( int anim_i = 0; anim_i < mLbAnimSequence->GetCount(); ++anim_i )
+	for( unsigned int anim_i = 0; anim_i < mLbAnimSequence->GetCount(); ++anim_i )
 	{
 		std::string anim_name = mLbAnimSequence->GetString(anim_i).To8BitData();
 		if( !zhAnimationSystem->hasAnimation(anim_name) )

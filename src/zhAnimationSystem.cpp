@@ -375,6 +375,7 @@ void AnimationSystem::playAnimation( const std::string& animName )
 	AnimationTransitionBlender* root =
 		static_cast<AnimationTransitionBlender*>( mAnimTree->getRoot() );
 	root->addTransition(animName);
+	root->setDefaultNode((zh::AnimationNode*)NULL);
 	root->setPlaying();
 }
 
@@ -393,8 +394,9 @@ void AnimationSystem::playAnimationNow( const std::string& animName )
 	mAnimTree->setApplyMover(false);
 	AnimationTransitionBlender* root =
 		static_cast<AnimationTransitionBlender*>( mAnimTree->getRoot() );
-	root->addTransition(animName);
-	root->addTransition(animName);
+	//root->addTransition(animName);
+	//root->addTransition(animName);
+	root->setDefaultNode(animName);
 	root->setPlaying();
 }
 

@@ -897,10 +897,13 @@ void AnimationStudioFrame::OnTool_PlaySequence( wxCommandEvent& evt )
 	std::vector<zh::Animation*> anims;
 	mWndAnimSequence->getAnimSequence(anims);
 
+	gApp->deselectAnimation();
 	zhAnimationSystem->stopAnimation();
 	for( std::vector<zh::Animation*>::const_iterator anim_i = anims.begin();
 		anim_i != anims.end(); ++anim_i )
 		zhAnimationSystem->playAnimation( (*anim_i)->getFullName() );
+	// TODO: simpler way of doing this...
+	zhAnimationSystem->getAnimationTree()->getRoot()->setOrigin( zh::Skeleton::Situation(0,0,0) );
 }
 
 void AnimationStudioFrame::OnTool_Stop( wxCommandEvent& evt )

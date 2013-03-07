@@ -45,7 +45,7 @@ SOFTWARE.
 
 #define zhCamera_Pos Ogre::Vector3( 50.f, 50.f, 50.f )
 #define zhCamera_Focus Ogre::Vector3( 0.f, 12.f, 0.f )
-#define zhCamera_TransSpeed 20.f
+#define zhCamera_TransSpeed 50.f
 #define zhCamera_RotSpeed 1
 
 #define zhOgreVector3(v) Ogre::Vector3( (v).x, (v).y, (v).z )
