@@ -24,19 +24,15 @@ SOFTWARE.
 #include "AnimationStudioApp.h"
 #include "AnimationStudioFrame.h"
 #include "OgreWindow.h"
-#include "NewResourceDialog.h"
-// TODO: remove this
-#include "DefineAnimParamDialog.h"
-//
+//#include "NewResourceDialog.h"
 
 class wxTreeProjectData : public wxTreeItemData
 {
 };
 
-class wxTreeSkeletonsData : public wxTreeItemData
+/*class wxTreeSkeletonsData : public wxTreeItemData
 {
-};
-
+};*/
 
 class wxTreeSkeletonData : public wxTreeItemData
 {
@@ -52,7 +48,7 @@ private:
 
 };
 
-class wxTreeAnimIndexesData : public wxTreeItemData
+/*class wxTreeAnimIndexesData : public wxTreeItemData
 {
 };
 
@@ -90,7 +86,7 @@ private:
 
 class wxTreeAnimsData : public wxTreeItemData
 {
-};
+};*/
 
 class wxTreeAnimData : public wxTreeItemData
 {
@@ -106,7 +102,7 @@ private:
 
 };
 
-class wxTreeAnimSpacesData : public wxTreeItemData
+/*class wxTreeAnimSpacesData : public wxTreeItemData
 {
 };
 
@@ -122,7 +118,7 @@ private:
 
 	AnimationSpace* mAnimSpace;
 
-};
+};*/
 
 ProjectViewWindow::ProjectViewWindow( wxWindow* parent, wxWindowID id )
 : wxWindow( parent, id, wxDefaultPosition, wxDefaultSize )
@@ -140,12 +136,11 @@ void ProjectViewWindow::refresh()
 	// Clear current view
 	trcProjTree->DeleteAllItems();
 
-	// add root
+	// Add root
 	wxTreeItemId trc_root = trcProjTree->AddRoot( "Project Files", -1, -1, new wxTreeProjectData() );
 
-	// add skeletons
-	wxTreeItemId trc_skels = trcProjTree->AppendItem( trc_root, "Skeletons", -1, -1,
-		new wxTreeSkeletonsData() );
+	// Add skeletons
+	wxTreeItemId trc_skels = trcProjTree->AppendItem( trc_root, "Skeletons", -1, -1, NULL );
 	AnimationSystem::SkeletonConstIterator skel_i = zhAnimationSystem->getSkeletonConstIterator();
 	while( !skel_i.end() )
 	{
@@ -167,26 +162,20 @@ void ProjectViewWindow::refresh()
 			new wxTreeAnimIndexData(anim_index) );
 	}*/
 
-	// Add animation sets
-	wxTreeItemId trc_anims = trcProjTree->AppendItem( trc_root, "Animation Sets", -1, -1,
-		new wxTreeAnimSetsData() );
+	// Add animations
+	wxTreeItemId trc_anims = trcProjTree->AppendItem( trc_root, "Animations", -1, -1, NULL );
 	zh::ResourceManager::ResourceConstIterator asi =
 		zhAnimationSystem->getAnimationManager()->getResourceConstIterator();
 	while( !asi.end() )
 	{
 		AnimationSetPtr anim_set = AnimationSetPtr::DynamicCast<zh::Resource>(asi.next());
 
-		wxTreeItemId trc_as = trcProjTree->AppendItem( trc_anims, anim_set->getName(), -1, -1,
-			new wxTreeAnimSetData(anim_set) );
-			
 		// Add animation clips
-		wxTreeItemId trc_banims = trcProjTree->AppendItem( trc_as, "Animations", -1, -1,
-			new wxTreeAnimsData() );
 		AnimationSet::AnimationConstIterator anim_i = anim_set->getAnimationConstIterator();
 		while( !anim_i.end() )
 		{
 			zh::Animation* anim = anim_i.next();
-			trcProjTree->AppendItem( trc_banims, anim->getName(), -1, -1,
+			trcProjTree->AppendItem( trc_anims, anim->getFullName(), -1, -1,
 				new wxTreeAnimData(anim) );
 		}
 
@@ -217,6 +206,22 @@ void ProjectViewWindow::OnSize( wxSizeEvent& evt )
 	trcProjTree->SetSize( GetSize() );
 }
 
+void ProjectViewWindow::OnDrag_ProjTree( wxTreeEvent& evt )
+{
+	wxTreeItemData* base_data = trcProjTree->GetItemData( evt.GetItem() );
+	if( base_data == NULL )
+		return;
+
+	wxTreeAnimData* anim_data = dynamic_cast<wxTreeAnimData*>(base_data);
+	if( anim_data == NULL ) return;
+
+	// Drag and drop the animation?
+	wxTextDataObject dndanim_data( anim_data->getAnimation()->getFullName() );
+	wxDropSource dndanim_src(this);
+	dndanim_src.SetData(dndanim_data);
+	dndanim_src.DoDragDrop(TRUE);
+}
+
 void ProjectViewWindow::OnDblClick_ProjTree( wxTreeEvent& evt )
 {
 	wxTreeItemData* base_data = trcProjTree->GetItemData( evt.GetItem() );
@@ -243,26 +248,26 @@ void ProjectViewWindow::OnRightClick_ProjTree( wxTreeEvent& evt )
 		return;
 
 	wxTreeProjectData* proj_data;
-	wxTreeSkeletonsData* chars_data;
+	//wxTreeSkeletonsData* chars_data;
 	wxTreeSkeletonData* char_data;
-	wxTreeAnimIndexesData* animindexes_data;
+	/*wxTreeAnimIndexesData* animindexes_data;
 	wxTreeAnimIndexData* animindex_data;
 	wxTreeAnimSetsData* anims_data;
 	wxTreeAnimSetData* animset_data;
-	wxTreeAnimsData* banims_data;
-	wxTreeAnimData* banim_data;
-	wxTreeAnimSpacesData* panims_data;
-	wxTreeAnimSpaceData* panim_data;
+	wxTreeAnimsData* banims_data;*/
+	wxTreeAnimData* anim_data;
+	/*wxTreeAnimSpacesData* panims_data;
+	wxTreeAnimSpaceData* panim_data;*/
 
 	// determine the correct popup menu to display
 	if( ( proj_data = dynamic_cast<wxTreeProjectData*>(base_data) ) != NULL )
 	{
 		// display Project popup menu
 	}
-	else if( ( chars_data = dynamic_cast<wxTreeSkeletonsData*>(base_data) ) != NULL )
+	/*else if( ( chars_data = dynamic_cast<wxTreeSkeletonsData*>(base_data) ) != NULL )
 	{
 		// display Characters popup menu
-	}
+	}*/
 	else if( ( char_data = dynamic_cast<wxTreeSkeletonData*>(base_data) ) != NULL )
 	{
 		// display Character popup menu
@@ -273,7 +278,7 @@ void ProjectViewWindow::OnRightClick_ProjTree( wxTreeEvent& evt )
 		menu.Append( ID_mnSkeletonRemove, "Remove" );
 		PopupMenu(&menu);
 	}
-	else if( ( animindexes_data = dynamic_cast<wxTreeAnimIndexesData*>(base_data) ) != NULL )
+	/*else if( ( animindexes_data = dynamic_cast<wxTreeAnimIndexesData*>(base_data) ) != NULL )
 	{
 		// display Animation Indexes popup menu
 
@@ -304,19 +309,19 @@ void ProjectViewWindow::OnRightClick_ProjTree( wxTreeEvent& evt )
 	else if( ( banims_data = dynamic_cast<wxTreeAnimsData*>(base_data) ) != NULL )
 	{
 		// display Base Animations popup menu
-	}
-	else if( ( banim_data = dynamic_cast<wxTreeAnimData*>(base_data) ) != NULL )
+	}*/
+	else if( ( anim_data = dynamic_cast<wxTreeAnimData*>(base_data) ) != NULL )
 	{
 		// display Base Animation popup menu
 
 		wxMenu menu;
-		menu.SetClientData(banim_data);
+		menu.SetClientData(anim_data);
 		menu.Append( ID_mnAnimSelect, "Select" );
 		menu.Append( ID_mnAnimRemove, "Remove" );
 		menu.Append( ID_mnAnimRename, "Rename" );
 		PopupMenu(&menu);
 	}
-	else if( ( panims_data = dynamic_cast<wxTreeAnimSpacesData*>(base_data) ) != NULL )
+	/*else if( ( panims_data = dynamic_cast<wxTreeAnimSpacesData*>(base_data) ) != NULL )
 	{
 		// display Animation Spaces popup menu
 	}
@@ -334,7 +339,7 @@ void ProjectViewWindow::OnRightClick_ProjTree( wxTreeEvent& evt )
 		menu.Append( ID_mnAnimSpaceMatchAnnots, "Match Annotations" );
 		menu.Append( ID_mnAnimSpaceBuildBlendCurves, "Build Blend Curves" );
 		PopupMenu(&menu);
-	}
+	}*/
 }
 
 void ProjectViewWindow::OnMenu_SkeletonSelect( wxCommandEvent& evt )
@@ -353,7 +358,7 @@ void ProjectViewWindow::OnMenu_SkeletonRemove( wxCommandEvent& evt )
 {
 }
 
-void ProjectViewWindow::OnMenu_AnimIndexesBuildIndex( wxCommandEvent& evt )
+/*void ProjectViewWindow::OnMenu_AnimIndexesBuildIndex( wxCommandEvent& evt )
 {
 	gApp->getAppFrame()->OnMenu_ToolsBuildAnimIndex(evt);
 }
@@ -394,7 +399,7 @@ void ProjectViewWindow::OnMenu_AnimSetRename( wxCommandEvent& evt )
 
 void ProjectViewWindow::OnMenu_AnimSetClear( wxCommandEvent& evt )
 {
-}
+}*/
 
 void ProjectViewWindow::OnMenu_AnimSelect( wxCommandEvent& evt )
 {
@@ -414,7 +419,7 @@ void ProjectViewWindow::OnMenu_AnimRename( wxCommandEvent& evt )
 {
 }
 
-void ProjectViewWindow::OnMenu_AnimSpacesBuildAnimSpace( wxCommandEvent& evt )
+/*void ProjectViewWindow::OnMenu_AnimSpacesBuildAnimSpace( wxCommandEvent& evt )
 {
 	gApp->getAppFrame()->OnMenu_ToolsBuildAnimSpace(evt);
 }
@@ -431,7 +436,7 @@ void ProjectViewWindow::OnMenu_AnimSpaceSelect( wxCommandEvent& evt )
 	
 	zh::AnimationSpace* anim_space = panim_data->getAnimationSpace();
 
-	/* TODO: remove this
+	// TODO: remove this
 	gApp->getAppFrame()->getOgreWindow()->show3DAxesOnBone( "Bip01" );
 
 	zh::Model* mdl = gApp->getCurrentCharacter()->getModelController()->getModel();
@@ -497,7 +502,7 @@ void ProjectViewWindow::OnMenu_AnimSpaceSelect( wxCommandEvent& evt )
 		pts.clear();
 	}
 
-	gApp->selectAnimation( anim_space->getAnimationSet()->getName(), anim_space->getName() );*/
+	gApp->selectAnimation( anim_space->getAnimationSet()->getName(), anim_space->getName() );
 }
 
 void ProjectViewWindow::OnMenu_AnimSpaceRemove( wxCommandEvent& evt )
@@ -530,7 +535,7 @@ void ProjectViewWindow::OnMenu_AnimSpaceDefineParam( wxCommandEvent& evt )
 	// build parametrization over the animation space
 	zhAnimationSearchSystem->setMaxExtrapolation( dlg.getMaxExtrapolation() );
 	zhAnimationSearchSystem->setMinSampleDistance( dlg.getMinSampleDistance() );
-	/*std::vector<AnimationParamSpec> pspecs;
+	std::vector<AnimationParamSpec> pspecs;
 	pspecs.push_back( AnimationParamSpec( "posX", anim_space->getBaseAnimation(0),
 		0.82f, mdl->getSkeleton()->getBone("Bip01 L Hand")->getId(),
 		mdl->getSkeleton()->getBone("Bip01")->getId(),
@@ -545,7 +550,7 @@ void ProjectViewWindow::OnMenu_AnimSpaceDefineParam( wxCommandEvent& evt )
 		0.82f, mdl->getSkeleton()->getBone("Bip01 L Hand")->getId(),
 		mdl->getSkeleton()->getBone("Bip01")->getId(),
 		AnimationParamSpec::TransfType_Translation, AnimationParamSpec::Axis_z )
-		);*/
+		);
 	zhAnimationSearchSystem->parametrizeAnimSpace( skel, anim_space, dlg.getParamSpecs() );
 
 	// TODO: anim. set modified
@@ -566,33 +571,24 @@ void ProjectViewWindow::OnMenu_AnimSpaceMatchAnnots( wxCommandEvent& evt )
 
 void ProjectViewWindow::OnMenu_AnimSpaceBuildBlendCurves( wxCommandEvent& evt )
 {
-}
+}*/
 
 BEGIN_EVENT_TABLE( ProjectViewWindow, wxWindow )
 	EVT_SIZE( ProjectViewWindow::OnSize )
+	EVT_TREE_BEGIN_DRAG( ID_trcProjTree, ProjectViewWindow::OnDrag_ProjTree )
 	EVT_TREE_ITEM_ACTIVATED( ID_trcProjTree, ProjectViewWindow::OnDblClick_ProjTree )
 	EVT_TREE_ITEM_RIGHT_CLICK( ID_trcProjTree, ProjectViewWindow::OnRightClick_ProjTree )
 	EVT_MENU( ID_mnSkeletonSelect, ProjectViewWindow::OnMenu_SkeletonSelect )
 	EVT_MENU( ID_mnSkeletonRemove, ProjectViewWindow::OnMenu_SkeletonRemove )
-	EVT_MENU( ID_mnAnimIndexesBuildIndex, ProjectViewWindow::OnMenu_AnimIndexesBuildIndex )
-	EVT_MENU( ID_mnAnimIndexesAddIndex, ProjectViewWindow::OnMenu_AnimIndexesAddIndex )
-	EVT_MENU( ID_mnAnimIndexesClearIndexes, ProjectViewWindow::OnMenu_AnimIndexesClearIndexes )
-	EVT_MENU( ID_mnAnimIndexesViewMatchWeb, ProjectViewWindow::OnMenu_AnimIndexesViewMatchWeb )
-	EVT_MENU( ID_mnAnimIndexesSearch, ProjectViewWindow::OnMenu_AnimIndexesSearch )
-	EVT_MENU( ID_mnAnimIndexRemove, ProjectViewWindow::OnMenu_AnimIndexRemove )
+	/*EVT_MENU( ID_mnAnimIndexRemove, ProjectViewWindow::OnMenu_AnimIndexRemove )
 	EVT_MENU( ID_mnAnimIndexRename, ProjectViewWindow::OnMenu_AnimIndexRename )
 	EVT_MENU( ID_mnAnimSetRemove, ProjectViewWindow::OnMenu_AnimSetRemove )
 	EVT_MENU( ID_mnAnimSetRename, ProjectViewWindow::OnMenu_AnimSetRename )
-	EVT_MENU( ID_mnAnimSetClear, ProjectViewWindow::OnMenu_AnimSetClear )
+	EVT_MENU( ID_mnAnimSetClear, ProjectViewWindow::OnMenu_AnimSetClear )*/
 	EVT_MENU( ID_mnAnimSelect, ProjectViewWindow::OnMenu_AnimSelect )
 	EVT_MENU( ID_mnAnimRemove, ProjectViewWindow::OnMenu_AnimRemove )
 	EVT_MENU( ID_mnAnimRename, ProjectViewWindow::OnMenu_AnimRename )
-	EVT_MENU( ID_mnAnimSpacesBuildAnimSpace, ProjectViewWindow::OnMenu_AnimSpacesBuildAnimSpace )
-	EVT_MENU( ID_mnAnimSpacesClear, ProjectViewWindow::OnMenu_AnimSpacesClear )
-	EVT_MENU( ID_mnAnimSpaceSelect, ProjectViewWindow::OnMenu_AnimSpaceSelect )
-	EVT_MENU( ID_mnAnimSpaceRemove, ProjectViewWindow::OnMenu_AnimSpaceRemove )
-	EVT_MENU( ID_mnAnimSpaceRename, ProjectViewWindow::OnMenu_AnimSpaceRename )
-	EVT_MENU( ID_mnAnimSpaceDefineParam, ProjectViewWindow::OnMenu_AnimSpaceDefineParam )
+	/*EVT_MENU( ID_mnAnimSpaceDefineParam, ProjectViewWindow::OnMenu_AnimSpaceDefineParam )
 	EVT_MENU( ID_mnAnimSpaceMatchAnnots, ProjectViewWindow::OnMenu_AnimSpaceMatchAnnots )
-	EVT_MENU( ID_mnAnimSpaceBuildBlendCurves, ProjectViewWindow::OnMenu_AnimSpaceBuildBlendCurves )
+	EVT_MENU( ID_mnAnimSpaceBuildBlendCurves, ProjectViewWindow::OnMenu_AnimSpaceBuildBlendCurves )*/
 END_EVENT_TABLE()

@@ -32,7 +32,7 @@ class OgreWindow;
 //class TimelineWindow;
 class ProjectViewWindow;
 class MotionVisualizationWindow;
-class AnimTreeWindow;
+class AnimSequenceWindow;
 
 enum
 {
@@ -81,6 +81,7 @@ enum
 	ID_wndOgre,
 	//ID_wndTimeline,
 	ID_wndProjectView,
+	ID_wndAnimSequence,
 	ID_wndMotionVis
 };
 
@@ -187,6 +188,7 @@ protected:
 	//TimelineWindow* mWndTimeline;
 	ProjectViewWindow* mWndProjectView;
 	MotionVisualizationWindow* mWndMotionVis;
+	AnimSequenceWindow* mWndAnimSequence;
 };
 
 #endif // __AnimationStudioFrame_h__

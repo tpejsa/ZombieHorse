@@ -31,27 +31,19 @@ enum
 	ID_trcProjTree,
 	ID_mnSkeletonSelect,
 	ID_mnSkeletonRemove,
-	ID_mnAnimIndexesBuildIndex,
-	ID_mnAnimIndexesAddIndex,
-	ID_mnAnimIndexesClearIndexes,
-	ID_mnAnimIndexesViewMatchWeb,
-	ID_mnAnimIndexesSearch,
-	ID_mnAnimIndexRemove,
+	/*ID_mnAnimIndexRemove,
 	ID_mnAnimIndexRename,
 	ID_mnAnimSetRemove,
 	ID_mnAnimSetRename,
-	ID_mnAnimSetClear,
+	ID_mnAnimSetClear,*/
 	ID_mnAnimSelect,
 	ID_mnAnimRemove,
-	ID_mnAnimRename,
-	ID_mnAnimSpacesBuildAnimSpace,
-	ID_mnAnimSpacesClear,
-	ID_mnAnimSpaceSelect,
+	ID_mnAnimRename/*,
 	ID_mnAnimSpaceRemove,
 	ID_mnAnimSpaceRename,
 	ID_mnAnimSpaceDefineParam,
 	ID_mnAnimSpaceMatchAnnots,
-	ID_mnAnimSpaceBuildBlendCurves
+	ID_mnAnimSpaceBuildBlendCurves*/
 
 };
 
@@ -76,31 +68,22 @@ public:
 	bool Show( bool show = true );
 
 	void OnSize( wxSizeEvent& evt );
+	void OnDrag_ProjTree( wxTreeEvent& evt );
 	void OnDblClick_ProjTree( wxTreeEvent& evt );
 	void OnRightClick_ProjTree( wxTreeEvent& evt );
 	void OnMenu_SkeletonSelect( wxCommandEvent& evt );
 	void OnMenu_SkeletonRemove( wxCommandEvent& evt );
-	void OnMenu_AnimIndexesBuildIndex( wxCommandEvent& evt );
-	void OnMenu_AnimIndexesAddIndex( wxCommandEvent& evt );
-	void OnMenu_AnimIndexesClearIndexes( wxCommandEvent& evt );
-	void OnMenu_AnimIndexesViewMatchWeb( wxCommandEvent& evt );
-	void OnMenu_AnimIndexesSearch( wxCommandEvent& evt );
-	void OnMenu_AnimIndexRemove( wxCommandEvent& evt );
+	/*void OnMenu_AnimIndexRemove( wxCommandEvent& evt );
 	void OnMenu_AnimIndexRename( wxCommandEvent& evt );
 	void OnMenu_AnimSetRemove( wxCommandEvent& evt );
 	void OnMenu_AnimSetRename( wxCommandEvent& evt );
-	void OnMenu_AnimSetClear( wxCommandEvent& evt );
+	void OnMenu_AnimSetClear( wxCommandEvent& evt );*/
 	void OnMenu_AnimSelect( wxCommandEvent& evt );
 	void OnMenu_AnimRemove( wxCommandEvent& evt );
 	void OnMenu_AnimRename( wxCommandEvent& evt );
-	void OnMenu_AnimSpacesBuildAnimSpace( wxCommandEvent& evt );
-	void OnMenu_AnimSpacesClear( wxCommandEvent& evt );
-	void OnMenu_AnimSpaceSelect( wxCommandEvent& evt );
-	void OnMenu_AnimSpaceRemove( wxCommandEvent& evt );
-	void OnMenu_AnimSpaceRename( wxCommandEvent& evt );
-	void OnMenu_AnimSpaceDefineParam( wxCommandEvent& evt );
+	/*void OnMenu_AnimSpaceDefineParam( wxCommandEvent& evt );
 	void OnMenu_AnimSpaceMatchAnnots( wxCommandEvent& evt );
-	void OnMenu_AnimSpaceBuildBlendCurves( wxCommandEvent& evt );
+	void OnMenu_AnimSpaceBuildBlendCurves( wxCommandEvent& evt );*/
 
 	DECLARE_EVENT_TABLE()
 

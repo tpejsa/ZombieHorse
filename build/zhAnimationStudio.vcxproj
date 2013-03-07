@@ -28,6 +28,7 @@
     <ClInclude Include="..\tools\zhAnimationStudio\src\MotionVisualizationWindow.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\NewResourceDialog.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\OgreWindow.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\AnimSequenceWindow.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\PlaySlider.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\ProjectViewWindow.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\resource.h" />
@@ -52,6 +53,7 @@
     <ClCompile Include="..\tools\zhAnimationStudio\src\MotionVisualizationWindow.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\NewResourceDialog.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\OgreWindow.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\AnimSequenceWindow.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\PlaySlider.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\ProjectViewWindow.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\TimelineWindow.cpp" />

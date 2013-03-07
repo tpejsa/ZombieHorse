@@ -132,9 +132,9 @@ namespace zh
 	}
 	bool BVHLoader::tryLoad( ResourcePtr res, const std::string& path )
 	{
-		static bool first = true;
-		if(first){
-			first = false;
+		static int first2 = 0;
+		if( first2 < 2 ){
+			first2++;
 		}else{
 			return false;
 		}
@@ -153,7 +153,10 @@ namespace zh
 
 	bool BVHLoader::load( ResourcePtr res, const std::string& path )
 	{
-		
+		// TODO: remove this
+		static int first2 = 0;
+		first2++;
+		//
 		zhAssert( res != NULL );
 		zhAssert( res->getClassId() == Resource_AnimationSet );
 
@@ -196,6 +199,31 @@ namespace zh
 
 		Skeleton* skel = zhAnimationSystem->createSkeleton(mAnimSet->getName());
 		root -> ConvertToBones(skel);
+
+		// TODO: remove this
+		// Create dummy animation
+		mAnim = mAnimSet->createAnimation( 0, mAnimSet->getName() );
+		BoneAnimationTrack* root_tr = mAnim->createBoneTrack(0);
+		if( first2 == 1 )
+		{
+			TransformKeyFrame* tkf = static_cast<TransformKeyFrame*>( root_tr->createKeyFrame(0) );
+			tkf->setTranslation( Vector3(5,0,5) );
+			tkf->setRotation( Quat(0,0,0) );
+			tkf = static_cast<TransformKeyFrame*>( root_tr->createKeyFrame(1) );
+			tkf->setTranslation( Vector3(20,0,20) );
+			tkf->setRotation( Quat(0,45,0) );
+		}
+		else if( first2 == 2 )
+		{
+			TransformKeyFrame* tkf = static_cast<TransformKeyFrame*>( root_tr->createKeyFrame(0) );
+			tkf->setTranslation( Vector3(5,0,-5) );
+			tkf->setRotation( Quat(0,0,0) );
+			tkf = static_cast<TransformKeyFrame*>( root_tr->createKeyFrame(1) );
+			tkf->setTranslation( Vector3(20,0,-20) );
+			tkf->setRotation( Quat(90,0,0) );
+		}
+		//
+
 		return true;
 	}
 

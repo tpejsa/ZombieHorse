@@ -24,16 +24,17 @@ SOFTWARE.
 #include "AnimationStudioApp.h"
 #include "TimelineWindow.h"
 #include "ProjectViewWindow.h"
+#include "AnimSequenceWindow.h"
 #include "MotionVisualizationWindow.h"
 #include "OgreWindow.h"
-#include "NewResourceDialog.h"
+/*#include "NewResourceDialog.h"
 #include "BuildMotionGraphDialog.h"
 #include "MotionGraphViewDialog.h"
 #include "BuildIndexDialog.h"
 #include "MatchWebViewDialog.h"
 #include "MatchGraphViewDialog.h"
 #include "BuildAnimSpaceDialog.h"
-#include "DefineAnimParamDialog.h"
+#include "DefineAnimParamDialog.h"*/
 
 AnimationStudioFrame::AnimationStudioFrame( wxWindowID id, const wxString &title, const wxPoint &pos, const wxSize &size )
 : wxFrame( NULL, id, title, pos, size, wxDEFAULT_FRAME_STYLE, "frmAnimationStudio" ),
@@ -69,8 +70,9 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 
 	// create application windows
 	mWndOgre = new OgreWindow( this, ID_wndOgre );
-	//mWndTimeline = new TimelineWindow( this, ID_wndTimeline );
+	//mWndTimeline = new TimelineWindow( this, ID_wndTimeline );	
 	mWndProjectView = new ProjectViewWindow( this, ID_wndProjectView );
+	mWndAnimSequence = new AnimSequenceWindow( this, ID_wndAnimSequence );
 	mWndMotionVis = new MotionVisualizationWindow( this, ID_wndMotionVis );
 
 	//
@@ -178,7 +180,7 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 
 	// TODO: also add toolbar items for: see current anim. framerate, set desired framerate
 
-	// Add mWndOgre to AUI manager
+	// Add OGRE window to AUI manager
 	wxAuiPaneInfo wndOgre_pi;
 	wndOgre_pi.CentrePane();
 	wndOgre_pi.Dock();
@@ -186,7 +188,7 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 	wndOgre_pi.CloseButton(false);
 	mAuiMgr.AddPane( mWndOgre, wndOgre_pi );
 
-	// Add mWndTimeline to AUI manager
+	// Add timeline window to AUI manager
 	/*mWndTimeline->SetSize( 272, size.GetHeight() );
 	wxAuiPaneInfo wndTimeline_pi;
 	wndTimeline_pi.Top();
@@ -196,7 +198,7 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 	wndTimeline_pi.Show(true);
 	mAuiMgr.AddPane( mWndTimeline, wndTimeline_pi );*/
 
-	// Add mWndProjectView to AUI manager
+	// Add project view window to AUI manager
 	mWndProjectView->SetSize( 272, size.GetHeight() );
 	wxAuiPaneInfo wndProjectView_pi;
 	wndProjectView_pi.Left();
@@ -205,10 +207,19 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 	wndProjectView_pi.Caption( "Project View" );
 	mAuiMgr.AddPane( mWndProjectView, wndProjectView_pi );
 
-	// Add mWndMotionVis to AUI manager
+	// Add animation sequence window to AUI manager
+	mWndAnimSequence->SetSize( 272, size.GetHeight() );
+	wxAuiPaneInfo wndAnimSeq_pi;
+	wndAnimSeq_pi.Left();
+	wndAnimSeq_pi.Floatable();
+	wndAnimSeq_pi.CloseButton(false);
+	wndAnimSeq_pi.Caption( "Animation Sequence" );
+	mAuiMgr.AddPane( mWndAnimSequence, wndAnimSeq_pi );
+
+	// Add motion visualization window to AUI manager
 	mWndMotionVis->SetSize( 272, size.GetHeight() );
 	wxAuiPaneInfo wndMotionVis_pi;
-	wndMotionVis_pi.Left();
+	wndMotionVis_pi.Right();
 	wndMotionVis_pi.Floatable();
 	wndMotionVis_pi.CloseButton(false);
 	wndMotionVis_pi.Caption( "Motion Visualization" );
@@ -883,13 +894,20 @@ void AnimationStudioFrame::OnTool_Play( wxCommandEvent& evt )
 
 void AnimationStudioFrame::OnTool_PlaySequence( wxCommandEvent& evt )
 {
-	// TODO: pop dialog for choosing the clips to play
+	std::vector<zh::Animation*> anims;
+	mWndAnimSequence->getAnimSequence(anims);
+
+	zhAnimationSystem->stopAnimation();
+	for( std::vector<zh::Animation*>::const_iterator anim_i = anims.begin();
+		anim_i != anims.end(); ++anim_i )
+		zhAnimationSystem->playAnimation( (*anim_i)->getFullName() );
 }
 
 void AnimationStudioFrame::OnTool_Stop( wxCommandEvent& evt )
 {
 	zhAnimationSystem->stopAnimation();
-
+	
+	mWndAnimSequence->clearAnimSequence();
 	mTbPlayer->ToggleTool( ID_btnPlay, false );
 }
 

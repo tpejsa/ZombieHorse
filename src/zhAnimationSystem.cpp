@@ -363,8 +363,19 @@ void AnimationSystem::setOutputSkeleton( const std::string& name )
 
 void AnimationSystem::playAnimation( const std::string& animName )
 {
-	// TODO: add animation to the queue,
-	// or play right away if there's nothing playing
+	if( !mAnimTree->hasNode(animName) )
+	{
+		zhLog( "AnimationSystem", "playAnimationNow",
+			"Unable to play animation %s, animation node does not exist.", animName.c_str() );
+		return;
+	}
+
+	// Play the animation
+	mAnimTree->setApplyMover();
+	AnimationTransitionBlender* root =
+		static_cast<AnimationTransitionBlender*>( mAnimTree->getRoot() );
+	root->addTransition(animName);
+	root->setPlaying();
 }
 
 void AnimationSystem::playAnimationNow( const std::string& animName )
@@ -385,8 +396,6 @@ void AnimationSystem::playAnimationNow( const std::string& animName )
 	root->addTransition(animName);
 	root->addTransition(animName);
 	root->setPlaying();
-
-	// TODO: clear animation queue and play the animation
 }
 
 void AnimationSystem::stopAnimation()

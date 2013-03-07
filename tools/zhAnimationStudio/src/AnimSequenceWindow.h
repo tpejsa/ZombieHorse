@@ -20,41 +20,51 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __AnimationStudio_h__
-#define __AnimationStudio_h__
+#ifndef __AnimSequenceWindow_h__
+#define __AnimSequenceWindow_h__
 
-#include "zh.h"
+#include "AnimationStudio.h"
 
-#include <wx/wx.h>
-#include <wx/sizer.h>
-#include <wx/grid.h>
-#include <wx/dir.h>
-#include <wx/propgrid/propgrid.h>
-#include <wx/dnd.h>
+enum
+{
+	ID_lbAnimSequence
+};
 
-#include "ogre.h"
+class AnimSequenceWindow : public wxWindow, public wxTextDropTarget
+{
 
-#define zhGround_Size 1000
-#define zhGround_TileSize 15.f
+public:
 
-#define zhSkeleton_BoneSize 0.2f
-#define zhSkeleton_BoneColor Ogre::ColourValue(0,0.6f,0.2f)
-#define zhSkeleton_MarkerSize 12.f
-#define zhSkeleton_MarkerColor Ogre::ColourValue(0.6f,0.1f,0.4f)
-#define zhSkeleton_PathColor Ogre::ColourValue(0.6f,0.1f,0.1f)
+	AnimSequenceWindow( wxWindow *parent, wxWindowID id );
 
-#define zhCamera_Pos Ogre::Vector3( 50.f, 50.f, 50.f )
-#define zhCamera_Focus Ogre::Vector3( 0.f, 12.f, 0.f )
-#define zhCamera_TransSpeed 20.f
-#define zhCamera_RotSpeed 1
+	/**
+	* Gets the currently specified animation sequence.
+	*/
+	void getAnimSequence( std::vector<zh::Animation*>& anims ) const;
 
-#define zhOgreVector3(v) Ogre::Vector3( (v).x, (v).y, (v).z )
-#define zhOgreQuat(q) Ogre::Quaternion( (q).w, (q).x, (q).y, (q).z )
-#define zhVector3(v) zh::Vector3( (v).x, (v).y, (v).z )
-#define zhQuat(q) zh::Quat( (q).w, (q).x, (q).y, (q).z )
+	/**
+	* Clears the currently specified animation sequence.
+	*/
+	void clearAnimSequence();
 
-using namespace std;
-using namespace Ogre;
-using namespace zh;
+	/**
+	* Updates the animation sequence window contents.
+	*/
+	void refresh();
 
-#endif // __AnimationStudio_h__
+	/**
+	* Called when the user drags and drops a text object to this window.
+	*/
+	bool OnDropText( wxCoord x, wxCoord y, const wxString& data );
+
+	void OnSize( wxSizeEvent& evt );
+
+	DECLARE_EVENT_TABLE()
+
+private:
+
+	wxListBox* mLbAnimSequence;
+
+};
+
+#endif // __AnimSequenceWindow_h__
