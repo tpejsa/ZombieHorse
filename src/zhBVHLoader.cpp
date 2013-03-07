@@ -64,10 +64,11 @@ namespace zh
 		float offsets[3];
 		std::vector<float> keyframes[6];
 		static int  jointCount;
+		static void resetID(){jointCount = 0;}
 		static void increaseID(){jointCount++;}
 		JointInfo(std::string jointName){
 			name = jointName;
-			jointID = jointCount++;
+			jointID = jointCount;
 			increaseID();
 			numberOfChannels = 0;
 		}
@@ -278,7 +279,8 @@ namespace zh
 		std::string motionContent = content.substr(hierarchyEnd + 7,content.length() - (hierarchyEnd + 7));;
 		//parsing!!
 		//std::string offsetReg("HIERARCHY[\t\r\n\v\f]+ROOT Hips{[A-Za-z]+}");
-		
+		JointInfo::resetID();
+
 		const boost::regex jointNameStructure(jointNameReg.c_str());
 		boost::cmatch what;
 		boost::regex_search(skeletonContent.c_str(), what, jointNameStructure);
@@ -286,6 +288,7 @@ namespace zh
 		std::string jointName;
 		jointName.assign(what[2].first, what[2].second);
 		skeletonContent = what.suffix();
+		
 		JointInfo* root = parseAJoint(skeletonContent,jointName);
 		free(bvhf_content);
 
