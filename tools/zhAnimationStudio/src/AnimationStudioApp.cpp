@@ -356,7 +356,10 @@ bool AnimationStudioApp::init( wxWindow* wnd )
 	mOgreRoot->addResourceLocation( "../../samples/data/OGRE/materials/textures", "FileSystem", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
 
 	// Load ZombieHorse resources
-	for( boost::filesystem::recursive_directory_iterator end, dir("../../samples/data/animations"); dir != end; ++dir )
+	// TODO: enable loading of all resources once Haixiang fixes parsing performance
+	int nres = 3;
+	for( boost::filesystem::recursive_directory_iterator end, dir("../../samples/data/animations");
+		dir != end, nres > 0; ++dir, --nres )
 	{
 		std::string path = (*dir).path().string();
 		std::transform( path.begin(), path.end(), path.begin(), ::tolower );
@@ -368,7 +371,6 @@ bool AnimationStudioApp::init( wxWindow* wnd )
 	zh::Skeleton* out_skel = zhAnimationSystem->getOutputSkeleton();
 	if( out_skel != NULL )
 		mFrmMain->getOgreWindow()->setRenderSkeleton(out_skel);
-	//displayJointMarkers( std::set<std::string>() );
 
 	// Update window contents
 	mFrmMain->refresh();

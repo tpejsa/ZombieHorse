@@ -53,7 +53,7 @@ void OgreWindow::showGround( bool show )
 	}
 
 	// Setup ground
-	ManualObject* ground = scene_mgr->createManualObject( "Ground" );
+	ManualObject* ground = scene_mgr->createManualObject("Ground");
 	ground->begin( "Samples/VisageGround", RenderOperation::OT_TRIANGLE_LIST );
 	for( unsigned int i = 0; i < zhGround_Size; ++i )
 	{
@@ -189,8 +189,8 @@ void OgreWindow::setRenderSkeleton( zh::Skeleton* skel )
 	if( mRenderSkel != NULL )
 	{
 		// Delete existing skeleton
+		_destroyRenderSkeleton(mRenderSkel);
 		scene_mgr->getRootSceneNode()->removeAndDestroyChild( mRenderSkel->getName() );
-		scene_mgr->destroyAllManualObjects();
 	}
 
 	MaterialPtr bone_mat = MaterialManager::getSingleton().getByName( "BoneMat" );
@@ -203,7 +203,7 @@ void OgreWindow::setRenderSkeleton( zh::Skeleton* skel )
 		bone_mat->setDiffuse(zhSkeleton_BoneColor);
 	}
 
-	_createRenderSkeleton( skel->getRoot(), scene_mgr->getRootSceneNode(), NULL );
+	mRenderSkel = _createRenderSkeleton( skel->getRoot(), scene_mgr->getRootSceneNode(), NULL );
 
 	// Make sure skeleton's feet are touching the ground
 	/*zh::Skeleton::BoneIterator bone_i = skel->getBoneIterator();
@@ -413,12 +413,17 @@ void OgreWindow::OnSize( wxSizeEvent& evt )
 	gApp->resize( evt.GetSize().GetWidth(), evt.GetSize().GetHeight() );
 }
 
-void OgreWindow::_createRenderSkeleton( zh::Bone* bone, Ogre::SceneNode* renderParent, Ogre::SceneNode* parentObj )
+Ogre::SceneNode* OgreWindow::_createRenderSkeleton( zh::Bone* bone,
+	Ogre::SceneNode* renderParent, Ogre::SceneNode* parentObj )
 {
+	SceneManager* scene_mgr = gApp->getSceneManager();
+
 	SceneNode* rbone = renderParent->createChildSceneNode( bone->getName() );
 	rbone->setPosition( zhOgreVector3(bone->getInitialPosition()) );
 	SceneNode* rbone_obj = rbone->createChildSceneNode( rbone->getName() + "Obj" );
-	rbone_obj->attachObject( _createBox(bone->getName(),"BoneMat",zhSkeleton_BoneSize) );
+	if( scene_mgr->hasManualObject(bone->getName()) )
+		scene_mgr->destroyManualObject(bone->getName());
+	rbone_obj->attachObject( _createBox( bone->getName(), "BoneMat", zhSkeleton_BoneSize ) );
 
 	if( parentObj != NULL && bone->getParent()->getNumChildren() <= 1 )
 	{
@@ -436,6 +441,26 @@ void OgreWindow::_createRenderSkeleton( zh::Bone* bone, Ogre::SceneNode* renderP
 
 	if( bone->getNumChildren() <= 0 )
 		rbone_obj->scale( 0.5f, 0.5f, 0.5f );
+
+	return rbone;
+}
+
+void OgreWindow::_destroyRenderSkeleton( Ogre::SceneNode* bone )
+{
+	SceneManager* scene_mgr = gApp->getSceneManager();
+
+	// Destroy all objects attached to this bone
+	while( bone->numAttachedObjects() > 0 )
+	{
+		Ogre::MovableObject* obj = bone->getAttachedObject(0);
+		bone->detachObject(obj);
+		scene_mgr->destroyMovableObject(obj);
+	}
+
+	// Do the same for children, too
+	Ogre::SceneNode::ChildNodeIterator bone_i = bone->getChildIterator();
+	while( bone_i.hasMoreElements() )
+		_destroyRenderSkeleton( static_cast<Ogre::SceneNode*>( bone_i.getNext() ) );
 }
 
 ManualObject* OgreWindow::_createBox( const Ogre::String& name, const Ogre::String& matName, float size )

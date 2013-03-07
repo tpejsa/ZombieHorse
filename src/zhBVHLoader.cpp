@@ -227,12 +227,6 @@ namespace zh
 	}
 	bool BVHLoader::tryLoad( ResourcePtr res, const std::string& path )
 	{
-		static bool first = true;
-		if(first){
-			first = false;
-		}else{
-			return false;
-		}
 		zhAssert( res != NULL );
 		zhAssert( res->getClassId() == Resource_AnimationSet );
 

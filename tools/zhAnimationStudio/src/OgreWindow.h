@@ -142,7 +142,9 @@ public:
 
 private:
 
-	void _createRenderSkeleton( zh::Bone* bone, Ogre::SceneNode* renderParent, Ogre::SceneNode* parentObj );
+	Ogre::SceneNode* _createRenderSkeleton( zh::Bone* bone,
+		Ogre::SceneNode* renderParent, Ogre::SceneNode* parentObj );
+	void _destroyRenderSkeleton( Ogre::SceneNode* bone );
 	ManualObject* _createBox( const Ogre::String& name, const Ogre::String& matName, float size );
 
 	zh::Skeleton* mOutSkel; // ZombieHorse output skeleton

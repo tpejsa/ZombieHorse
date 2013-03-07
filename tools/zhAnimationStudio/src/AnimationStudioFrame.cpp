@@ -880,7 +880,7 @@ void AnimationStudioFrame::OnTool_Play( wxCommandEvent& evt )
 			wxTextCtrl* txt_framerate = static_cast<wxTextCtrl*>( FindWindowById( ID_txtFrameRate, mTbPlayer ) );
 			int framerate = fromString<int>( txt_framerate->GetValue().To8BitData() );
 			if( framerate <= 0 ) framerate = anim->getFrameRate();
-			zhAnimationSystem->setAnimationRate( anim->getFrameRate() > 0 ? framerate/anim->getFrameRate() : 1 );
+			zhAnimationSystem->setAnimationRate( anim->getFrameRate() > 0 ? ((float)framerate)/anim->getFrameRate() : 1 );
 			zhAnimationSystem->playAnimationNow( anim->getFullName() );
 		}
 	}

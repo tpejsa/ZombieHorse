@@ -169,6 +169,7 @@ void AnimationTransitionBlender::addTransition( AnimationNode* node )
 		if( psnode != mCurrentNode )
 		{
 			psnode->setParams( mTransitionQueue.back().getTargetParams() );
+			// TODO: I'm pretty sure this is a bug...
 		}
 	}
 
@@ -447,7 +448,7 @@ void AnimationTransitionBlender::_updateNode( float dt )
 	mCurrentNode, Transition1, Transition2, ...
 
 	*/
-
+	
 	if( mTransitionQueue.empty() )
 	{
 		if( mDefaultNode != NULL )
