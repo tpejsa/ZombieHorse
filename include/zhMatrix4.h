@@ -31,12 +31,12 @@ namespace zh
 
 enum EulerRotOrder
 {
-	EulerRotOrder_XYZ,
-	EulerRotOrder_XZY,
-	EulerRotOrder_YXZ,
-	EulerRotOrder_YZX,
-	EulerRotOrder_ZXY,
-	EulerRotOrder_ZYX
+	EulerRotOrder_XYZ = 123,
+	EulerRotOrder_XZY = 132,
+	EulerRotOrder_YXZ = 213,
+	EulerRotOrder_YZX = 231,
+	EulerRotOrder_ZXY = 312,
+	EulerRotOrder_ZYX = 321
 };
 
 /**

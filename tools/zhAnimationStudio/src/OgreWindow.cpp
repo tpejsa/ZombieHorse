@@ -265,7 +265,7 @@ void OgreWindow::updateRenderSkeletonPose( zh::Skeleton* skel )
 		if( bone->getWorldPosition().y < feet_height )
 			feet_height = bone->getWorldPosition().y;
 	}
-	scene_mgr->getSceneNode( skel->getRoot()->getName() )->translate(0,-feet_height,0);
+	//scene_mgr->getSceneNode( skel->getRoot()->getName() )->translate(0,-feet_height,0);
 }
 
 void OgreWindow::createPrettyObject( const Ogre::String& name,
