@@ -40,8 +40,8 @@ SOFTWARE.
 #define zhSkeleton_BoneSize 0.2f
 #define zhSkeleton_BoneColor Ogre::ColourValue(0,0.6f,0.2f)
 #define zhSkeleton_MarkerSize 12.f
-#define zhSkeleton_MarkerColor Ogre::ColourValue(0.6f,0.1f,0.4f)
-#define zhSkeleton_PathColor Ogre::ColourValue(0.6f,0.1f,0.1f)
+#define zhSkeleton_MarkerColor Ogre::ColourValue(0.8f,0.2f,0.6f)
+#define zhSkeleton_TraceColor Ogre::ColourValue(0.8f,0.2f,0.2f)
 
 #define zhCamera_Pos Ogre::Vector3( 50.f, 50.f, 50.f )
 #define zhCamera_Focus Ogre::Vector3( 0.f, 12.f, 0.f )

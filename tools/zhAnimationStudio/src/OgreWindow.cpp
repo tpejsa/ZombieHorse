@@ -91,7 +91,7 @@ void OgreWindow::showGround( bool show )
 		}
 	}
 	ground->end();
-	scene_mgr->getRootSceneNode()->createChildSceneNode( "Ground" )->attachObject(ground);
+	scene_mgr->getRootSceneNode()->createChildSceneNode("Ground")->attachObject(ground);
 }
 
 void OgreWindow::showSkybox( bool show )
@@ -132,22 +132,6 @@ void OgreWindow::showCoordAxesOnBone( const Ogre::String& boneName, bool show )
 			return;
 		}
 	}
-	
-	// find specified bone
-	/*OgreModelController* omc = static_cast<OgreModelController*>( gApp->getCurrentCharacter()->getModelController() );
-	OgreModelController::EntityConstIterator oei = omc->getEntityConstIterator();
-	while( !oei.end() )
-	{
-		Ogre::Entity* oent = oei.next();
-		if( oent->hasSkeleton() )
-		{
-			oskel = oent->getSkeleton();
-			zhAssert( oskel->hasBone(boneName) );
-
-			break;
-		}
-	}*/
-	// TODO: figure out what the bone is
 
 	zhAssert( oskel != NULL );
 
@@ -219,24 +203,20 @@ void OgreWindow::setRenderSkeleton( zh::Skeleton* skel )
 		bone_mat->setDiffuse(zhSkeleton_BoneColor);
 	}
 
-	/*
-	skel = new zh::Skeleton("TestSkeleton");
-	zh::Bone* pelvis = skel->createBone(0,"pelvis");
-	zh::Bone* lHip = skel->createBone(1,"lHip");
-	zh::Bone* rHip = skel->createBone(2,"rHip");
-	zh::Bone* lKnee = skel->createBone(3,"lKnee");
-	zh::Bone* rKnee = skel->createBone(4,"rKnee");
-	pelvis->setInitialPosition( zh::Vector3(0,0,0) );
-	pelvis->addChild(lHip);
-	lHip->setInitialPosition( zh::Vector3(15,-15,0) );
-	pelvis->addChild(rHip);
-	rHip->setInitialPosition( zh::Vector3(-15,-15,0) );
-	lHip->addChild(lKnee);
-	lKnee->setInitialPosition( zh::Vector3(0,-30,0) );
-	rHip->addChild(rKnee);
-	rKnee->setInitialPosition( zh::Vector3(0,-30,0) );
-	*/
 	_createRenderSkeleton( skel->getRoot(), scene_mgr->getRootSceneNode(), NULL );
+
+	// Make sure skeleton's feet are touching the ground
+	zh::Skeleton::BoneIterator bone_i = skel->getBoneIterator();
+	float feet_height = FLT_MAX;
+	while( bone_i.hasMore() )
+	{
+		zh::Bone* bone = bone_i.next();
+		if( bone->getWorldPosition().y < feet_height )
+			feet_height = bone->getWorldPosition().y;
+	}
+	scene_mgr->getSceneNode("Ground")->translate(0,feet_height,0);
+	gApp->getCamera()->setPosition( gApp->getCamera()->getPosition() + Ogre::Vector3(0,feet_height,0) );
+	mCamFocus += Ogre::Vector3(0,feet_height,0);
 }
 
 void OgreWindow::updateRenderSkeletonPose( zh::Skeleton* skel )
@@ -255,17 +235,6 @@ void OgreWindow::updateRenderSkeletonPose( zh::Skeleton* skel )
 		rbone->setPosition( zhOgreVector3(bone->getPosition()) );
 		rbone->setOrientation( zhOgreQuat(bone->getOrientation()) );
 	}
-
-	// Make sure skeleton's feet are touching the ground
-	zh::Skeleton::BoneIterator bone_i = skel->getBoneIterator();
-	float feet_height = FLT_MAX;
-	while( bone_i.hasMore() )
-	{
-		zh::Bone* bone = bone_i.next();
-		if( bone->getWorldPosition().y < feet_height )
-			feet_height = bone->getWorldPosition().y;
-	}
-	scene_mgr->getSceneNode( skel->getRoot()->getName() )->translate(0,-feet_height,0);
 }
 
 void OgreWindow::createPrettyObject( const Ogre::String& name,
@@ -276,7 +245,7 @@ void OgreWindow::createPrettyObject( const Ogre::String& name,
 	Ogre::SceneManager* scene_mgr = gApp->getSceneManager();
 	zhAssert( !scene_mgr->hasEntity(name) );
 
-	// create material for the pretty object
+	// Create material for the pretty object
 	MaterialPtr psmat = MaterialManager::getSingleton().create( name, "General" );
 	psmat->setReceiveShadows(false);
 	psmat->getTechnique(0)->setLightingEnabled(false);
@@ -284,7 +253,8 @@ void OgreWindow::createPrettyObject( const Ogre::String& name,
 	psmat->getTechnique(0)->setDepthWriteEnabled(false);
 	psmat->getTechnique(0)->setPointSize(pSize);
 	
-	// create the pretty object in the scene
+	// Create the pretty object in the scene
+	deletePrettyObject(name); // delete any existing object with that name
 	ManualObject* psobj = scene_mgr->createManualObject(name);
 	psobj->begin( name, objType );
 	for( unsigned int pti = 0; pti < points.size(); ++pti )

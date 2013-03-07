@@ -28,6 +28,17 @@ SOFTWARE.
 class AnimationStudioFrame;
 
 /**
+* @brief Timer used for rendering at constant framerate.
+*/
+class RenderTimer : public wxTimer
+{
+
+public:
+
+	void Notify();
+};
+
+/**
 * @brief Animation Studio application class.
 */
 class AnimationStudioApp : public wxApp, public FrameListener
@@ -103,11 +114,6 @@ public:
 	zh::Animation* getCurrentAnimation() const;
 
 	/**
-	* Resizes the render window.
-	*/
-	void resize( unsigned int width, unsigned int height );
-
-	/**
 	* If true, animation is enabled (updates are sent to ZombieHorse system).
 	*/
 	bool getAnimationEnabled() const { return mAnimEnabled; }
@@ -154,6 +160,14 @@ public:
 	bool hasJointTrace( const std::string& boneName ) const;
 
 	/**
+	* Toggles rendering at constant framerate on/off.
+	*
+	* @remark Frame rate will be locked to the frame rate of the currently
+	* selected animation, as long as the latter is 20 fps or higher.
+	*/
+	void useConstFrameRate( bool useConstFR = true );
+
+	/**
 	* OGRE calls this method at the beginning of a new frame.
 	*/
 	bool frameStarted( const FrameEvent& evt );
@@ -162,6 +176,11 @@ public:
 	* OGRE calls this method at the end of the current frame.
 	*/
 	bool frameEnded( const FrameEvent& evt );
+
+	/**
+	* Resizes the render window.
+	*/
+	void resize( unsigned int width, unsigned int height );
 
 	/**
 	* This method is called on application initialization.
@@ -190,12 +209,15 @@ protected:
 	bool loadResourceLocations(); ///< Loads resource locations from resources.cfg.
 	bool createScene(); ///< Creates the default scene.
 	bool destroyScene(); ///< Destroys the default scene.
-
 	bool initZombieHorse(); ///< Initializes ZombieHorse system.
+
+	// Compute joint trace path (piecewise linear) for the specified set of bones and the current animation...
+	void _computeJointTracePath( const std::string& boneName, std::vector<Ogre::Vector3>& path );
 
 	DECLARE_EVENT_TABLE()
 
 	AnimationStudioFrame* mFrmMain;
+	RenderTimer* mRenderTimer;
 
 	Root *mOgreRoot; ///< OGRE system.
 	Camera* mCam; ///< Camera.
@@ -208,6 +230,7 @@ protected:
 	// Motion visualization
 	std::set<std::string> mJointsWithMarkers;
 	std::set<std::string> mTracedJoints;
+	zh::Animation* mTracedJointAnim;
 	std::map<std::string, std::vector<std::pair<float,zh::Vector3>>> mTracedJointPaths;
 };
 

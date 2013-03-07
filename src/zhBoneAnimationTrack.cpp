@@ -30,6 +30,7 @@ namespace zh
 TransformKeyFrame::TransformKeyFrame( float time, unsigned int index )
 : KeyFrame( time, index )
 {
+	mScale = Vector3(1,1,1);
 }
 
 TransformKeyFrame::~TransformKeyFrame()

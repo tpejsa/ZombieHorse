@@ -33,10 +33,20 @@ SOFTWARE.
 
 AnimationStudioApp* gApp = NULL;
 
+void RenderTimer::Notify()
+{
+	zh::Animation* cur_anim = gApp->getCurrentAnimation();
+	if( cur_anim == NULL || cur_anim->getFrameRate() < 20 )
+		Stop();
+	else
+		gApp->getOgreRoot()->renderOneFrame();
+}
+
 AnimationStudioApp::AnimationStudioApp()
 : mOgreRoot(NULL), mCam(NULL), mSceneMgr(NULL), mRenderWnd(NULL),
-mCurAnim(NULL), mAnimEnabled(true)
+mCurAnim(NULL), mAnimEnabled(true), mTracedJointAnim(NULL)
 {
+	mRenderTimer = new RenderTimer();
 }
 
 AnimationStudioApp::~AnimationStudioApp()
@@ -96,8 +106,18 @@ zh::Animation* AnimationStudioApp::selectAnimation( const string& anim )
 			return NULL;
 	}
 
-	mCurAnim = zhAnimationSystem->getAnimation(anim);
 	zhAnimationSystem->stopAnimation();
+	mCurAnim = zhAnimationSystem->getAnimation(anim);
+
+	// Position camera so that the whole motion is visible
+	float minx, maxx, miny, maxy, minz, maxz;
+	mCurAnim->computeAnimationBounds( minx, maxx, miny, maxy, minz, maxz );
+	// TODO
+
+	// Refresh joint traces
+	traceJointPaths( std::set<std::string>(), false );
+	if( !mTracedJoints.empty() )
+		traceJointPaths(mTracedJoints);
 }
 
 void AnimationStudioApp::deselectAnimation()
@@ -108,39 +128,6 @@ void AnimationStudioApp::deselectAnimation()
 zh::Animation* AnimationStudioApp::getCurrentAnimation() const
 {
 	return mCurAnim;
-}
-
-/*void AnimationStudioApp::applyAnimation( const std::string& animSetName, const std::string& animName, float time )
-{
-	if( mChar == NULL )
-	{
-		// no character loaded
-		wxMessageBox( "Unable to apply animation, no character loaded.",
-			"Error", wxOK | wxICON_EXCLAMATION );
-		return;
-	}
-
-	AnimationSetPtr anim_set = getAnimationSet( mChar->getId(), animSetName );
-	if( anim_set == NULL || !anim_set->hasAnimation(animName) )
-	{
-		// animation does not exist
-		wxMessageBox( "Unable to find animation " + animSetName + ":" + animName,
-			"Error", wxOK | wxICON_EXCLAMATION );
-		return;
-	}
-
-	zh::Animation* anim = anim_set->getAnimation(animName);
-	Model* mdl = mChar->getModelController()->getModel();
-
-	mdl->getSkeleton()->resetToInitialPose();
-	anim->apply( mdl, time, 1, 1, zh::Animation::EmptyBoneMask );
-	mChar->getModelController()->update(0);
-}*/
-
-void AnimationStudioApp::resize( unsigned int width, unsigned int height )
-{
-	if( mRenderWnd )
-		mRenderWnd->windowMovedOrResized();
 }
 
 void AnimationStudioApp::displayJointMarkers( const std::set<std::string>& boneNames, bool enable )
@@ -173,6 +160,8 @@ void AnimationStudioApp::displayJointMarkers( const std::set<std::string>& boneN
 		std::set_union( mJointsWithMarkers.begin(), mJointsWithMarkers.end(),
 			bone_names.begin(), bone_names.end(),
 			std::inserter( mJointsWithMarkers, mJointsWithMarkers.end() ) );
+
+		// Joint marker points
 		std::vector<Ogre::Vector3> pts;
 		pts.push_back(Ogre::Vector3(0,0,0));
 
@@ -200,10 +189,59 @@ bool AnimationStudioApp::hasJointMarker( const std::string& boneName ) const
 
 void AnimationStudioApp::traceJointPaths( const std::set<std::string>& boneNames, bool enable )
 {
+	zh::Skeleton* skel = zhAnimationSystem->getOutputSkeleton();
+	if( skel == NULL )
+		return;
+	std::set<std::string> bone_names = boneNames;
+	
+	if( bone_names.empty() )
+	{
+		zh::Skeleton::BoneConstIterator bone_i = skel->getBoneConstIterator();
+		while( bone_i.hasMore() )
+			bone_names.insert( bone_i.next()->getName() );
+	}
+
+	if(!enable)
+	{
+		std::set<std::string> results;
+		std::set_difference( mTracedJoints.begin(), mTracedJoints.end(),
+			bone_names.begin(), bone_names.end(), std::inserter( results, results.end() ) );
+		mTracedJoints = results;
+		mTracedJointAnim = NULL;
+
+		for( std::set<std::string>::const_iterator jmi = boneNames.begin();
+			jmi != boneNames.end(); ++jmi )
+			mFrmMain->getOgreWindow()->deletePrettyObject("Trace"+*jmi);
+	}
+	else
+	{
+		if( getCurrentAnimation() == NULL )
+			return;
+		else
+			mTracedJointAnim = getCurrentAnimation();
+
+		std::set_union( mTracedJoints.begin(), mTracedJoints.end(),
+			bone_names.begin(), bone_names.end(),
+			std::inserter( mTracedJoints, mTracedJoints.end() ) );
+
+		for( std::set<std::string>::const_iterator jmi = bone_names.begin();
+			jmi != bone_names.end(); ++jmi )
+		{
+			std::vector<Ogre::Vector3> path;
+			_computeJointTracePath( *jmi, path );
+
+			mFrmMain->getOgreWindow()->createPrettyObject(
+				"Trace"+*jmi, Ogre::RenderOperation::OT_LINE_STRIP, path,
+				zhSkeleton_TraceColor, zhSkeleton_MarkerSize, RENDER_QUEUE_WORLD_GEOMETRY_2 );
+		}
+	}
 }
 
 void AnimationStudioApp::traceJointPath( const std::string& boneName, bool enable )
 {
+	std::set<std::string> bone_names;
+	bone_names.insert(boneName);
+	traceJointPaths( bone_names, enable );
 }
 
 bool AnimationStudioApp::hasJointTrace( const std::string& boneName ) const
@@ -211,10 +249,27 @@ bool AnimationStudioApp::hasJointTrace( const std::string& boneName ) const
 	return mTracedJoints.count(boneName) > 0;
 }
 
+void AnimationStudioApp::useConstFrameRate( bool useConstFR )
+{
+	mRenderTimer->Stop();
+	zh::Animation* cur_anim = getCurrentAnimation();
+	if( useConstFR && cur_anim != NULL && cur_anim->getFrameRate() >= 20 )
+		mRenderTimer->Start( 1000.f/cur_anim->getFrameRate() );
+}
+
 bool AnimationStudioApp::frameStarted( const FrameEvent& evt )
 {
+	if( mCurAnim != mTracedJointAnim )
+	{
+		traceJointPaths( std::set<std::string>(), false ); // disable joint traces when no anim. selected
+
+		if( mCurAnim != NULL && !mTracedJoints.empty() )
+			// Animation changed, joint traces must be refreshed
+			traceJointPaths( mTracedJoints);
+	}
+
 	if( mAnimEnabled )
-		// update ZombieHorse System
+		// Update the ZombieHorse system
 		zhAnimationSystem->update( evt.timeSinceLastFrame );
 
 	// Apply updated pose to the skeleton in viewport
@@ -226,6 +281,12 @@ bool AnimationStudioApp::frameStarted( const FrameEvent& evt )
 bool AnimationStudioApp::frameEnded( const FrameEvent& evt )
 {
 	return true;
+}
+
+void AnimationStudioApp::resize( unsigned int width, unsigned int height )
+{
+	if( mRenderWnd )
+		mRenderWnd->windowMovedOrResized();
 }
 
 bool AnimationStudioApp::OnInit()
@@ -257,6 +318,10 @@ int AnimationStudioApp::OnExit()
 
 void AnimationStudioApp::OnIdle( wxIdleEvent& evt )
 {
+	if( mRenderTimer->IsRunning() )
+		// Rendering at constant framerate, skip this
+		return;
+
 	mOgreRoot->renderOneFrame();
 	evt.RequestMore();
 }
@@ -434,6 +499,23 @@ bool AnimationStudioApp::initZombieHorse()
 	zhAnimationSearchSystem->init();
 
 	return true;
+}
+
+void AnimationStudioApp::_computeJointTracePath( const std::string& boneName,
+	std::vector<Ogre::Vector3>& path )
+{
+	zh::Skeleton* skel = zhAnimationSystem->getOutputSkeleton();
+	zhAssert( skel != NULL );
+	zhAssert( mTracedJointAnim != NULL );
+	
+	float dt = 1/60.f;
+	for( float t = 0; t <= mTracedJointAnim->getLength(); t += dt )
+	{
+		skel->resetToInitialPose();
+		mTracedJointAnim->apply( skel, t, 1, 1, zh::Animation::EmptyBoneMask );
+		zh::Vector3 pt = skel->getBone(boneName)->getWorldPosition();
+		path.push_back( zhOgreVector3(pt) );
+	}
 }
 
 BEGIN_EVENT_TABLE( AnimationStudioApp, wxApp )
