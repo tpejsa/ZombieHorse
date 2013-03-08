@@ -154,8 +154,14 @@ AnimationSetPtr AnimationSystem::loadAnimationSet( const std::string& path, cons
 	parsePathStr( path, dir, filename, animset_name, ext );
 	int asi = 0;
 	std::string banimset_name = animset_name;
-	while( anim_mgr->hasResource(animset_name) )
-		animset_name = banimset_name + toString<int>(asi++);
+	if( anim_mgr->hasResource(animset_name) )
+	{
+		zhLog( "AnimationSystem", "loadAnimationSet",
+			"WARNING: Unable to load animation set %s from path %s. Animation set by that name already exists.",
+			animset_name.c_str(), path.c_str() );
+		
+		return AnimationSetPtr::DynamicCast<zh::Resource>( anim_mgr->getResource(animset_name) );
+	}
 
 	// Determine animation set ID
 	unsigned int animset_id = 0;
@@ -247,15 +253,40 @@ bool AnimationSystem::hasAnimationSet( const std::string& name ) const
 Animation* AnimationSystem::createAnimationFromSegment( const std::string& newAnimName,
 	const std::string& origAnimName, float startTime, float length )
 {
-	// TODO
-	/*
+	zhLog( "AnimationSystem", "createAnimationFromSegment",
+		"Creating a new animation %s from segment of existing animation %s.",
+		newAnimName.c_str(), origAnimName.c_str() );
+
+	if( !hasAnimation(origAnimName) )
+	{
+		zhLog( "AnimationSystem", "createAnimationFromSegment",
+		"ERROR: Unable to create new animation %s from segment of existing animation %s. Original animation does not exist.",
+		newAnimName.c_str(), origAnimName.c_str() );
+		return NULL;
+	}
+
+	Animation* orig_anim = getAnimation(origAnimName);
+	AnimationSetPtr anim_set = orig_anim->getAnimationSet();
+
+	if( hasAnimation( zhA(anim_set->getName(),newAnimName) ) )
+	{
+		zhLog( "AnimationSystem", "createAnimationFromSegment",
+		"ERROR: Unable to create new animation %s from segment of existing animation %s. Animation by that name already exists.",
+		newAnimName.c_str(), origAnimName.c_str() );
+		return NULL;
+	}
+
+	// Clamp start and end times if necessary
+	startTime = startTime < 0 ? 0 : startTime;
+	length = startTime+length > orig_anim->getLength() ? orig_anim->getLength()-startTime : length;
+
 	// Create new animation
 	unsigned short anim_id = 0;
 	while( anim_set->hasAnimation(anim_id) ) ++anim_id;
-	anim = anim_set->createAnimation( anim_id, anim_name );
+	Animation* anim = anim_set->createAnimation( anim_id, newAnimName );
 
 	// Fill up animation with key-frames
-	zh::Animation::BoneTrackConstIterator bti = raw_anim->getBoneTrackConstIterator();
+	zh::Animation::BoneTrackConstIterator bti = orig_anim->getBoneTrackConstIterator();
 	while( !bti.end() )
 	{
 		BoneAnimationTrack* rbat = bti.next();
@@ -263,33 +294,40 @@ Animation* AnimationSystem::createAnimationFromSegment( const std::string& newAn
 		
 		// create initial key-frame
 		zh::TransformKeyFrame* tkf = static_cast<zh::TransformKeyFrame*>( bat->createKeyFrame(0) );
-		rbat->getInterpolatedKeyFrame( anim_seg.getStartTime(), tkf );
+		rbat->getInterpolatedKeyFrame( startTime, tkf );
 
 		// create final key-frame
-		tkf = static_cast<zh::TransformKeyFrame*>( bat->createKeyFrame( anim_seg.getEndTime() - anim_seg.getStartTime() ) );
-		rbat->getInterpolatedKeyFrame( anim_seg.getEndTime(), tkf );
+		tkf = static_cast<zh::TransformKeyFrame*>( bat->createKeyFrame(length) );
+		rbat->getInterpolatedKeyFrame( startTime + length, tkf );
 
 		// copy intervening key-frames
 		for( unsigned int kfi = 0; kfi < rbat->getNumKeyFrames(); ++kfi )
 		{
 			zh::TransformKeyFrame* rtkf = static_cast<zh::TransformKeyFrame*>( rbat->getKeyFrame(kfi) );
 			
-			if( rtkf->getTime() <= anim_seg.getStartTime() )
+			if( rtkf->getTime() <= startTime )
 				continue;
-			if( rtkf->getTime() >= anim_seg.getEndTime() )
+			if( rtkf->getTime() >= startTime+length )
 				break;
 
-			tkf = static_cast<zh::TransformKeyFrame*>( bat->createKeyFrame( rtkf->getTime() - anim_seg.getStartTime() ) );
+			tkf = static_cast<zh::TransformKeyFrame*>( bat->createKeyFrame( rtkf->getTime() - startTime ) );
 			tkf->setTranslation( rtkf->getTranslation() );
 			tkf->setRotation( rtkf->getRotation() );
 			tkf->setScale( rtkf->getScale() );
 		}
 	}
 
-	// TODO: Copy annots. as well
-	*/
+	// Add the new animation to the animation tree
+	AnimationSampler* node = static_cast<AnimationSampler*>(
+		mAnimTree->createNode( AnimationSampler::ClassId(), mAnimTree->getNumNodes(), anim->getFullName() )
+		);
+	node->setAnimation( anim->getAnimationSet(), anim->getId() );
+	mAnimTree->getNode("Root")->addChild(node);
+	// TODO: Add under correct retargetting node
 
-	return NULL;
+	// TODO: Copy annots. as well
+
+	return anim;
 }
 
 void AnimationSystem::deleteAnimation( const std::string& name )
@@ -394,8 +432,6 @@ void AnimationSystem::playAnimationNow( const std::string& animName )
 	mAnimTree->setApplyMover(false);
 	AnimationTransitionBlender* root =
 		static_cast<AnimationTransitionBlender*>( mAnimTree->getRoot() );
-	//root->addTransition(animName);
-	//root->addTransition(animName);
 	root->setDefaultNode(animName);
 	root->setPlaying();
 }

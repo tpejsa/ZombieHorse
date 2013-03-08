@@ -144,14 +144,14 @@ void BoneAnimationTrack::apply( Skeleton* skel, float time, float weight, float 
 {
 	TransformKeyFrame tkf( time, 0 );
 	Bone* bone = skel->getBone(mBoneId);
+	if( bone == NULL )
+		// Skeleton doesn't contain a bone for this track
+		return;
 
 	getInterpolatedKeyFrame( time, &tkf );
 
-	// apply translation
 	bone->translate( tkf.getTranslation() * weight * scale );
-	// apply rotation
 	bone->rotate( Quat().slerp( tkf.getRotation(), weight ) );
-	// apply scale
 	bone->scale( Vector3(1,1,1) + ( Vector3(1,1,1) - tkf.getScale() ) * weight * scale );
 }
 

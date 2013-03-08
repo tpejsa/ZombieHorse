@@ -40,7 +40,7 @@ enum
 	ID_mnViewShowSkel,
 	ID_mnViewShowGround,
 	ID_mnViewShowSkybox,
-	ID_mnTools,
+	/*ID_mnTools,
 	ID_mnToolsDefineEndEffectors,
 	ID_mnToolsDetectPlantConstr,
 	ID_mnToolsFootskateCleanup,
@@ -56,28 +56,31 @@ enum
 	ID_mnToolsViewMotionGraph2,
 	ID_mnToolsDefineParam,
 	ID_mnToolsMatchAnnots,
-	ID_mnToolsBuildBlendCurves,
+	ID_mnToolsBuildBlendCurves,*/
 	ID_mnHelp,
 	ID_mnHelpAbout,
-	ID_dlgProjectSettings,
+	/*ID_dlgProjectSettings,
 	ID_dlgBuildAnimIndex,
-	ID_dlgFindSimilarMotion,
-	ID_tbAnnots,
-	ID_btnAnnotStart,
-	ID_cbAnnots,
-	ID_btnClearAnnots,
+	ID_dlgFindSimilarMotion,*/
 	ID_tbPlayer,
 	ID_btnPlay,
 	ID_btnPlaySequence,
 	ID_btnStop,
-	ID_txtParams,
+	//ID_txtParams,
+	ID_btnStepPrev,
+	ID_btnStepNext,
 	ID_stxPlayTime,
 	ID_stxPlayLength,
 	ID_slPlaySlider,
 	ID_txtFrameRate,
 	ID_stxOrigFrameRate,
+	ID_tbEditor,
 	ID_btnSelect,
 	ID_btnDeselect,
+	ID_btnCreateAnimFromSelection,
+	/*ID_btnAnnotStart,
+	ID_cbAnnots,
+	ID_btnClearAnnots,*/
 	ID_wndOgre,
 	//ID_wndTimeline,
 	ID_wndProjectView,
@@ -142,7 +145,7 @@ public:
 	void OnMenu_ViewShowSkel( wxCommandEvent& evt );
 	void OnMenu_ViewShowGround( wxCommandEvent& evt );
 	void OnMenu_ViewShowSkybox( wxCommandEvent& evt );
-	void OnMenu_ToolsDefineEndEffectors( wxCommandEvent& evt );
+	/*void OnMenu_ToolsDefineEndEffectors( wxCommandEvent& evt );
 	void OnMenu_ToolsDetectPlantConstr( wxCommandEvent& evt );
 	void OnMenu_ToolsFootskateCleanup( wxCommandEvent& evt );
 	void OnMenu_ToolsMirror( wxCommandEvent& evt );
@@ -157,18 +160,21 @@ public:
 	void OnMenu_ToolsViewMotionGraph2( wxCommandEvent& evt );
 	void OnMenu_ToolsDefineParam( wxCommandEvent& evt );
 	void OnMenu_ToolsMatchAnnots( wxCommandEvent& evt );
-	void OnMenu_ToolsBuildBlendCurves( wxCommandEvent& evt );
+	void OnMenu_ToolsBuildBlendCurves( wxCommandEvent& evt );*/
 	void OnMenu_HelpAbout( wxCommandEvent& evt );
-	void OnTool_AnnotStart( wxCommandEvent& evt );
-	void OnComboBox_Annots( wxCommandEvent& evt );
-	void OnTool_ClearAnnots( wxCommandEvent& evt );
 	void OnTool_Play( wxCommandEvent& evt );
 	void OnTool_PlaySequence( wxCommandEvent& evt );
 	void OnTool_Stop( wxCommandEvent& evt );
+	void OnTool_StepPrev( wxCommandEvent& evt );
+	void OnTool_StepNext( wxCommandEvent& evt );
 	void OnScroll_PlaySlider( wxScrollEvent& evt );
 	void OnTextEnter_FrameRate( wxCommandEvent& evt );
 	void OnTool_Select( wxCommandEvent& evt );
 	void OnTool_Deselect( wxCommandEvent& evt );
+	void OnTool_CreateAnimFromSelection( wxCommandEvent& evt );
+	/*void OnTool_AnnotStart( wxCommandEvent& evt );
+	void OnComboBox_Annots( wxCommandEvent& evt );
+	void OnTool_ClearAnnots( wxCommandEvent& evt );*/
 	void OnIdle( wxIdleEvent& evt );
 
 	DECLARE_EVENT_TABLE()
@@ -177,9 +183,9 @@ protected:
 
 	wxAuiManager mAuiMgr;
 	std::map<std::string, wxBitmap*> mBitmaps;
-	wxMenuBar* mbMain; ///< Pointer to the main menu.
-	wxToolBar* mTbAnnots; ///< Pointer to the annotation toolbar.
+	wxMenuBar* mbMain; ///< Pointer to the main menu.	
 	wxToolBar* mTbPlayer; ///< Pointer to the player toolbar.
+	wxToolBar* mTbEditor; ///< Pointer to the annotation toolbar.
 
 	bool mSelectMode;
 	float mSelectStart, mSelectEnd;

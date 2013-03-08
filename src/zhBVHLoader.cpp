@@ -104,6 +104,11 @@ namespace zh
 			return true;
 		}
 	};
+	void resetParsingData(){
+		channelToKeyFrame.clear();
+		totalChannels = 0;
+		JointInfo::resetID();
+	}
 	EulerRotOrder ParseChannelOrder(JointInfo* joint,string channels){
 		boost::cmatch what;
 		string channel[3];
@@ -273,7 +278,7 @@ namespace zh
 		std::string motionContent = content.substr(hierarchyEnd + 7,content.length() - (hierarchyEnd + 7));;
 		//parsing!!
 		//std::string offsetReg("HIERARCHY[\t\r\n\v\f]+ROOT Hips{[A-Za-z]+}");
-		JointInfo::resetID();
+		resetParsingData();
 
 		const boost::regex jointNameStructure(jointNameReg.c_str());
 		boost::cmatch what;

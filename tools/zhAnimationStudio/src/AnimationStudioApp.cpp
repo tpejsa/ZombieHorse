@@ -357,11 +357,13 @@ bool AnimationStudioApp::init( wxWindow* wnd )
 
 	// Load ZombieHorse resources
 	// TODO: enable loading of all resources once Haixiang fixes parsing performance
-	int nres = 3;
-	for( boost::filesystem::recursive_directory_iterator end, dir("../../samples/data/animations");
-		dir != end, nres > 0; ++dir, --nres )
+	boost::filesystem::recursive_directory_iterator end;
+	for( boost::filesystem::recursive_directory_iterator dir("./test_data");
+		dir != end; ++dir )
 	{
-		std::string path = (*dir).path().string();
+		boost::filesystem::directory_entry bdir = (*dir);
+		boost::filesystem::path bpath = bdir.path();
+		std::string path = bpath.string();
 		std::transform( path.begin(), path.end(), path.begin(), ::tolower );
 		if( path.substr(path.size()-4) ==  ".bvh" || path.substr(path.size()-4) ==  ".zha" )
 			zhAnimationSystem->loadAnimationSet(path);

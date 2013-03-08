@@ -38,7 +38,7 @@ SOFTWARE.
 
 AnimationStudioFrame::AnimationStudioFrame( wxWindowID id, const wxString &title, const wxPoint &pos, const wxSize &size )
 : wxFrame( NULL, id, title, pos, size, wxDEFAULT_FRAME_STYLE, "frmAnimationStudio" ),
-mbMain(NULL), mTbAnnots(NULL), mTbPlayer(NULL),
+mbMain(NULL), mTbPlayer(NULL), mTbEditor(NULL),
 mSelectMode(false), mSelectStart(0), mSelectEnd(-1000),
 mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 {
@@ -53,6 +53,10 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 	mBitmaps["ID_bmpPause"] = new wxBitmap( "ID_bmpPause", wxBITMAP_TYPE_BMP_RESOURCE );
 	mBitmaps["ID_bmpStop"] = new wxBitmap( "ID_bmpStop", wxBITMAP_TYPE_BMP_RESOURCE );
 	mBitmaps["ID_bmpStopDisabled"] = new wxBitmap( "ID_bmpStopDisabled", wxBITMAP_TYPE_BMP_RESOURCE );
+	mBitmaps["ID_bmpStepPrev"] = new wxBitmap( "ID_bmpStepPrev", wxBITMAP_TYPE_BMP_RESOURCE );
+	mBitmaps["ID_bmpStepPrevDisabled"] = new wxBitmap( "ID_bmpStepPrevDisabled", wxBITMAP_TYPE_BMP_RESOURCE );
+	mBitmaps["ID_bmpStepNext"] = new wxBitmap( "ID_bmpStepNext", wxBITMAP_TYPE_BMP_RESOURCE );
+	mBitmaps["ID_bmpStepNextDisabled"] = new wxBitmap( "ID_bmpStepNextDisabled", wxBITMAP_TYPE_BMP_RESOURCE );
 	mBitmaps["ID_bmpAnnotStart"] = new wxBitmap( "ID_bmpAnnotStart", wxBITMAP_TYPE_BMP_RESOURCE );
 	mBitmaps["ID_bmpAnnotStartDisabled"] = new wxBitmap( "ID_bmpAnnotStartDisabled", wxBITMAP_TYPE_BMP_RESOURCE );
 	mBitmaps["ID_bmpAnnotEnd"] = new wxBitmap( "ID_bmpAnnotEnd", wxBITMAP_TYPE_BMP_RESOURCE );
@@ -64,6 +68,9 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 	mBitmaps["ID_bmpSelectDisabled"] = new wxBitmap( "ID_bmpSelectDisabled", wxBITMAP_TYPE_BMP_RESOURCE );
 	mBitmaps["ID_bmpDeselect"] = new wxBitmap( "ID_bmpDeselect", wxBITMAP_TYPE_BMP_RESOURCE );
 	mBitmaps["ID_bmpDeselectDisabled"] = new wxBitmap( "ID_bmpDeselectDisabled", wxBITMAP_TYPE_BMP_RESOURCE );
+	mBitmaps["ID_bmpCreateAnimFromSelection"] = new wxBitmap( "ID_bmpCreateAnimFromSelection", wxBITMAP_TYPE_BMP_RESOURCE );
+	mBitmaps["ID_bmpCreateAnimFromSelectionDisabled"] =
+		new wxBitmap( "ID_bmpCreateAnimFromSelectionDisabled", wxBITMAP_TYPE_BMP_RESOURCE );
 
 	// set icon
 	this->SetIcon( wxICON( ID_icoAnimationStudio ) );
@@ -75,14 +82,10 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 	mWndAnimSequence = new AnimSequenceWindow( this, ID_wndAnimSequence );
 	mWndMotionVis = new MotionVisualizationWindow( this, ID_wndMotionVis );
 
-	//
-	// Create main menu:
-	//
-
+	// Create main menu
 	mbMain = new wxMenuBar();
 	wxMenu* menu = NULL;
-	wxMenu* submenu = NULL;
-	
+	wxMenu* submenu = NULL;	
 	menu = new wxMenu();
 	menu->AppendCheckItem( ID_mnViewShowSkel, wxT("Show Skeleton") );
 	menu->Check( ID_mnViewShowSkel, true );
@@ -91,13 +94,12 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 	menu->AppendCheckItem( ID_mnViewShowSkybox, wxT("Show Skybox") );
 	mbMain->Append( menu, wxT( "&View" ) );
 	menu->Check( ID_mnViewShowSkybox, true );
-	
-	menu = new wxMenu();
+	/*menu = new wxMenu();
 	menu->Append( ID_mnToolsDefineEndEffectors, wxT( "Define End-effectors" ) );
 	menu->Append( ID_mnToolsDetectPlantConstr, wxT( "Detect Plant Constr." ) );
 	menu->Append( ID_mnToolsFootskateCleanup, wxT( "Footskate Cleanup" ) );
 	menu->Append( ID_mnToolsMirror, wxT( "Mirror Animation" ) );
-	/*menu->AppendSeparator();
+	menu->AppendSeparator();
 	submenu = new wxMenu();
 	submenu->Append( ID_mnToolsBuildAnimIndex, wxT( "Build" ) );
 	submenu->Append( ID_mnToolsViewMatchWeb, wxT( "View Match Web" ) );
@@ -119,11 +121,10 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 	submenu->Append( ID_mnToolsBuildBlendCurves, wxT( "Build Blend Curves" ) );
 	menu->AppendSubMenu( submenu, "Current Animation" );
 	mbMain->Append( menu, wxT( "&Tools" ) );*/
-
 	menu = new wxMenu();
 	menu->Append( ID_mnHelpAbout, wxT( "About" ) );
 	mbMain->Append( menu, wxT( "&Help" ) );
-	
+
 	this->SetMenuBar(mbMain);
 
 	// create annotations toolbar
@@ -140,21 +141,27 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 		wxITEM_NORMAL, "Clear Annotations" );
 	mTbAnnots->Realize();*/
 
-	// create player toolbar
+	// Create player toolbar
 	mTbPlayer = new wxToolBar( this, ID_tbPlayer, wxDefaultPosition, wxDefaultSize,
 		wxNO_BORDER | wxTB_HORIZONTAL | wxTB_FLAT, "tbPlayer" );
 	mTbPlayer->AddCheckTool( ID_btnPlay, "btnPlay",
 		*mBitmaps["ID_bmpPlay"], *mBitmaps["ID_bmpPlayDisabled"],
 		"Play Current Animation" );
-	mTbPlayer->AddTool( ID_btnPlaySequence, "Play Sequence",
+	mTbPlayer->AddTool( ID_btnPlaySequence, "btnPlaySequence",
 		*mBitmaps["ID_bmpPlaySequence"], *mBitmaps["ID_bmpPlaySequenceDisabled"],
 		wxITEM_NORMAL, "Play Animation Sequence" );
-	mTbPlayer->AddTool( ID_btnStop, "Stop",
+	mTbPlayer->AddTool( ID_btnStop, "btnStop",
 		*mBitmaps["ID_bmpStop"], *mBitmaps["ID_bmpStopDisabled"],
 		wxITEM_NORMAL, "Stop Animation" );
-	/*mTbPlayer->AddControl( new wxTextCtrl( mTbPlayer, ID_txtParams,
-		wxEmptyString, wxDefaultPosition, wxSize( 80, 24 ) )
-		);*/
+	mTbPlayer->AddSeparator();
+	mTbPlayer->AddTool( ID_btnStepPrev, "btnStepPrev",
+		*mBitmaps["ID_bmpStepPrev"], *mBitmaps["ID_bmpStepPrevDisabled"],
+		wxITEM_NORMAL, "Step to Previous Frame" );
+	mTbPlayer->AddTool( ID_btnStepNext, "btnStepNext",
+		*mBitmaps["ID_bmpStepNext"], *mBitmaps["ID_bmpStepNextDisabled"],
+		wxITEM_NORMAL, "Step to Next Frame" );
+	//mTbPlayer->AddControl( new wxTextCtrl( mTbPlayer, ID_txtParams,
+		//wxEmptyString, wxDefaultPosition, wxSize( 80, 24 ) ) );
 	mTbPlayer->AddSeparator();
 	mTbPlayer->AddControl( new wxStaticText( mTbPlayer, ID_stxPlayTime, "00.00" ) );
 	mTbPlayer->AddControl( new wxStaticText( mTbPlayer, -1, "/" ) );
@@ -169,16 +176,22 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 	mTbPlayer->AddControl( new wxStaticText( mTbPlayer, ID_stxOrigFrameRate, "0" ) );
 	mTbPlayer->AddControl( new wxStaticText( mTbPlayer, -1, "Hz" ) );
 	mTbPlayer->AddControl( new wxSlider( mTbPlayer, ID_slPlaySlider, 0, 0, 1000, wxDefaultPosition, wxSize( 480, 24 ) ) );
-	mTbPlayer->AddSeparator();
-	mTbPlayer->AddCheckTool( ID_btnSelect, "btnSelect",
-		*mBitmaps["ID_bmpSelect"], *mBitmaps["ID_bmpSelectDisabled"],
-		"Select Animation Segment" );
-	mTbPlayer->AddTool( ID_btnDeselect, "Deselect",
-		*mBitmaps["ID_bmpDeselect"], *mBitmaps["ID_bmpDeselectDisabled"],
-		wxITEM_NORMAL, "Deselect Animation Segment" );
 	mTbPlayer->Realize();
 
-	// TODO: also add toolbar items for: see current anim. framerate, set desired framerate
+	// Create editor toolbar
+	mTbEditor = new wxToolBar( this, ID_tbEditor, wxDefaultPosition, wxDefaultSize,
+		wxNO_BORDER | wxTB_HORIZONTAL | wxTB_FLAT, "tbEditor" );
+	mTbEditor->AddCheckTool( ID_btnSelect, "btnSelect",
+		*mBitmaps["ID_bmpSelect"], *mBitmaps["ID_bmpSelectDisabled"],
+		"Select Animation Segment" );
+	mTbEditor->AddTool( ID_btnDeselect, "btnDeselect",
+		*mBitmaps["ID_bmpDeselect"], *mBitmaps["ID_bmpDeselectDisabled"],
+		wxITEM_NORMAL, "Deselect Animation Segment" );
+	mTbEditor->AddSeparator();
+	mTbEditor->AddTool( ID_btnCreateAnimFromSelection, "btnCreateAnimFromSelection",
+		*mBitmaps["ID_bmpCreateAnimFromSelection"], *mBitmaps["ID_bmpCreateAnimFromSelectionDisabled"],
+		wxITEM_NORMAL, "Create New Animation From Selection" );
+	mTbEditor->Realize();
 
 	// Add OGRE window to AUI manager
 	wxAuiPaneInfo wndOgre_pi;
@@ -225,21 +238,21 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 	wndMotionVis_pi.Caption( "Motion Visualization" );
 	mAuiMgr.AddPane( mWndMotionVis, wndMotionVis_pi );
 
-	// add tbAnnots to AUI manager
-	/*wxAuiPaneInfo tbAnnots_pi;
-	tbAnnots_pi.ToolbarPane();
-	tbAnnots_pi.Top();
-	tbAnnots_pi.Floatable();
-	tbAnnots_pi.CloseButton();
-	mAuiMgr.AddPane( mTbAnnots, tbAnnots_pi );*/
-
-	// add tbPlayer to AUI manager
+	// Add player toolbar to AUI manager
 	wxAuiPaneInfo tbPlayer_pi;
 	tbPlayer_pi.ToolbarPane();
 	tbPlayer_pi.Top();
 	tbPlayer_pi.Floatable();
 	tbPlayer_pi.CloseButton(false);
 	mAuiMgr.AddPane( mTbPlayer, tbPlayer_pi );
+
+	// Add editor toolbar to AUI manager
+	wxAuiPaneInfo tbEditor_pi;
+	tbEditor_pi.ToolbarPane();
+	tbEditor_pi.Top();
+	tbEditor_pi.Floatable();
+	tbEditor_pi.CloseButton(false);
+	mAuiMgr.AddPane( mTbEditor, tbEditor_pi );
 
 	// update AUI manager
 	mAuiMgr.Update();
@@ -304,7 +317,7 @@ void AnimationStudioFrame::OnMenu_ViewShowSkybox( wxCommandEvent& evt )
 	gApp->getAppFrame()->getOgreWindow()->showSkybox( mbMain->IsChecked( ID_mnViewShowSkybox ) );
 }
 
-void AnimationStudioFrame::OnMenu_ToolsDefineEndEffectors( wxCommandEvent& evt )
+/*void AnimationStudioFrame::OnMenu_ToolsDefineEndEffectors( wxCommandEvent& evt )
 {
 	// TODO: pop multichoice dialog with list of all bones, designate checked ones as end-effectors
 }
@@ -332,7 +345,7 @@ void AnimationStudioFrame::OnMenu_ToolsDetectPlantConstr( wxCommandEvent& evt )
 
 	// Detect plant constraints
 	// TODO: update this
-	/*const std::set<std::string>& ee_names = gApp->getEndEffectorSet( skel->getName() );
+	const std::set<std::string>& ee_names = gApp->getEndEffectorSet( skel->getName() );
 	for( std::set<std::string>::const_iterator eei = ee_names.begin(); eei != ee_names.end(); ++eei )
 	{
 		PlantConstrDetector* pcd = new PlantConstrDetector( skel, anim );
@@ -340,7 +353,7 @@ void AnimationStudioFrame::OnMenu_ToolsDetectPlantConstr( wxCommandEvent& evt )
 		pcd->setMinConstrLength(min_constrlength);
 		pcd->detect(*eei);
 		delete pcd;
-	}*/
+	}
 
 	// TODO: refresh appropriate displays
 }
@@ -370,7 +383,7 @@ void AnimationStudioFrame::OnMenu_ToolsMirror( wxCommandEvent& evt )
 
 void AnimationStudioFrame::OnMenu_ToolsBuildAnimIndex( wxCommandEvent& evt )
 {
-	/*Character* ch = gApp->getCurrentCharacter();
+	Character* ch = gApp->getCurrentCharacter();
 	Model* mdl = NULL;
 
 	if( gApp->getCurrentCharacter() != NULL )
@@ -460,12 +473,12 @@ void AnimationStudioFrame::OnMenu_ToolsBuildAnimIndex( wxCommandEvent& evt )
 	gApp->addAnimationIndex( gApp->getCurrentCharacter()->getId(), anim_index );
 
 	// refresh controls
-	refresh();*/
+	refresh();
 }
 
 void AnimationStudioFrame::OnMenu_ToolsViewMatchWeb( wxCommandEvent& evt )
 {
-	/*Character* ch = gApp->getCurrentCharacter();
+	Character* ch = gApp->getCurrentCharacter();
 	Model* mdl = NULL;
 
 	if( gApp->getCurrentCharacter() != NULL )
@@ -534,12 +547,12 @@ void AnimationStudioFrame::OnMenu_ToolsViewMatchWeb( wxCommandEvent& evt )
 	{
 		MatchWebViewDialog mwv_dlg( mw, this, wxID_ANY );
 		mwv_dlg.ShowModal();
-	}*/
+	}
 }
 
 void AnimationStudioFrame::OnMenu_ToolsSearchAnimIndex( wxCommandEvent& evt )
 {
-	/*Character* ch = gApp->getCurrentCharacter();
+	Character* ch = gApp->getCurrentCharacter();
 	Model* mdl = NULL;
 
 	if( gApp->getCurrentCharacter() != NULL )
@@ -653,12 +666,12 @@ void AnimationStudioFrame::OnMenu_ToolsSearchAnimIndex( wxCommandEvent& evt )
 	// TODO: anim. set modified
 
 	// refresh controls
-	refresh();*/
+	refresh();
 }
 
 void AnimationStudioFrame::OnMenu_ToolsBuildMotionGraph( wxCommandEvent& evt )
 {
-	/*Character* ch = gApp->getCurrentCharacter();
+	Character* ch = gApp->getCurrentCharacter();
 	Model* mdl = NULL;
 
 	if( gApp->getCurrentCharacter() != NULL )
@@ -698,12 +711,12 @@ void AnimationStudioFrame::OnMenu_ToolsBuildMotionGraph( wxCommandEvent& evt )
 
 	// inform user
 	wxMessageBox( "Finished building animation transitions. Time taken: " + toString<float>(build_time) + "s",
-		"Build Complete", wxOK|wxICON_INFORMATION );*/
+		"Build Complete", wxOK|wxICON_INFORMATION );
 }
 
 void AnimationStudioFrame::OnMenu_ToolsViewMotionGraph( wxCommandEvent& evt )
 {
-	/*if( gApp->getCurrentCharacter() == NULL )
+	if( gApp->getCurrentCharacter() == NULL )
 	{
 		wxMessageBox( "Cannot view motion graph. Character model not loaded.",
 			"Error", wxOK|wxICON_EXCLAMATION );
@@ -711,7 +724,7 @@ void AnimationStudioFrame::OnMenu_ToolsViewMotionGraph( wxCommandEvent& evt )
 	}
 
 	MotionGraphViewDialog dlg( this, wxID_ANY, MGView_Raw );
-	dlg.ShowModal();*/
+	dlg.ShowModal();
 }
 
 void AnimationStudioFrame::OnMenu_ToolsCreateAnimFromSeg( wxCommandEvent& evt )
@@ -735,15 +748,15 @@ void AnimationStudioFrame::OnMenu_ToolsCreateAnimFromSeg( wxCommandEvent& evt )
 
 void AnimationStudioFrame::OnMenu_ToolsBuildAnimSpace( wxCommandEvent& evt )
 {
-	/*// TODO: implement this
+	// TODO: implement this
 
 	// refresh controls
-	refresh();*/
+	refresh();
 }
 
 void AnimationStudioFrame::OnMenu_ToolsBuildTransitions( wxCommandEvent& evt )
 {
-	/*Model* mdl = NULL;
+	Model* mdl = NULL;
 	AnimationSpace *src_panim = NULL, *trg_panim = NULL;
 	zh::Animation *src_anim = NULL, *trg_anim = NULL;
 
@@ -825,7 +838,7 @@ void AnimationStudioFrame::OnMenu_ToolsBuildTransitions( wxCommandEvent& evt )
 			zhAnimationSearchSystem->buildTransitions( mdl, src_panim, trg_anim );
 		else
 			zhAnimationSearchSystem->buildTransitions( mdl, src_anim, trg_anim );
-	}*/
+	}
 }
 
 void AnimationStudioFrame::OnMenu_ToolsViewMotionGraph2( wxCommandEvent& evt )
@@ -842,21 +855,9 @@ void AnimationStudioFrame::OnMenu_ToolsMatchAnnots( wxCommandEvent& evt )
 
 void AnimationStudioFrame::OnMenu_ToolsBuildBlendCurves( wxCommandEvent& evt )
 {
-}
+}*/
 
 void AnimationStudioFrame::OnMenu_HelpAbout( wxCommandEvent& evt )
-{
-}
-
-void AnimationStudioFrame::OnTool_AnnotStart( wxCommandEvent& evt )
-{
-}
-
-void AnimationStudioFrame::OnComboBox_Annots( wxCommandEvent& evt )
-{
-}
-
-void AnimationStudioFrame::OnTool_ClearAnnots( wxCommandEvent& evt )
 {
 }
 
@@ -914,6 +915,14 @@ void AnimationStudioFrame::OnTool_Stop( wxCommandEvent& evt )
 	mTbPlayer->ToggleTool( ID_btnPlay, false );
 }
 
+void AnimationStudioFrame::OnTool_StepPrev( wxCommandEvent& evt )
+{
+}
+
+void AnimationStudioFrame::OnTool_StepNext( wxCommandEvent& evt )
+{
+}
+
 void AnimationStudioFrame::OnScroll_PlaySlider( wxScrollEvent& evt )
 {
 	zhAnimationSystem->setAnimationTime( evt.GetInt()/1000.f *
@@ -948,6 +957,38 @@ void AnimationStudioFrame::OnTool_Deselect( wxCommandEvent& evt )
 	mSelectStart = 0;
 	mSelectEnd = -1000.f;
 }
+
+void AnimationStudioFrame::OnTool_CreateAnimFromSelection( wxCommandEvent& evt )
+{
+	if( !hasSelection() )
+	{
+		wxMessageBox( "You must select the animation segment first.", "Select Animation Segment",
+			wxOK|wxICON_INFORMATION, this );
+		return;
+	}
+
+	AnimationSegment anim_seg = getSelection();
+	zhAnimationSystem->createAnimationFromSegment( anim_seg.getAnimation()->getName()
+		+ "[" + toString<float>(anim_seg.getStartTime()) + "-" + 
+		toString<float>(anim_seg.getEndTime()) + "]",
+		anim_seg.getAnimation()->getFullName(),
+		anim_seg.getStartTime(), anim_seg.getLength() );
+
+	// Refresh controls
+	refresh();
+}
+
+/*void AnimationStudioFrame::OnTool_AnnotStart( wxCommandEvent& evt )
+{
+}
+
+void AnimationStudioFrame::OnComboBox_Annots( wxCommandEvent& evt )
+{
+}
+
+void AnimationStudioFrame::OnTool_ClearAnnots( wxCommandEvent& evt )
+{
+}*/
 
 void AnimationStudioFrame::OnIdle( wxIdleEvent& evt )
 {
@@ -986,7 +1027,7 @@ BEGIN_EVENT_TABLE( AnimationStudioFrame, wxFrame )
 	EVT_MENU( ID_mnViewShowSkel, AnimationStudioFrame::OnMenu_ViewShowSkel )
 	EVT_MENU( ID_mnViewShowGround, AnimationStudioFrame::OnMenu_ViewShowGround )
 	EVT_MENU( ID_mnViewShowSkybox, AnimationStudioFrame::OnMenu_ViewShowSkybox )
-	EVT_MENU( ID_mnToolsDefineEndEffectors, AnimationStudioFrame::OnMenu_ToolsDefineEndEffectors )
+	/*EVT_MENU( ID_mnToolsDefineEndEffectors, AnimationStudioFrame::OnMenu_ToolsDefineEndEffectors )
 	EVT_MENU( ID_mnToolsDetectPlantConstr, AnimationStudioFrame::OnMenu_ToolsDetectPlantConstr )
 	EVT_MENU( ID_mnToolsFootskateCleanup, AnimationStudioFrame::OnMenu_ToolsFootskateCleanup )
 	EVT_MENU( ID_mnToolsMirror, AnimationStudioFrame::OnMenu_ToolsMirror )
@@ -1001,17 +1042,20 @@ BEGIN_EVENT_TABLE( AnimationStudioFrame, wxFrame )
 	EVT_MENU( ID_mnToolsViewMotionGraph2, AnimationStudioFrame::OnMenu_ToolsViewMotionGraph2 )
 	EVT_MENU( ID_mnToolsDefineParam, AnimationStudioFrame::OnMenu_ToolsDefineParam )
 	EVT_MENU( ID_mnToolsMatchAnnots, AnimationStudioFrame::OnMenu_ToolsMatchAnnots )
-	EVT_MENU( ID_mnToolsBuildBlendCurves, AnimationStudioFrame::OnMenu_ToolsBuildBlendCurves )
+	EVT_MENU( ID_mnToolsBuildBlendCurves, AnimationStudioFrame::OnMenu_ToolsBuildBlendCurves )*/
 	EVT_MENU( ID_mnHelpAbout, AnimationStudioFrame::OnMenu_HelpAbout )
-	EVT_TOOL( ID_btnAnnotStart, AnimationStudioFrame::OnTool_AnnotStart )
-	EVT_COMBOBOX( ID_cbAnnots, AnimationStudioFrame::OnComboBox_Annots )
-	EVT_TOOL( ID_btnClearAnnots, AnimationStudioFrame::OnTool_ClearAnnots )
 	EVT_TOOL( ID_btnPlay, AnimationStudioFrame::OnTool_Play )
 	EVT_TOOL( ID_btnPlaySequence, AnimationStudioFrame::OnTool_PlaySequence )
 	EVT_TOOL( ID_btnStop, AnimationStudioFrame::OnTool_Stop )
+	EVT_TOOL( ID_btnStepPrev, AnimationStudioFrame::OnTool_StepPrev )
+	EVT_TOOL( ID_btnStepNext, AnimationStudioFrame::OnTool_StepNext )
 	EVT_TEXT_ENTER( ID_txtFrameRate, AnimationStudioFrame::OnTextEnter_FrameRate )
 	EVT_COMMAND_SCROLL( ID_slPlaySlider, AnimationStudioFrame::OnScroll_PlaySlider )
 	EVT_TOOL( ID_btnSelect, AnimationStudioFrame::OnTool_Select )
 	EVT_TOOL( ID_btnDeselect, AnimationStudioFrame::OnTool_Deselect )
+	EVT_TOOL( ID_btnCreateAnimFromSelection, AnimationStudioFrame::OnTool_CreateAnimFromSelection )
+	/*EVT_TOOL( ID_btnAnnotStart, AnimationStudioFrame::OnTool_AnnotStart )
+	EVT_COMBOBOX( ID_cbAnnots, AnimationStudioFrame::OnComboBox_Annots )
+	EVT_TOOL( ID_btnClearAnnots, AnimationStudioFrame::OnTool_ClearAnnots )*/
 	EVT_IDLE( AnimationStudioFrame::OnIdle )
 END_EVENT_TABLE()
