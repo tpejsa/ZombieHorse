@@ -205,7 +205,41 @@ namespace zh
 		//}
 		return joint;
 	}
+	float findNextData(const char* &data){
+		string result = "";
+		while(data[0] == ' ' || data[0] == '\t' || data[0] == '\n' || data[0] == '\r'){
+			data++;
+		}
+		while((data[0] <= '9' && data[0] >= '0') || data[0] == '.' || data[0] == '-'){
+			result.insert(result.end(),1,*data++);
+		}
+		return std::atof(result.c_str());
+	}
 	bool parseMotion(std::string & motionContent){
+	
+		boost::cmatch what;
+		boost::regex_search(motionContent.c_str(), what, boost::regex(nFramesReg));
+		std::string nFrameString;
+		nFrameString.assign(what[1].first, what[1].second);
+		nFrames = std::atoi(nFrameString.c_str());
+	
+		boost::regex_search(what.suffix().first, what, boost::regex(frameTimeReg));
+		std::string frameTimeString;
+		frameTimeString.assign(what[1].first, what[1].second);
+		frameTime = std::atof(frameTimeString.c_str());
+
+		//printf("%s",motionContent.c_str());
+		const char* pointer = what.suffix().first;
+		for(int f = 0;f < nFrames;++f){
+			std::string keyFrameString;
+			for(int i = 0;i < totalChannels;++i){
+				channelToKeyFrame[i]->push_back(findNextData(pointer));
+			}
+		}
+		return true;
+	}
+
+	/*bool parseMotion(std::string & motionContent){
 	
 		boost::cmatch what;
 		boost::regex_search(motionContent.c_str(), what, boost::regex(nFramesReg));
@@ -230,7 +264,7 @@ namespace zh
 			}
 		}
 		return true;
-	}
+	}*/
 	bool BVHLoader::tryLoad( ResourcePtr res, const std::string& path )
 	{
 		zhAssert( res != NULL );
