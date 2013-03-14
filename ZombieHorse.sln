@@ -8,8 +8,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zhAnimationStudio", "build\
 		{5CCBB77C-BACF-47C2-B901-A9C89181B0D0} = {5CCBB77C-BACF-47C2-B901-A9C89181B0D0}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bvhParser", "bvhParser\bvhParser.vcxproj", "{32AAC8AC-8564-47CA-A776-4951672304BD}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -24,10 +22,6 @@ Global
 		{6416BAE3-0A15-496E-9833-AE3B052399A2}.Debug|Win32.Build.0 = Debug|Win32
 		{6416BAE3-0A15-496E-9833-AE3B052399A2}.Release|Win32.ActiveCfg = Release|Win32
 		{6416BAE3-0A15-496E-9833-AE3B052399A2}.Release|Win32.Build.0 = Release|Win32
-		{32AAC8AC-8564-47CA-A776-4951672304BD}.Debug|Win32.ActiveCfg = Debug|Win32
-		{32AAC8AC-8564-47CA-A776-4951672304BD}.Debug|Win32.Build.0 = Debug|Win32
-		{32AAC8AC-8564-47CA-A776-4951672304BD}.Release|Win32.ActiveCfg = Release|Win32
-		{32AAC8AC-8564-47CA-A776-4951672304BD}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

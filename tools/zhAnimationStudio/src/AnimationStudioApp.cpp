@@ -120,6 +120,8 @@ zh::Animation* AnimationStudioApp::selectAnimation( const string& anim )
 	traceJointPaths( std::set<std::string>(), false );
 	if( !mTracedJoints.empty() )
 		traceJointPaths(mTracedJoints);
+
+	return mCurAnim;
 }
 
 void AnimationStudioApp::deselectAnimation()
