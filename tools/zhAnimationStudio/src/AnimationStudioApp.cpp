@@ -27,6 +27,7 @@ SOFTWARE.
 #include "NewResourceDialog.h"
 #include "DotSceneLoader.h"
 #include "zhOgreModelController.h"
+#include "ParametricSkeletonGenerator.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/tokenizer.hpp> // TODO: remove this?
@@ -371,6 +372,15 @@ bool AnimationStudioApp::init( wxWindow* wnd )
 
 	// Set default output skeleton
 	zh::Skeleton* out_skel = zhAnimationSystem->getOutputSkeleton();
+
+		//testing scale system!!!!!
+		zh::Skeleton* skelTest = zhAnimationSystem->createSkeleton("testingScale");
+		SkeletonParameters p;
+		p.scaleGlobal = 2;
+		p.scaleBody = 3;
+		ParametricSkeletonGenerator(skelTest,out_skel,p);
+		//testing scale system!!!!!
+
 	if( out_skel != NULL )
 		mFrmMain->getOgreWindow()->setRenderSkeleton(out_skel);
 
