@@ -29,7 +29,7 @@ namespace zh
 {
 
 AnimationNode::AnimationNode()
-: mName(""), mOwner(NULL), mParent(NULL), mMainChild(NULL),
+: mName(""), mOwner(NULL), mParent(NULL), mMainChild(NULL), mAnimAdaptor(NULL),
 mPlaying(true), mPaused(false), mPlayRate(1), mAnnotsEnabled(true)
 {
 	mTransAnnots = new TransitionAnnotationContainer();
@@ -266,6 +266,28 @@ void AnimationNode::setMainChild( AnimationNode* node )
 	mMainChild = node;
 }
 
+AnimationAdaptor* AnimationNode::createAdaptor( Skeleton* origSkel )
+{
+	deleteAdaptor();
+	mAnimAdaptor = new AnimationAdaptor( origSkel, this );
+
+	return mAnimAdaptor;
+}
+
+void AnimationNode::deleteAdaptor()
+{
+	if( mAnimAdaptor != NULL )
+	{
+		delete mAnimAdaptor;
+		mAnimAdaptor = NULL;
+	}
+}
+
+AnimationAdaptor* AnimationNode::getAdaptor() const
+{
+	return mAnimAdaptor;
+}
+
 bool AnimationNode::getPlaying() const
 {
 	return mPlaying;
@@ -452,12 +474,17 @@ void AnimationNode::apply( float weight, const std::set<unsigned short>& boneMas
 	if( !mPlaying )
 		return;
 
-	// compute merged bone mask
+	// Compute merged bone mask
 	std::set<unsigned short> jmts;
 	std::set_union( boneMask.begin(), boneMask.end(),
 		mBoneMask.begin(), mBoneMask.end(),
 		std::inserter( jmts, jmts.begin() )
 		);
+
+	Skeleton* trg_skel = mOwner->_getCurrentSkeleton();
+	if( mAnimAdaptor != NULL )
+		// If we are retargetting motion, switch to the "original" skeleton
+		mOwner->_setCurrentSkeleton( mAnimAdaptor->getOriginalSkeleton() );
 
 	_applyNode( weight, jmts );
 	if( mAnnotsEnabled )
@@ -466,15 +493,14 @@ void AnimationNode::apply( float weight, const std::set<unsigned short>& boneMas
 	if( isLeaf() )
 		// update cumulative blend weight
 		mOwner->_setTotalWeight( mOwner->_getTotalWeight() + weight );
-}
 
-size_t AnimationNode::_calcMemoryUsage() const
-{
-	return 0;
-}
-
-void AnimationNode::_unload()
-{
+	if( mAnimAdaptor != NULL )
+	{
+		// If we are retargetting motion, we can now switch to
+		// "target" skeleton, and adapt the current pose
+		mOwner->_setCurrentSkeleton(trg_skel);
+		mAnimAdaptor->adapt(trg_skel);
+	}
 }
 
 void AnimationNode::_clone( AnimationNode* clonePtr, bool shareData ) const

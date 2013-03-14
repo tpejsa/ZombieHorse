@@ -20,23 +20,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __zhAnimationTransitionBlenderEvents_h__
-#define __zhAnimationTransitionBlenderEvents_h__
+#ifndef __zhAnimationAdaptor_h__
+#define __zhAnimationAdaptor_h__
 
 #include "zhPrereq.h"
-#include "zhEvent.h"
+#include "zhIterators.h"
 
 namespace zh
 {
 
-class AnimationTransitionBlender;
+class AnimationNode;
+class Skeleton;
 
 /**
-* @brief Class representing an event which is emitted by
-* AnimationTransitionBlender when a transition starts.
+* @brief Class representing an animation retargetting system.
+*
+* Any AnimationNode can be associate with an AnimationAdaptor, which takes
+* its output animation data and adapts it to a different character figure.
 */
-class TransitionBlendEvent :
-	public Event<TransitionBlendEvent>
+class zhDeclSpec AnimationAdaptor
 {
 
 public:
@@ -44,37 +46,45 @@ public:
 	/**
 	* Constructor.
 	*
-	* @param node Transition blending node that triggered the event.
-	* @param finished If true, event was triggered by transition end,
-	* otherwise it was triggered by transition start.
+	* @param origSkel Pointer to the skeleton with the original motion.
+	* @param animNode Pointer to the owning animation node.
 	*/
-	TransitionBlendEvent( AnimationTransitionBlender* node, bool finished = false );
+	AnimationAdaptor( Skeleton* origSkel, AnimationNode* animNode );
 
 	/**
-	* Gets the transition blend node which emitted this event.
+	* Destructor.
 	*/
-	virtual AnimationTransitionBlender* getTransitionBlendNode() const;
+	~AnimationAdaptor();
 
 	/**
-	* If true, event was triggered by transition start.
+	* Get the skeleton with the original motion.
+	*
+	* @return Pointer to the skeleton.
 	*/
-	virtual bool getStarted() const;
+	Skeleton* getOriginalSkeleton() const;
 
 	/**
-	* If true, event was triggered by transition end.
+	* Get the owning animation node.
+	*
+	* @return Pointer to the owning naimation node.
 	*/
-	virtual bool getFinished() const;
+	AnimationNode* getAnimationNode() const;
+
+	/**
+	* Adapt the animation that's playing on the original skeleton
+	* to the target skeleton.
+	*
+	* @param Pointer to the target skeleton.
+	*/
+	void adapt( Skeleton* targetSkel );
 
 protected:
 
-	AnimationTransitionBlender* mTransBlendNode;
-	bool mFinished;
+	Skeleton* mOrigSkel;
+	AnimationNode* mAnimNode;
 
 };
 
-typedef EventEmitter<TransitionBlendEvent> TransitionBlendEmitter;
-typedef EventListener<TransitionBlendEvent> TransitionBlendListener;
-
 }
 
-#endif // __zhAnimationTransitionBlenderEvents_h__
+#endif // __zhAnimationAdaptor_h__

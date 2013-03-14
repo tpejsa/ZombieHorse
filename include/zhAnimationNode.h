@@ -29,20 +29,21 @@ SOFTWARE.
 #include "zhSkeleton.h"
 #include "zhAnimation.h"
 #include "zhAnimationNodeEvents.h"
+#include "zhAnimationAdaptor.h"
 
-#define zhAnimationSampler_ClassId 1
-#define zhAnimationSampler_ClassName "AnimationSampler"
-#define zhAnimationBlender_ClassId 2
-#define zhAnimationBlender_ClassName "AnimationBlender"
-#define zhAnimationTransitionBlender_ClassId 3
-#define zhAnimationTransitionBlender_ClassName "AnimationTransitionBlender"
+#define zhAnimationSampleNode_ClassId 1
+#define zhAnimationSampleNode_ClassName "AnimationSampleNode"
+#define zhAnimationBlendNode_ClassId 2
+#define zhAnimationBlendNode_ClassName "AnimationBlendNode"
+#define zhAnimationQueueNode_ClassId 3
+#define zhAnimationQueueNode_ClassName "AnimationQueueNode"
 
 #define zhDeclare_AnimationNode( AN, classId, className ) \
 	zhDeclare_Class( AnimationNode, AN, classId, className, unsigned short )
 #define zhRegister_AnimationNode( AN ) \
-	AnimationSystem::Instance()->getAnimationTree()->_getNodeFactory()->registerClass( AN::ClassId(), AN::ClassName(), &AN::Create )
+	AnimationSystem::Instance()->_getAnimationNodeFactory().registerClass( AN::ClassId(), AN::ClassName(), &AN::Create )
 #define zhUnregister_AnimationNode( AN ) \
-	AnimationSystem::Instance()->getAnimationTree()->_getNodeFactory()->registerClass( AN::ClassId() )
+	AnimationSystem::Instance()->_getAnimationNodeFactory().unregisterClass( AN::ClassId() )
 
 namespace zh
 {
@@ -229,6 +230,27 @@ public:
 	virtual void setMainChild( AnimationNode* node );
 
 	/**
+	* Create an animation adaptor on this node.
+	*
+	* @param origSkel Skeleton for the original motion, played/synthesized
+	* by this animation node's subtree.
+	* @return Pointer to the adaptor.
+	*/
+	virtual AnimationAdaptor* createAdaptor( Skeleton* origSkel );
+
+	/**
+	* Delete the animation adaptor on this node.
+	*/
+	virtual void deleteAdaptor();
+
+	/**
+	* Get the animation adaptor on this node.
+	*
+	* @return Pointer to the adaptor, or NULL if adaptor does not exist.
+	*/
+	virtual AnimationAdaptor* getAdaptor() const;
+
+	/**
 	* Gets the play status of this animation node and its children.
 	*
 	* @return true if this animation node is playing, false otherwise.
@@ -399,16 +421,6 @@ public:
 	virtual Skeleton::Situation _getRealignedOrigin( const Skeleton::Situation& sit ) const;
 
 	/**
-	* Calculates the AnimationNode memory usage.
-	*/
-	virtual size_t _calcMemoryUsage() const;
-
-	/**
-	* Unloads the AnimationNode, freeing up the memory it occupies.
-	*/
-	virtual void _unload();
-
-	/**
 	* Creates a deep copy of the AnimationNode.
 	*
 	* @param clonePtr Pointer to the copy.
@@ -453,11 +465,11 @@ protected:
 
 	std::string mName; ///< init'ed by AnimationTree::createNode()
 	AnimationTree* mOwner; ///< init'ed by AnimationTree::createNode()
-
 	AnimationNode* mParent;
 	std::map<unsigned short, AnimationNode*> mChildrenById;
 	std::map<std::string, AnimationNode*> mChildrenByName;
 	mutable AnimationNode* mMainChild;
+	AnimationAdaptor* mAnimAdaptor;
 
 	bool mPlaying;
 	bool mPaused;

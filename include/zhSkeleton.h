@@ -26,6 +26,7 @@ SOFTWARE.
 #include "zhPrereq.h"
 #include "zhIterators.h"
 #include "zhBone.h"
+#include "zhIKSolver.h"
 
 namespace zh
 {
@@ -46,9 +47,6 @@ public:
 	*/
 	struct zhDeclSpec Situation
 	{
-
-	public:
-
 		/**
 		* Constructor.
 		*/
@@ -156,6 +154,8 @@ public:
 
 	typedef MapIterator< std::map<unsigned short, Bone*> > BoneIterator;
 	typedef MapConstIterator< std::map<unsigned short, Bone*> > BoneConstIterator;
+	typedef MapIterator< std::map<unsigned short, IKSolver*> > IKSolverIterator;
+	typedef MapConstIterator< std::map<unsigned short, IKSolver*> > IKSolverConstIterator;
 
 	/**
 	* Constructor.
@@ -251,13 +251,116 @@ public:
 	*/
 	void resetToInitialPose();
 
+	/**
+	* Get the bone with the specified semantic tag.
+	*
+	* @param tag Bone tag.
+	* @return Pointer to the bone.
+	*/
+	Bone* getBoneByTag( BoneTag tag ) const;
+
+	/**
+	* Check if a bone exists with the specified semantic tag.
+	*
+	* @param tag Bone tag.
+	* @return true if the bone exists, false otherwise.
+	*/
+	bool hasBoneWithTag( BoneTag tag ) const;
+
+	/**
+	* Create an IK solver on this skeleton.
+	*
+	* @param classId IK solver class ID.
+	* @param id IK solver ID.
+	* @param name IK solver name.
+	* @param startBone Starting bone of the IK chain.
+	* @param endBone Terminating bone of the IK chain.
+	*/
+	IKSolver* createIKSolver( unsigned long classId, unsigned short id,
+		const std::string& name, BoneTag startBone, BoneTag endBone );
+
+	/**
+	* Delete the specified IK solver.
+	*
+	* @param id IK solver ID.
+	*/
+	virtual void deleteIKSolver( unsigned short id );
+
+	/**
+	* Delete the specified IK solver.
+	*
+	* @param name IK solver name.
+	*/
+	virtual void deleteIKSolver( const std::string& name );
+
+	/**
+	* Delete all solvers in the skeleton.
+	*/
+	virtual void deleteAllIKSolvers();
+
+	/**
+	* Check if the specified IK solver exists in the skeleton.
+	*
+	* @param id IK solver ID.
+	* @return true if the solver exists, false otherwise.
+	*/
+	virtual bool hasIKSolver( unsigned short id ) const;
+
+	/**
+	* Check if the specified IK solver exists in the skeleton.
+	*
+	* @param name IK solver name.
+	* @return true if the solver exists, false otherwise.
+	*/
+	virtual bool hasIKSolver( const std::string& name ) const;
+
+	/**
+	* Get a pointer to the specified IK solver.
+	*
+	* @param id IK solver ID.
+	* @return Pointer to specified solver or NULL if the solver doesn't exist.
+	*/
+	virtual IKSolver* getIKSolver( unsigned short id ) const;
+
+	/**
+	* Get a pointer to the specified IK solver.
+	*
+	* @param name IK solver name.
+	* @return Pointer to specified solver or NULL if the solver doesn't exist.
+	*/
+	virtual IKSolver* getIKSolver( const std::string& name ) const;
+
+	/**
+	* Get the number of IK solvers in the skeleton.
+	*/
+	virtual unsigned int getNumIKSolvers() const;
+
+	/**
+	* Get an iterator over the map of IK solvers
+	* in the skeleton.
+	*/
+	virtual IKSolverIterator getIKSolverIterator();
+
+	/**
+	* Get an iterator over the map of IK solvers
+	* in the skeleton.
+	*/
+	virtual IKSolverConstIterator getIKSolverConstIterator() const;
+
+	// Tagging functions, only called from Bone class
+	void _addBoneTag( BoneTag tag, unsigned short boneId );
+	void _removeBoneTag( BoneTag tag );
+	void _removeBoneTagsFromBone( unsigned short boneId );
+
 private:
 
 	std::string mName;
 	mutable Bone* mRoot;
 	std::map<unsigned short, Bone*> mBonesById;
 	std::map<std::string, Bone*> mBonesByName;
-
+	std::map<BoneTag, Bone*> mBonesByTag;
+	std::map<unsigned short, IKSolver*> mIKSolversById;
+	std::map<std::string, IKSolver*> mIKSolversByName;
 };
 
 template <>

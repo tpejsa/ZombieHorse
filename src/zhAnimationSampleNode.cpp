@@ -20,26 +20,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#include "zhAnimationSampler.h"
+#include "zhAnimationSampleNode.h"
 
 namespace zh
 {
 
-AnimationSampler::AnimationSampler()
+AnimationSampleNode::AnimationSampleNode()
 : mAnimSet(NULL), mAnimId(0), mPlayTime(0)
 {
 }
 
-AnimationSampler::~AnimationSampler()
+AnimationSampleNode::~AnimationSampleNode()
 {
 }
 
-bool AnimationSampler::isLeaf() const
+bool AnimationSampleNode::isLeaf() const
 {
 	return true;
 }
 
-void AnimationSampler::setPlaying( bool playing )
+void AnimationSampleNode::setPlaying( bool playing )
 {
 	AnimationNode::setPlaying(playing);
 
@@ -47,12 +47,12 @@ void AnimationSampler::setPlaying( bool playing )
 		mPlayTime = 0;
 }
 
-float AnimationSampler::getPlayTime() const
+float AnimationSampleNode::getPlayTime() const
 {
 	return mPlayTime;
 }
 
-void AnimationSampler::setPlayTime( float time )
+void AnimationSampleNode::setPlayTime( float time )
 {
 	float length = getPlayLength();
 	
@@ -62,24 +62,24 @@ void AnimationSampler::setPlayTime( float time )
 		mPlayTime -= floor(mPlayTime/length) * length;
 }
 
-float AnimationSampler::getNormalizedPlayTime() const
+float AnimationSampleNode::getNormalizedPlayTime() const
 {
 	return mPlayTime / getPlayLength();
 }
 
-void AnimationSampler::setNormalizedPlayTime( float time )
+void AnimationSampleNode::setNormalizedPlayTime( float time )
 {
 	setPlayTime( time * getPlayLength() );
 }
 
-float AnimationSampler::getPlayLength() const
+float AnimationSampleNode::getPlayLength() const
 {
 	Animation* anim = getAnimation();
 
 	return anim != NULL ? anim->getLength() : 0;
 }
 
-TransitionAnnotationContainer* AnimationSampler::getTransitionAnnotations() const
+TransitionAnnotationContainer* AnimationSampleNode::getTransitionAnnotations() const
 {
 	Animation* anim = getAnimation();
 	zhAssert( anim != NULL );
@@ -87,7 +87,7 @@ TransitionAnnotationContainer* AnimationSampler::getTransitionAnnotations() cons
 	return anim->getTransitionAnnotations();
 }
 
-ParamTransitionAnnotationContainer* AnimationSampler::getParamTransitionAnnotations() const
+ParamTransitionAnnotationContainer* AnimationSampleNode::getParamTransitionAnnotations() const
 {
 	Animation* anim = getAnimation();
 	zhAssert( anim != NULL );
@@ -95,7 +95,7 @@ ParamTransitionAnnotationContainer* AnimationSampler::getParamTransitionAnnotati
 	return anim->getParamTransitionAnnotations();
 }
 
-PlantConstraintAnnotationContainer* AnimationSampler::getPlantConstraintAnnotations() const
+PlantConstraintAnnotationContainer* AnimationSampleNode::getPlantConstraintAnnotations() const
 {
 	Animation* anim = getAnimation();
 	zhAssert( anim != NULL );
@@ -103,7 +103,7 @@ PlantConstraintAnnotationContainer* AnimationSampler::getPlantConstraintAnnotati
 	return anim->getPlantConstraintAnnotations();
 }
 
-SimEventAnnotationContainer* AnimationSampler::getSimEventAnnotations() const
+SimEventAnnotationContainer* AnimationSampleNode::getSimEventAnnotations() const
 {
 	Animation* anim = getAnimation();
 	zhAssert( anim != NULL );
@@ -111,27 +111,27 @@ SimEventAnnotationContainer* AnimationSampler::getSimEventAnnotations() const
 	return anim->getSimEventAnnotations();
 }
 
-const Skeleton::Situation& AnimationSampler::getOrigin() const
+const Skeleton::Situation& AnimationSampleNode::getOrigin() const
 {
 	return mOrigin;
 }
 
-void AnimationSampler::setOrigin( const Skeleton::Situation& origin )
+void AnimationSampleNode::setOrigin( const Skeleton::Situation& origin )
 {
 	mOrigin = origin;
 }
 
-AnimationSetPtr AnimationSampler::getAnimationSet() const
+AnimationSetPtr AnimationSampleNode::getAnimationSet() const
 {
 	return mAnimSet;
 }
 
-unsigned short AnimationSampler::getAnimationId() const
+unsigned short AnimationSampleNode::getAnimationId() const
 {
 	return mAnimId;
 }
 
-Animation* AnimationSampler::getAnimation() const
+Animation* AnimationSampleNode::getAnimation() const
 {
 	if( mAnimSet == NULL || !mAnimSet->hasAnimation(mAnimId) )
 		return NULL;
@@ -139,7 +139,7 @@ Animation* AnimationSampler::getAnimation() const
 	return mAnimSet->getAnimation(mAnimId);
 }
 
-void AnimationSampler::setAnimation( AnimationSetPtr animSet, unsigned short animId )
+void AnimationSampleNode::setAnimation( AnimationSetPtr animSet, unsigned short animId )
 {
 	zhAssert( animSet != NULL );
 
@@ -147,7 +147,7 @@ void AnimationSampler::setAnimation( AnimationSetPtr animSet, unsigned short ani
 	mAnimId = animId;
 }
 
-Skeleton::Situation AnimationSampler::_sampleMover() const
+Skeleton::Situation AnimationSampleNode::_sampleMover() const
 {
 	Animation* anim = getAnimation();
 
@@ -182,27 +182,18 @@ Skeleton::Situation AnimationSampler::_sampleMover() const
 	return mv;
 }
 
-size_t AnimationSampler::_calcMemoryUsage() const
-{
-	return 0;
-}
-
-void AnimationSampler::_unload()
-{
-}
-
-void AnimationSampler::_clone( AnimationNode* clonePtr, bool shareData ) const
+void AnimationSampleNode::_clone( AnimationNode* clonePtr, bool shareData ) const
 {
 	zhAssert( clonePtr != NULL );
 	zhAssert( getClassId() == clonePtr->getClassId() );
 
 	AnimationNode::_clone( clonePtr, shareData );
 
-	zhLog( "AnimationSampler", "_clone",
-		"Cloning AnimationSampler %s %u, %s.",
+	zhLog( "AnimationSampleNode", "_clone",
+		"Cloning AnimationSampleNode %s %u, %s.",
 		getClassName().c_str(), mId, mName.c_str() );
 
-	AnimationSampler* clone = static_cast<AnimationSampler*>( clonePtr );
+	AnimationSampleNode* clone = static_cast<AnimationSampleNode*>( clonePtr );
 
 	clone->mPlayTime = mPlayTime;
 	clone->mOrigin = mOrigin;
@@ -213,7 +204,7 @@ void AnimationSampler::_clone( AnimationNode* clonePtr, bool shareData ) const
 	clone->mAnnotsEnabled = mAnnotsEnabled;
 }
 
-void AnimationSampler::_updateNode( float dt )
+void AnimationSampleNode::_updateNode( float dt )
 {
 	float length = getPlayLength();
 	
@@ -223,7 +214,7 @@ void AnimationSampler::_updateNode( float dt )
 		mPlayTime -= floor(mPlayTime/length) * length;
 }
 
-void AnimationSampler::_applyNode( float weight, const std::set<unsigned short>& boneMask ) const
+void AnimationSampleNode::_applyNode( float weight, const std::set<unsigned short>& boneMask ) const
 {
 	Animation* anim = getAnimation();
 

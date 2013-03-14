@@ -214,7 +214,6 @@ private:
 
 	unsigned short mId;
 	std::string mName;
-
 	AnimationSetPtr mAnimSet;
 
 	std::map<unsigned short, BoneAnimationTrack*> mBoneTracks;

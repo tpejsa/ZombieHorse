@@ -26,15 +26,12 @@
     <ClInclude Include="..\tools\zhAnimationStudio\src\MotionGraphView.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\MotionGraphViewDialog.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\MotionVisualizationWindow.h" />
-    <ClInclude Include="..\tools\zhAnimationStudio\src\NewResourceDialog.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\OgreWindow.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\AnimSequenceWindow.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\PlaySlider.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\ProjectViewWindow.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\resource.h" />
-    <ClInclude Include="..\tools\zhAnimationStudio\src\TimelineWindow.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\wxImagePanel.h" />
-    <ClInclude Include="..\tools\zhAnimationStudio\src\zhOgreModelController.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\tools\zhAnimationStudio\src\AnimAnnotGrid.cpp" />
@@ -51,14 +48,11 @@
     <ClCompile Include="..\tools\zhAnimationStudio\src\MotionGraphView.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\MotionGraphViewDialog.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\MotionVisualizationWindow.cpp" />
-    <ClCompile Include="..\tools\zhAnimationStudio\src\NewResourceDialog.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\OgreWindow.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\AnimSequenceWindow.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\PlaySlider.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\ProjectViewWindow.cpp" />
-    <ClCompile Include="..\tools\zhAnimationStudio\src\TimelineWindow.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\wxImagePanel.cpp" />
-    <ClCompile Include="..\tools\zhAnimationStudio\src\zhOgreModelController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\tools\zhAnimationStudio\res\AnimationStudio.ico" />

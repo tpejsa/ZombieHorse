@@ -20,30 +20,30 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#include "zhAnimationTransitionBlenderEvents.h"
-#include "zhAnimationTransitionBlender.h"
+#include "zhAnimationQueueNodeEvents.h"
+#include "zhAnimationQueueNode.h"
 
 namespace zh
 {
 
-TransitionBlendEvent::TransitionBlendEvent( AnimationTransitionBlender* node, bool finished )
-: Event<TransitionBlendEvent>(node)
+AnimationQueueNodeEvent::AnimationQueueNodeEvent( AnimationQueueNode* node, bool finished )
+: Event<AnimationQueueNodeEvent>(node)
 {
 	mTransBlendNode = node;
 	mFinished = finished;
 }
 
-AnimationTransitionBlender* TransitionBlendEvent::getTransitionBlendNode() const
+AnimationQueueNode* AnimationQueueNodeEvent::getTransitionBlendNode() const
 {
 	return mTransBlendNode;
 }
 
-bool TransitionBlendEvent::getStarted() const
+bool AnimationQueueNodeEvent::getStarted() const
 {
 	return !mFinished;
 }
 
-bool TransitionBlendEvent::getFinished() const
+bool AnimationQueueNodeEvent::getFinished() const
 {
 	return mFinished;
 }

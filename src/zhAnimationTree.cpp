@@ -22,6 +22,7 @@ SOFTWARE.
 
 #include "zhAnimationTree.h"
 #include "zhAnimationNode.h"
+#include "zhAnimationSystem.h"
 
 namespace zh
 {
@@ -29,13 +30,11 @@ namespace zh
 AnimationTree::AnimationTree( const std::string& name ) :
 mName(name), mRoot(NULL), mApplyMover(true), mTotalWeight(0)
 {
-	mNodeFact = new NodeFactory();
 }
 
 AnimationTree::~AnimationTree()
 {
 	deleteAllNodes();
-	delete mNodeFact;
 }
 
 const std::string& AnimationTree::getName() const
@@ -71,7 +70,7 @@ AnimationNode* AnimationTree::createNode( unsigned long classId,
 {
 	zhAssert( !hasNode(id) && !hasNode(name) );
 
-	AnimationNode* node = _getNodeFactory()->createObject( classId, id );
+	AnimationNode* node = zhAnimationSystem->_getAnimationNodeFactory().createObject( classId, id );
 	node->mOwner = this;
 	node->mName = name;
 
@@ -318,11 +317,6 @@ const Skeleton::Situation& AnimationTree::_getPrevSituation() const
 void AnimationTree::_setPrevSituation( const Skeleton::Situation& sit )
 {
 	mPrevSit = sit;
-}
-
-AnimationTree::NodeFactory* AnimationTree::_getNodeFactory() const
-{
-	return mNodeFact;
 }
 
 }

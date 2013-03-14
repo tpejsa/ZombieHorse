@@ -20,8 +20,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __zhAnimationTransitionBlender_h__
-#define __zhAnimationTransitionBlender_h__
+#ifndef __zhAnimationQueueNode_h__
+#define __zhAnimationQueueNode_h__
 
 #include "zhPrereq.h"
 #include "zhIterators.h"
@@ -31,20 +31,20 @@ SOFTWARE.
 #include "zhAnimationTree.h"
 #include "zhAnimationNode.h"
 #include "zhAnimation.h"
-#include "zhAnimationTransitionBlenderEvents.h"
+#include "zhAnimationQueueNodeEvents.h"
 
 #include <queue>
 
 namespace zh
 {
 
-class AnimationBlender;
+class AnimationBlendNode;
 
 /**
 * @brief Class representing an animation transition
 * blending and scheduling node.
 */
-class zhDeclSpec AnimationTransitionBlender : public AnimationNode,
+class zhDeclSpec AnimationQueueNode : public AnimationNode,
 	public TransitionBlendEmitter
 {
 
@@ -135,17 +135,17 @@ public:
 
 	typedef std::queue<Transition> TransitionQueue;
 
-	zhDeclare_AnimationNode( AnimationTransitionBlender, zhAnimationTransitionBlender_ClassId, zhAnimationTransitionBlender_ClassName )
+	zhDeclare_AnimationNode( AnimationQueueNode, zhAnimationQueueNode_ClassId, zhAnimationQueueNode_ClassName )
 
 	/**
 	* Constructor.
 	*/
-	AnimationTransitionBlender();
+	AnimationQueueNode();
 
 	/**
 	* Destructor.
 	*/
-	~AnimationTransitionBlender();
+	~AnimationQueueNode();
 
 	/**
 	* Returns true if the current animation node is a leaf
@@ -230,7 +230,7 @@ public:
 	* @param node Target animation blend node.
 	* @param params Parameter values for the target blend.
 	*/
-	virtual void addTransition( AnimationBlender* node, const Vector& params );
+	virtual void addTransition( AnimationBlendNode* node, const Vector& params );
 
 	/**
 	* Schedules a new transition.
@@ -330,16 +330,6 @@ public:
 	Skeleton::Situation _sampleMover() const;
 
 	/**
-	* Calculates the AnimationNode memory usage.
-	*/
-	size_t _calcMemoryUsage() const;
-
-	/**
-	* Unloads the AnimationNode, freeing up the memory it occupies.
-	*/
-	void _unload();
-
-	/**
 	* Creates a deep copy of the AnimationNode.
 	*
 	* @param clonePtr Pointer to the copy.
@@ -386,4 +376,4 @@ protected:
 
 }
 
-#endif // __zhAnimationTransitionBlender_h__
+#endif // __zhAnimationQueueNode_h__

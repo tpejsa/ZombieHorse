@@ -21,12 +21,16 @@ SOFTWARE.
 ******************************************************************************/
 
 #include "zhBone.h"
+#include "zhSkeleton.h"
 
 namespace zh
 {
 
-Bone::Bone( unsigned short id, const std::string& name ) : mId(id), mName(name), mParent(NULL)
+Bone::Bone( unsigned short id, const std::string& name, Skeleton* skel ) :
+mId(id), mName(name), mSkel(skel), mParent(NULL)
 {
+	zhAssert( skel != NULL );
+
 	mInitPos = Vector3( 0, 0, 0 );
 	mInitOrient = Quat( 0, 0, 0 );
 	mInitScal = Vector3( 1, 1, 1 );
@@ -301,6 +305,41 @@ Bone::ChildIterator Bone::getChildIterator()
 Bone::ChildConstIterator Bone::getChildConstIterator() const
 {
 	return ChildConstIterator(mChildrenById);
+}
+
+bool Bone::findChain( Bone* endBone, std::vector<Bone*>& chain )
+{
+	zhAssert( endBone != NULL );
+
+	if( this == endBone )
+	{
+		chain.insert( chain.begin(), this );
+		return true;
+	}
+
+	Bone::ChildConstIterator child_i = getChildConstIterator();
+	while( child_i.hasMore() )
+	{
+		Bone* child = child_i.next();
+
+		if( child->findChain( endBone, chain ) )
+		{
+			chain.insert( chain.begin(), this );
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void Bone::tag( BoneTag tag )
+{
+	mSkel->_addBoneTag( tag, mId );
+}
+
+void Bone::untag()
+{
+	mSkel->_removeBoneTagsFromBone(mId);
 }
 
 }

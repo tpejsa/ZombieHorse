@@ -112,13 +112,16 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\zhAnimationAdaptor.h" />
+    <ClInclude Include="..\include\zhEnvironment.h" />
+    <ClInclude Include="..\include\zhIKSolver.h" />
     <ClInclude Include="..\include\rapidxml.hpp" />
     <ClInclude Include="..\include\rapidxml_print.hpp" />
     <ClInclude Include="..\include\zh.h" />
     <ClInclude Include="..\include\zhAllocObj.h" />
     <ClInclude Include="..\include\zhAnimation.h" />
     <ClInclude Include="..\include\zhAnimationAnnotation.h" />
-    <ClInclude Include="..\include\zhAnimationBlender.h" />
+    <ClInclude Include="..\include\zhAnimationBlendNode.h" />
     <ClInclude Include="..\include\zhAnimationDistanceGrid.h" />
     <ClInclude Include="..\include\zhAnimationIndex.h" />
     <ClInclude Include="..\include\zhAnimationIndexManager.h" />
@@ -126,7 +129,9 @@
     <ClInclude Include="..\include\zhAnimationNode.h" />
     <ClInclude Include="..\include\zhAnimationNodeEvents.h" />
     <ClInclude Include="..\include\zhAnimationParametrization.h" />
-    <ClInclude Include="..\include\zhAnimationSampler.h" />
+    <ClInclude Include="..\include\zhAnimationQueueNode.h" />
+    <ClInclude Include="..\include\zhAnimationQueueNodeEvents.h" />
+    <ClInclude Include="..\include\zhAnimationSampleNode.h" />
     <ClInclude Include="..\include\zhAnimationSearchEvents.h" />
     <ClInclude Include="..\include\zhAnimationSearchSystem.h" />
     <ClInclude Include="..\include\zhAnimationSegment.h" />
@@ -134,8 +139,6 @@
     <ClInclude Include="..\include\zhAnimationSpace.h" />
     <ClInclude Include="..\include\zhAnimationSpaceBuilder.h" />
     <ClInclude Include="..\include\zhAnimationTrack.h" />
-    <ClInclude Include="..\include\zhAnimationTransitionBlender.h" />
-    <ClInclude Include="..\include\zhAnimationTransitionBlenderEvents.h" />
     <ClInclude Include="..\include\zhAnimationTransitionBuilder.h" />
     <ClInclude Include="..\include\zhAnimationTree.h" />
     <ClInclude Include="..\include\zhAnnotationMatchMaker.h" />
@@ -151,6 +154,7 @@
     <ClInclude Include="..\include\zhFileSystem.h" />
     <ClInclude Include="..\include\zhFunctor.h" />
     <ClInclude Include="..\include\zhIterators.h" />
+    <ClInclude Include="..\include\zhLimbIKSolver.h" />
     <ClInclude Include="..\include\zhLogger.h" />
     <ClInclude Include="..\include\zhMatchGraph.h" />
     <ClInclude Include="..\include\zhMatchWeb.h" />
@@ -164,10 +168,12 @@
     <ClInclude Include="..\include\zhParamAnimationBuilder.h" />
     <ClInclude Include="..\include\zhPlantConstrDetector.h" />
     <ClInclude Include="..\include\zhAnimationSystem.h" />
+    <ClInclude Include="..\include\zhPostureIKSolver.h" />
     <ClInclude Include="..\include\zhPrereq.h" />
     <ClInclude Include="..\include\zhQBSpline.h" />
     <ClInclude Include="..\include\zhQuat.h" />
     <ClInclude Include="..\include\zhResourceManager.h" />
+    <ClInclude Include="..\include\zhRootIKSolver.h" />
     <ClInclude Include="..\include\zhSingleton.h" />
     <ClInclude Include="..\include\zhSkeleton.h" />
     <ClInclude Include="..\include\zhSmartPtr.h" />
@@ -182,16 +188,20 @@
     <ClInclude Include="..\include\zhZHISerializer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\zhAnimationAdaptor.cpp" />
+    <ClCompile Include="..\src\zhIKSolver.cpp" />
     <ClCompile Include="..\src\zhAnimation.cpp" />
     <ClCompile Include="..\src\zhAnimationAnnotation.cpp" />
-    <ClCompile Include="..\src\zhAnimationBlender.cpp" />
+    <ClCompile Include="..\src\zhAnimationBlendNode.cpp" />
     <ClCompile Include="..\src\zhAnimationDistanceGrid.cpp" />
     <ClCompile Include="..\src\zhAnimationIndex.cpp" />
     <ClCompile Include="..\src\zhAnimationIndexManager.cpp" />
     <ClCompile Include="..\src\zhAnimationManager.cpp" />
     <ClCompile Include="..\src\zhAnimationNode.cpp" />
     <ClCompile Include="..\src\zhAnimationParametrization.cpp" />
-    <ClCompile Include="..\src\zhAnimationSampler.cpp" />
+    <ClCompile Include="..\src\zhAnimationQueueNode.cpp" />
+    <ClCompile Include="..\src\zhAnimationQueueNodeEvents.cpp" />
+    <ClCompile Include="..\src\zhAnimationSampleNode.cpp" />
     <ClCompile Include="..\src\zhAnimationSearchEvents.cpp" />
     <ClCompile Include="..\src\zhAnimationSearchSystem.cpp" />
     <ClCompile Include="..\src\zhAnimationSegment.cpp" />
@@ -199,8 +209,6 @@
     <ClCompile Include="..\src\zhAnimationSpace.cpp" />
     <ClCompile Include="..\src\zhAnimationSpaceBuilder.cpp" />
     <ClCompile Include="..\src\zhAnimationTrack.cpp" />
-    <ClCompile Include="..\src\zhAnimationTransitionBlender.cpp" />
-    <ClCompile Include="..\src\zhAnimationTransitionBlenderEvents.cpp" />
     <ClCompile Include="..\src\zhAnimationTransitionBuilder.cpp" />
     <ClCompile Include="..\src\zhAnimationTree.cpp" />
     <ClCompile Include="..\src\zhAnnotationMatchMaker.cpp" />
@@ -208,6 +216,7 @@
     <ClCompile Include="..\src\zhBoneAnimationTrack.cpp" />
     <ClCompile Include="..\src\zhBVHLoader.cpp" />
     <ClCompile Include="..\src\zhDenseSamplingParamBuilder.cpp" />
+    <ClCompile Include="..\src\zhLimbIKSolver.cpp" />
     <ClCompile Include="..\src\zhLogger.cpp" />
     <ClCompile Include="..\src\zhMatchGraph.cpp" />
     <ClCompile Include="..\src\zhMatchWeb.cpp" />
@@ -217,8 +226,10 @@
     <ClCompile Include="..\src\zhParamAnimationBuilder.cpp" />
     <ClCompile Include="..\src\zhPlantConstrDetector.cpp" />
     <ClCompile Include="..\src\zhAnimationSystem.cpp" />
+    <ClCompile Include="..\src\zhPostureIKSolver.cpp" />
     <ClCompile Include="..\src\zhQuat.cpp" />
     <ClCompile Include="..\src\zhResourceManager.cpp" />
+    <ClCompile Include="..\src\zhRootIKSolver.cpp" />
     <ClCompile Include="..\src\zhSkeleton.cpp" />
     <ClCompile Include="..\src\zhTimer.cpp" />
     <ClCompile Include="..\src\zhVector.cpp" />

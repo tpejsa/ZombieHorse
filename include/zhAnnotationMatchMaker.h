@@ -26,7 +26,7 @@ SOFTWARE.
 #include "zhPrereq.h"
 #include "zhAnimationSegment.h"
 #include "zhAnimationSpace.h"
-#include "zhAnimationBlender.h"
+#include "zhAnimationBlendNode.h"
 
 namespace zh
 {

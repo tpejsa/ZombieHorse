@@ -38,8 +38,8 @@ class AnimationTrack;
 
 enum AnimationTrackClass
 {
-	AnimationTrack_Bone,
-	AnimationTrack_Mesh
+	AT_Bone,
+	AT_Mesh
 };
 
 /**

@@ -20,52 +20,61 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __zh_h__
-#define __zh_h__
+#ifndef __zhAnimationQueueNodeEvents_h__
+#define __zhAnimationQueueNodeEvents_h__
 
 #include "zhPrereq.h"
-#include "zhIterators.h"
-#include "zhError.h"
-#include "zhString.h"
-#include "zhFileSystem.h"
-#include "zhTimer.h"
-#include "zhLogger.h"
-#include "zhAllocObj.h"
-#include "zhMemoryPool.h"
-#include "zhFunctor.h"
 #include "zhEvent.h"
-#include "zhObjectFactory.h"
-#include "zhSmartPtr.h"
-#include "zhResourceManager.h"
-#include "zhMath.h"
-#include "zhAnimationSystem.h"
-#include "zhAnimationManager.h"
-#include "zhAnimationSet.h"
-#include "zhAnimation.h"
-#include "zhAnimationSpace.h"
-#include "zhAnimationTrack.h"
-#include "zhBoneAnimationTrack.h"
-#include "zhAnimationSpace.h"
-#include "zhZHALoader.h"
-#include "zhZHASerializer.h"
-#include "zhAnimationTree.h"
-#include "zhAnimationNode.h"
-#include "zhAnimationSampleNode.h"
-#include "zhAnimationBlendNode.h"
-#include "zhAnimationQueueNode.h"
-#include "zhAnimationAdaptor.h"
-#include "zhAnimationDistanceGrid.h"
-#include "zhMatchGraph.h"
-#include "zhMatchWeb.h"
-#include "zhAnimationIndexManager.h"
-#include "zhAnimationIndex.h"
-#include "zhAnimationSpaceBuilder.h"
-#include "zhAnimationSearchSystem.h"
-#include "zhDenseSamplingParamBuilder.h"
-#include "zhPlantConstrDetector.h"
-#include "zhAnnotationMatchMaker.h"
 
-#include "rapidxml.hpp"
-#include "rapidxml_print.hpp"
+namespace zh
+{
 
-#endif // __zh_h__
+class AnimationQueueNode;
+
+/**
+* @brief Class representing an event which is emitted by
+* AnimationQueueNode when a transition starts.
+*/
+class AnimationQueueNodeEvent :
+	public Event<AnimationQueueNodeEvent>
+{
+
+public:
+
+	/**
+	* Constructor.
+	*
+	* @param node Transition blending node that triggered the event.
+	* @param finished If true, event was triggered by transition end,
+	* otherwise it was triggered by transition start.
+	*/
+	AnimationQueueNodeEvent( AnimationQueueNode* node, bool finished = false );
+
+	/**
+	* Gets the transition blend node which emitted this event.
+	*/
+	virtual AnimationQueueNode* getTransitionBlendNode() const;
+
+	/**
+	* If true, event was triggered by transition start.
+	*/
+	virtual bool getStarted() const;
+
+	/**
+	* If true, event was triggered by transition end.
+	*/
+	virtual bool getFinished() const;
+
+protected:
+
+	AnimationQueueNode* mTransBlendNode;
+	bool mFinished;
+
+};
+
+typedef EventEmitter<AnimationQueueNodeEvent> TransitionBlendEmitter;
+typedef EventListener<AnimationQueueNodeEvent> TransitionBlendListener;
+
+}
+
+#endif // __zhAnimationQueueNodeEvents_h__

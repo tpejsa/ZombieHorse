@@ -21,6 +21,8 @@ SOFTWARE.
 ******************************************************************************/
 
 #include "zhSkeleton.h"
+#include "zhLogger.h"
+#include "zhAnimationSystem.h"
 
 namespace zh
 {
@@ -196,7 +198,7 @@ Bone* Skeleton::createBone( unsigned short id, const std::string& name )
 {
 	zhAssert( !hasBone(id) && !hasBone(name) );
 
-	Bone* bone = new Bone( id, name );
+	Bone* bone = new Bone( id, name, this );
 
 	mBonesById[id] = bone;
 	mBonesByName[name] = bone;
@@ -213,7 +215,7 @@ void Skeleton::deleteBone( unsigned short id )
 	if( bone == NULL )
 		return;
 
-	// detach bone from the hierarchy
+	// Detach bone from the hierarchy
 	if( bone->getParent() != NULL )
 		bone->getParent()->removeChild(id);
 	bone->removeAllChildren();
@@ -232,7 +234,7 @@ void Skeleton::deleteBone( const std::string& name )
 	if( bone == NULL )
 		return;
 
-	// detach bone from the hierarchy
+	// Detach bone from the hierarchy
 	if( bone->getParent() != NULL )
 		bone->getParent()->removeChild( bone->getId() );
 	bone->removeAllChildren();
@@ -305,6 +307,173 @@ void Skeleton::resetToInitialPose()
 	BoneIterator bone_i = getBoneIterator();
 	while( !bone_i.end() )
 		bone_i.next()->resetToInitialPose();
+}
+
+IKSolver* Skeleton::createIKSolver( unsigned long classId, unsigned short id,
+	const std::string& name, BoneTag startBone, BoneTag endBone )
+{
+	zhAssert( !hasIKSolver(id) && !hasIKSolver(name) &&
+		hasBoneWithTag(startBone) && hasBoneWithTag(endBone) );
+
+	// Construct IK chain
+	Bone* sbone = getBoneByTag(startBone);
+	Bone* ebone = getBoneByTag(endBone);
+	std::vector<Bone*> chain;
+	sbone->findChain( ebone, chain );
+	
+	zhAssert( !chain.empty() );
+
+	// Create and initialize solver
+	IKSolver* solver = zhAnimationSystem->_getIKSolverFactory().createObject( classId, id );
+	solver->_init( name, chain, this );
+
+	zhLog( "Skeleton", "createIKSolver",
+		"Creating solver %s %u, %s on skeleton %s.",
+		solver->getClassName().c_str(), solver->getId(), solver->getName().c_str(),
+		mName.c_str() );
+
+	mIKSolversById.insert( make_pair( id, solver ) );
+	mIKSolversByName.insert( make_pair( name, solver ) );
+
+	return solver;
+}
+
+void Skeleton::deleteIKSolver( unsigned short id )
+{
+	std::map<unsigned short, IKSolver*>::iterator iksi = mIKSolversById.find(id);
+
+	if( iksi != mIKSolversById.end() )
+	{
+		IKSolver* solver = iksi->second;
+
+		zhLog( "Skeleton", "deleteIKSolver",
+			"Deleting solver %s %u, %s from skeleton %s.",
+			solver->getClassName().c_str(), solver->getId(),
+			mName.c_str() );
+
+		mIKSolversById.erase(iksi);
+		mIKSolversByName.erase( solver->getName() );
+		delete solver;
+	}
+}
+
+void Skeleton::deleteIKSolver( const std::string& name )
+{
+	std::map<std::string, IKSolver*>::iterator iksi = mIKSolversByName.find(name);
+
+	if( iksi != mIKSolversByName.end() )
+	{
+		IKSolver* solver = iksi->second;
+
+		zhLog( "Skeleton", "deleteIKSolver",
+			"Deleting solver %s %u, %s from skeleton %s.",
+			solver->getClassName().c_str(), solver->getId(), solver->getName().c_str(),
+			mName.c_str() );
+
+		mIKSolversById.erase( solver->getId() );
+		mIKSolversByName.erase(name);
+		delete solver;
+	}
+}
+
+void Skeleton::deleteAllIKSolvers()
+{
+	zhLog( "Skeleton", "deleteAllIKSolvers",
+		"Deleting all solvers from skeleton %s.",
+		mName.c_str() );
+
+	for( std::map<unsigned short, IKSolver*>::iterator iksi = mIKSolversById.begin();
+		iksi != mIKSolversById.end(); ++iksi )
+		delete iksi->second;
+
+	mIKSolversById.clear();
+	mIKSolversByName.clear();
+}
+
+bool Skeleton::hasIKSolver( unsigned short id ) const
+{
+	return mIKSolversById.count(id) > 0;
+}
+
+bool Skeleton::hasIKSolver( const std::string& name ) const
+{
+	return mIKSolversByName.count(name) > 0;
+}
+
+IKSolver* Skeleton::getIKSolver( unsigned short id ) const
+{
+	std::map<unsigned short, IKSolver*>::const_iterator iksi = mIKSolversById.find(id);
+
+	if( iksi != mIKSolversById.end() )
+		return iksi->second;
+
+	return NULL;
+}
+
+IKSolver* Skeleton::getIKSolver( const std::string& name ) const
+{
+	std::map<std::string, IKSolver*>::const_iterator iksi = mIKSolversByName.find(name);
+
+	if( iksi != mIKSolversByName.end() )
+		return iksi->second;
+
+	return NULL;
+}
+
+unsigned int Skeleton::getNumIKSolvers() const
+{
+	return mIKSolversById.size();
+}
+
+Skeleton::IKSolverIterator Skeleton::getIKSolverIterator()
+{
+	return IKSolverIterator(mIKSolversById);
+}
+
+Skeleton::IKSolverConstIterator Skeleton::getIKSolverConstIterator() const
+{
+	return IKSolverConstIterator(mIKSolversById);
+}
+
+Bone* Skeleton::getBoneByTag( BoneTag tag ) const
+{
+	std::map<BoneTag, Bone*>::const_iterator bone_i = mBonesByTag.find(tag);
+	
+	if( bone_i != mBonesByTag.end() )
+		return bone_i->second;
+
+	return NULL;
+}
+
+bool Skeleton::hasBoneWithTag( BoneTag tag ) const
+{
+	return mBonesByTag.count(tag) > 0;
+}
+
+void Skeleton::_addBoneTag( BoneTag tag, unsigned short boneId )
+{
+	zhAssert( hasBone(boneId) );
+
+	mBonesByTag[tag] = getBone(boneId);
+}
+
+void Skeleton::_removeBoneTag( BoneTag tag )
+{
+	mBonesByTag.erase(tag);
+}
+
+void Skeleton::_removeBoneTagsFromBone( unsigned short boneId )
+{
+	std::vector<BoneTag> tags;
+	for( std::map<BoneTag, Bone*>::iterator tag_i = mBonesByTag.begin();
+		tag_i != mBonesByTag.end(); ++tag_i )
+	{
+		if( tag_i->second->getId() == boneId )
+			tags.push_back(tag_i->first);
+	}
+
+	for( std::vector<BoneTag>::iterator tag_j = tags.begin(); tag_j != tags.end(); ++tag_j )
+		_removeBoneTag(*tag_j);
 }
 
 }

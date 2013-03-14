@@ -20,8 +20,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __zhAnimationBlender_h__
-#define __zhAnimationBlender_h__
+#ifndef __zhAnimationBlendNode_h__
+#define __zhAnimationBlendNode_h__
 
 #include "zhPrereq.h"
 #include "zhIterators.h"
@@ -37,22 +37,22 @@ class BoneIKController;
 /**
 * @brief Class representing an animation blending node.
 */
-class zhDeclSpec AnimationBlender : public AnimationNode
+class zhDeclSpec AnimationBlendNode : public AnimationNode
 {
 
 public:
 
-	zhDeclare_AnimationNode( AnimationBlender, zhAnimationBlender_ClassId, zhAnimationBlender_ClassName )
+	zhDeclare_AnimationNode( AnimationBlendNode, zhAnimationBlendNode_ClassId, zhAnimationBlendNode_ClassName )
 	
 	/**
 	* Constructor.
 	*/
-	AnimationBlender();
+	AnimationBlendNode();
 
 	/**
 	* Destructor.
 	*/
-	~AnimationBlender();
+	~AnimationBlendNode();
 
 	/**
 	* Returns true if the current animation node is a leaf
@@ -60,7 +60,7 @@ public:
 	*/
 	bool isLeaf() const;
 
-	// TODO: main child should be an AnimationSampler somewhere below this AnimationBlender in the tree
+	// TODO: main child should be an AnimationSampleNode somewhere below this AnimationBlendNode in the tree
 	// maybe even the one with the highest blend weight?
 
 	/**
@@ -247,16 +247,6 @@ public:
 	Skeleton::Situation _sampleMover() const;
 
 	/**
-	* Calculates the AnimationNode memory usage.
-	*/
-	size_t _calcMemoryUsage() const;
-
-	/**
-	* Unloads the AnimationNode, freeing up the memory it occupies.
-	*/
-	void _unload();
-
-	/**
 	* Creates a deep copy of the AnimationNode.
 	*
 	* @param clonePtr Pointer to the copy.
@@ -418,4 +408,4 @@ inline void blendAnnotations<ParamTransitionAnnotation>( ParamTransitionAnnotati
 
 }
 
-#endif // __zhAnimationBlender__
+#endif // __zhAnimationBlendNode__

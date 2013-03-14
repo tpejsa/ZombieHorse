@@ -20,8 +20,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __zhAnimationSampler_h__
-#define __zhAnimationSampler_h__
+#ifndef __zhAnimationSampleNode_h__
+#define __zhAnimationSampleNode_h__
 
 #include "zhPrereq.h"
 #include "zhIterators.h"
@@ -35,27 +35,27 @@ SOFTWARE.
 namespace zh
 {
 
-class AnimationSampler;
+class AnimationSampleNode;
 
 /**
 * @brief Class representing an animation sampling node.
 */
-class zhDeclSpec AnimationSampler : public AnimationNode
+class zhDeclSpec AnimationSampleNode : public AnimationNode
 {
 
 public:
 
-	zhDeclare_AnimationNode( AnimationSampler, zhAnimationSampler_ClassId, zhAnimationSampler_ClassName )
+	zhDeclare_AnimationNode( AnimationSampleNode, zhAnimationSampleNode_ClassId, zhAnimationSampleNode_ClassName )
 
 	/**
 	* Constructor.
 	*/
-	AnimationSampler();
+	AnimationSampleNode();
 
 	/**
 	* Destructor.
 	*/
-	~AnimationSampler();
+	~AnimationSampleNode();
 
 	/**
 	* Returns true if the current animation node is a leaf
@@ -166,16 +166,6 @@ public:
 	Skeleton::Situation _sampleMover() const;
 
 	/**
-	* Calculates the AnimationNode memory usage.
-	*/
-	size_t _calcMemoryUsage() const;
-
-	/**
-	* Unloads the AnimationNode, freeing up the memory it occupies.
-	*/
-	void _unload();
-
-	/**
 	* Creates a deep copy of the AnimationNode.
 	*
 	* @param clonePtr Pointer to the copy.
@@ -215,4 +205,4 @@ protected:
 
 }
 
-#endif // __zhAnimationSampler_h__
+#endif // __zhAnimationSampleNode_h__

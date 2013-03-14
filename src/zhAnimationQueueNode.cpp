@@ -20,30 +20,30 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#include "zhAnimationTransitionBlender.h"
-#include "zhAnimationSampler.h"
-#include "zhAnimationBlender.h"
+#include "zhAnimationQueueNode.h"
+#include "zhAnimationSampleNode.h"
+#include "zhAnimationBlendNode.h"
 
 namespace zh
 {
 
-AnimationTransitionBlender::AnimationTransitionBlender()
+AnimationQueueNode::AnimationQueueNode()
 : mCurrentNode(NULL), mNextNode(NULL), mWeight(1),
 mDefaultTransitionLength(0), mDefaultNode(NULL),
 mTransStarted(false), mTransFinished(false)
 {
 }
 
-AnimationTransitionBlender::~AnimationTransitionBlender()
+AnimationQueueNode::~AnimationQueueNode()
 {
 }
 
-bool AnimationTransitionBlender::isLeaf() const
+bool AnimationQueueNode::isLeaf() const
 {
 	return false;
 }
 
-float AnimationTransitionBlender::getPlayTime() const
+float AnimationQueueNode::getPlayTime() const
 {
 	AnimationNode* cn = getCurrentNode();
 	if( cn == NULL )
@@ -52,7 +52,7 @@ float AnimationTransitionBlender::getPlayTime() const
 	return cn->getPlayTime();
 }
 
-void AnimationTransitionBlender::setPlayTime( float time )
+void AnimationQueueNode::setPlayTime( float time )
 {
 	AnimationNode* cn = getCurrentNode();
 	if( cn == NULL )
@@ -61,7 +61,7 @@ void AnimationTransitionBlender::setPlayTime( float time )
 	return cn->setPlayTime(time);
 }
 
-float AnimationTransitionBlender::getPlayLength() const
+float AnimationQueueNode::getPlayLength() const
 {
 	AnimationNode* cn = getCurrentNode();
 	if( cn == NULL )
@@ -70,7 +70,7 @@ float AnimationTransitionBlender::getPlayLength() const
 	return cn->getPlayLength();
 }
 
-const Skeleton::Situation& AnimationTransitionBlender::getOrigin() const
+const Skeleton::Situation& AnimationQueueNode::getOrigin() const
 {
 	AnimationNode* cn = getCurrentNode();
 	if( cn == NULL )
@@ -79,7 +79,7 @@ const Skeleton::Situation& AnimationTransitionBlender::getOrigin() const
 	return cn->getOrigin();
 }
 
-void AnimationTransitionBlender::setOrigin( const Skeleton::Situation& origin )
+void AnimationQueueNode::setOrigin( const Skeleton::Situation& origin )
 {
 	AnimationNode* cn = getCurrentNode();
 	if( cn == NULL )
@@ -88,28 +88,28 @@ void AnimationTransitionBlender::setOrigin( const Skeleton::Situation& origin )
 	cn->setOrigin(origin);
 }
 
-AnimationNode* AnimationTransitionBlender::getCurrentNode() const
+AnimationNode* AnimationQueueNode::getCurrentNode() const
 {
 	return mCurrentNode;
 }
 
-float AnimationTransitionBlender::getCurrentWeight() const
+float AnimationQueueNode::getCurrentWeight() const
 {
 	return mWeight;
 }
 
-AnimationNode* AnimationTransitionBlender::getNextNode() const
+AnimationNode* AnimationQueueNode::getNextNode() const
 {
 	return mTransitionQueue.size() > 0 ?
 		mTransitionQueue.front().getTargetNode() : NULL;
 }
 
-float AnimationTransitionBlender::getNextWeight() const
+float AnimationQueueNode::getNextWeight() const
 {
 	return 1.f - mWeight;
 }
 
-void AnimationTransitionBlender::addTransition( unsigned short id )
+void AnimationQueueNode::addTransition( unsigned short id )
 {
 	zhAssert( hasChild(id) );
 
@@ -117,7 +117,7 @@ void AnimationTransitionBlender::addTransition( unsigned short id )
 	addTransition(cn);
 }
 
-void AnimationTransitionBlender::addTransition( const std::string& name )
+void AnimationQueueNode::addTransition( const std::string& name )
 {
 	zhAssert( hasChild(name) );
 
@@ -125,22 +125,22 @@ void AnimationTransitionBlender::addTransition( const std::string& name )
 	addTransition(cn);
 }
 
-void AnimationTransitionBlender::addTransition( AnimationNode* node )
+void AnimationQueueNode::addTransition( AnimationNode* node )
 {
 	zhAssert( node != NULL && hasChild( node->getId() ) );
 
 	// source and target nodes
 	AnimationNode *tnode = node, *snode = NULL;
-	AnimationBlender *ptnode = NULL;
+	AnimationBlendNode *ptnode = NULL;
 
 	// transition spec.
 	float stime, etime, ttime;
 	Vector tparams;
 
 	// is the target node a blend?
-	if( tnode->isClass( AnimationBlender::ClassId() ) )
+	if( tnode->isClass( AnimationBlendNode::ClassId() ) )
 	{
-		ptnode = static_cast<AnimationBlender*>(tnode);
+		ptnode = static_cast<AnimationBlendNode*>(tnode);
 		tparams = ptnode->getParams();
 	}
 
@@ -158,12 +158,12 @@ void AnimationTransitionBlender::addTransition( AnimationNode* node )
 		snode = mCurrentNode;
 
 	Vector sparams0;
-	if( snode->isClass( AnimationBlender::ClassId() ) )
+	if( snode->isClass( AnimationBlendNode::ClassId() ) )
 	{
 		// source node is a blend,
 		// make its state match what it will be just prior to transition
 
-		AnimationBlender* psnode = static_cast<AnimationBlender*>(snode);
+		AnimationBlendNode* psnode = static_cast<AnimationBlendNode*>(snode);
 
 		sparams0 = psnode->getParams();
 		if( psnode != mCurrentNode )
@@ -179,11 +179,11 @@ void AnimationTransitionBlender::addTransition( AnimationNode* node )
 	{
 		// transition annotations enabled,
 		// schedule a transition
-		if( tnode->isClass( AnimationBlender::ClassId() ) )
+		if( tnode->isClass( AnimationBlendNode::ClassId() ) )
 		{
 			// schedule parametric transition
 
-			AnimationBlender* ptnode = static_cast<AnimationBlender*>(tnode);
+			AnimationBlendNode* ptnode = static_cast<AnimationBlendNode*>(tnode);
 
 			ParamTransitionAnnotationContainer::AnnotationConstIterator ptannot_i =
 				snode->getParamTransitionAnnotations()->getAnnotationConstIterator();
@@ -209,9 +209,9 @@ void AnimationTransitionBlender::addTransition( AnimationNode* node )
 		{
 			// schedule regular transition
 
-			AnimationSampler* stnode = NULL;
-			if( tnode->isClass( AnimationSampler::ClassId() ) )
-				stnode = static_cast<AnimationSampler*>(tnode);
+			AnimationSampleNode* stnode = NULL;
+			if( tnode->isClass( AnimationSampleNode::ClassId() ) )
+				stnode = static_cast<AnimationSampleNode*>(tnode);
 
 			TransitionAnnotationContainer::AnnotationConstIterator tannot_i =
 				snode->getTransitionAnnotations()->getAnnotationConstIterator();
@@ -245,12 +245,12 @@ void AnimationTransitionBlender::addTransition( AnimationNode* node )
 		ttime = 0;
 	}
 
-	if( snode->isClass( AnimationBlender::ClassId() ) )
+	if( snode->isClass( AnimationBlendNode::ClassId() ) )
 	{
 		// source node is a blend,
 		// restore its current state
 
-		AnimationBlender* psnode = static_cast<AnimationBlender*>(snode);
+		AnimationBlendNode* psnode = static_cast<AnimationBlendNode*>(snode);
 		psnode->setParams(sparams0);
 	}
 
@@ -262,7 +262,7 @@ void AnimationTransitionBlender::addTransition( AnimationNode* node )
 	addTransition( Transition( stime, etime, ttime, tnode, tparams ) );
 }
 
-void AnimationTransitionBlender::addTransition( AnimationBlender* node, const Vector& params )
+void AnimationQueueNode::addTransition( AnimationBlendNode* node, const Vector& params )
 {
 	// save current blend state
 	Vector params0 = node->getParams();
@@ -275,7 +275,7 @@ void AnimationTransitionBlender::addTransition( AnimationBlender* node, const Ve
 	node->setParams(params0);
 }
 
-void AnimationTransitionBlender::addTransition( const Transition& transSpec )
+void AnimationQueueNode::addTransition( const Transition& transSpec )
 {
 	zhAssert( transSpec.getTargetNode() != NULL &&
 		hasChild( transSpec.getTargetNode()->getId() )
@@ -285,21 +285,21 @@ void AnimationTransitionBlender::addTransition( const Transition& transSpec )
 	{
 		// no animations scheduled, add the first one
 
-		zhLog( "AnimationTransitionBlender", "addTransition", "Scheduling node %s in transition blender %s.",
+		zhLog( "AnimationQueueNode", "addTransition", "Scheduling node %s in transition blender %s.",
 			transSpec.getTargetNode()->getName().c_str(), mName.c_str() );
 
 		mCurrentNode = transSpec.getTargetNode();
 		mCurrentNode->setPlaying();
 		mCurrentNode->setPlayTime( transSpec.getTargetTime() + transSpec.getEndTime() - transSpec.getStartTime() );
 
-		if( mCurrentNode->isClass( AnimationBlender::ClassId() ) )
-			static_cast<AnimationBlender*>(mCurrentNode)->setParams( transSpec.getTargetParams() );
+		if( mCurrentNode->isClass( AnimationBlendNode::ClassId() ) )
+			static_cast<AnimationBlendNode*>(mCurrentNode)->setParams( transSpec.getTargetParams() );
 	}
 	else
 	{
 		// add the new animation to the transition queue
 
-		zhLog( "AnimationTransitionBlender", "addTransition",
+		zhLog( "AnimationQueueNode", "addTransition",
 			"Scheduling transition in transition blender %s from node %s to node %s, with start time %f, end time %f, target time %f.",
 			mName.c_str(),
 			mTransitionQueue.empty() ? mCurrentNode->getName().c_str() : mTransitionQueue.front().getTargetNode()->getName().c_str(),
@@ -309,7 +309,7 @@ void AnimationTransitionBlender::addTransition( const Transition& transSpec )
 	}
 }
 
-void AnimationTransitionBlender::removeLastTransition()
+void AnimationQueueNode::removeLastTransition()
 {
 	if( !mTransitionQueue.empty() )
 		mTransitionQueue.pop();
@@ -317,46 +317,46 @@ void AnimationTransitionBlender::removeLastTransition()
 		mCurrentNode = NULL;
 }
 
-void AnimationTransitionBlender::removeAllTransitions()
+void AnimationQueueNode::removeAllTransitions()
 {
 	while( !mTransitionQueue.empty() )
 		mTransitionQueue.pop();
 	mCurrentNode = NULL;
 }
 
-const std::queue<AnimationTransitionBlender::Transition>& AnimationTransitionBlender::getTransitionQueue() const
+const std::queue<AnimationQueueNode::Transition>& AnimationQueueNode::getTransitionQueue() const
 {
 	return mTransitionQueue;
 }
 
-float AnimationTransitionBlender::getDefaultTransitionLength() const
+float AnimationQueueNode::getDefaultTransitionLength() const
 {
 	return mDefaultTransitionLength;
 }
 
-void AnimationTransitionBlender::setDefaultTransitionLength( float length )
+void AnimationQueueNode::setDefaultTransitionLength( float length )
 {
 	if( length < 0 ) length = 0;
 
 	mDefaultTransitionLength = length;
 }
 
-AnimationNode* AnimationTransitionBlender::getDefaultNode() const
+AnimationNode* AnimationQueueNode::getDefaultNode() const
 {
 	return mDefaultNode;
 }
 
-void AnimationTransitionBlender::setDefaultNode( unsigned short id )
+void AnimationQueueNode::setDefaultNode( unsigned short id )
 {
 	mDefaultNode = getChild(id);
 }
 
-void AnimationTransitionBlender::setDefaultNode( const std::string& name )
+void AnimationQueueNode::setDefaultNode( const std::string& name )
 {
 	mDefaultNode = getChild(name);
 }
 
-void AnimationTransitionBlender::setDefaultNode( AnimationNode* node )
+void AnimationQueueNode::setDefaultNode( AnimationNode* node )
 {
 	zhAssert( node == NULL ||
 		hasChild( node->getId() ) );
@@ -364,27 +364,27 @@ void AnimationTransitionBlender::setDefaultNode( AnimationNode* node )
 	mDefaultNode = node;
 }
 
-float AnimationTransitionBlender::_getNextTime() const
+float AnimationQueueNode::_getNextTime() const
 {
 	return mNextTime;
 }
 
-const Skeleton::Situation& AnimationTransitionBlender::_getNextOrigin() const
+const Skeleton::Situation& AnimationQueueNode::_getNextOrigin() const
 {
 	return mNextOrigin;
 }
 
-bool AnimationTransitionBlender::_getTransitionStarted() const
+bool AnimationQueueNode::_getTransitionStarted() const
 {
 	return mTransStarted;
 }
 
-bool AnimationTransitionBlender::_getTransitionFinished() const
+bool AnimationQueueNode::_getTransitionFinished() const
 {
 	return mTransFinished;
 }
 
-Skeleton::Situation AnimationTransitionBlender::_sampleMover() const
+Skeleton::Situation AnimationQueueNode::_sampleMover() const
 {
 	AnimationNode* cn = getCurrentNode();
 	if( cn == NULL )
@@ -393,27 +393,18 @@ Skeleton::Situation AnimationTransitionBlender::_sampleMover() const
 	return cn->_sampleMover();
 }
 
-size_t AnimationTransitionBlender::_calcMemoryUsage() const
-{
-	return 0;
-}
-
-void AnimationTransitionBlender::_unload()
-{
-}
-
-void AnimationTransitionBlender::_clone( AnimationNode* clonePtr, bool shareData ) const
+void AnimationQueueNode::_clone( AnimationNode* clonePtr, bool shareData ) const
 {
 	zhAssert( clonePtr != NULL );
 	zhAssert( getClassId() == clonePtr->getClassId() );
 
 	AnimationNode::_clone( clonePtr, shareData );
 
-	zhLog( "AnimationTransitionBlender", "_clone",
-		"Cloning AnimationTransitionBlender %s %u, %s.",
+	zhLog( "AnimationQueueNode", "_clone",
+		"Cloning AnimationQueueNode %s %u, %s.",
 		getClassName().c_str(), mId, mName.c_str() );
 
-	AnimationTransitionBlender* clone = static_cast<AnimationTransitionBlender*>( clonePtr );
+	AnimationQueueNode* clone = static_cast<AnimationQueueNode*>( clonePtr );
 
 	// clone data members
 
@@ -438,7 +429,7 @@ void AnimationTransitionBlender::_clone( AnimationNode* clonePtr, bool shareData
 		clone->mDefaultNode = clone->getAnimationTree()->getNode( mDefaultNode->getId() );
 }
 
-void AnimationTransitionBlender::_updateNode( float dt )
+void AnimationQueueNode::_updateNode( float dt )
 {
 	/*
 
@@ -478,9 +469,9 @@ void AnimationTransitionBlender::_updateNode( float dt )
 		return;
 	}
 
-	AnimationBlender* next_pnode = NULL; // if target is blend, cast down to this pointer
-	if( mNextNode != NULL && mNextNode->isClass( AnimationBlender::ClassId() ) )
-		next_pnode = static_cast<AnimationBlender*>(mNextNode);
+	AnimationBlendNode* next_pnode = NULL; // if target is blend, cast down to this pointer
+	if( mNextNode != NULL && mNextNode->isClass( AnimationBlendNode::ClassId() ) )
+		next_pnode = static_cast<AnimationBlendNode*>(mNextNode);
 	
 	// get next transition times
 	float stime = mTransitionQueue.front().getStartTime();
@@ -561,9 +552,9 @@ void AnimationTransitionBlender::_updateNode( float dt )
 			mNextNode->setPlayTime(mNextTime);
 			mNextNode->setOrigin(mNextOrigin);
 
-			if( mNextNode->isClass( AnimationBlender::ClassId() ) )
+			if( mNextNode->isClass( AnimationBlendNode::ClassId() ) )
 			{
-				next_pnode = static_cast<AnimationBlender*>(mNextNode);
+				next_pnode = static_cast<AnimationBlendNode*>(mNextNode);
 
 				// apply target param. values
 				next_pnode->setParams(mNextParams);
@@ -586,7 +577,7 @@ void AnimationTransitionBlender::_updateNode( float dt )
 	}
 }
 
-void AnimationTransitionBlender::_applyNode( float weight, const std::set<unsigned short>& boneMask ) const
+void AnimationQueueNode::_applyNode( float weight, const std::set<unsigned short>& boneMask ) const
 {
 	if( mCurrentNode == NULL )
 		// no animations are scheduled, nothing to do here
@@ -602,9 +593,9 @@ void AnimationTransitionBlender::_applyNode( float weight, const std::set<unsign
 		// we're in a transition, apply both animations with
 		// appropriate weights
 
-		AnimationBlender* next_pnode = NULL; // if target is blend, cast down to this pointer
-		if( mNextNode->isClass( AnimationBlender::ClassId() ) )
-			next_pnode = static_cast<AnimationBlender*>(mNextNode);
+		AnimationBlendNode* next_pnode = NULL; // if target is blend, cast down to this pointer
+		if( mNextNode->isClass( AnimationBlendNode::ClassId() ) )
+			next_pnode = static_cast<AnimationBlendNode*>(mNextNode);
 
 		// apply current anim.
 		mCurrentNode->apply( weight * mWeight, boneMask );
@@ -644,7 +635,7 @@ void AnimationTransitionBlender::_applyNode( float weight, const std::set<unsign
 		// notify listeners of transition start
 		if(mTransStarted)
 		{
-			TransitionBlendEvent evt( const_cast<AnimationTransitionBlender*>(this), false );
+			AnimationQueueNodeEvent evt( const_cast<AnimationQueueNode*>(this), false );
 			evt.emit();
 			
 			mTransStarted = false;
@@ -653,7 +644,7 @@ void AnimationTransitionBlender::_applyNode( float weight, const std::set<unsign
 		// notify listeners of transition end
 		if(mTransFinished)
 		{
-			TransitionBlendEvent evt( const_cast<AnimationTransitionBlender*>(this), true );
+			AnimationQueueNodeEvent evt( const_cast<AnimationQueueNode*>(this), true );
 			evt.emit();
 			
 			mTransFinished = false;

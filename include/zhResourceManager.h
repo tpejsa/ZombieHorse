@@ -60,7 +60,7 @@ enum ResourceState
 #define zhRegister_ResourceSerializer( resMgr, Serializer ) \
 	resMgr->registerSerializer( Serializer::ClassId(), Serializer::ClassName(), &Serializer::Create )
 #define zhUnregister_ResourceLoader( resMgr, Loader ) \
-	resMgr->unregisterSerializer( Loader::ClassId() )
+	resMgr->unregisterLoader( Loader::ClassId() )
 #define zhUnregister_ResourceSerializer( resMgr, Serializer ) \
 	resMgr->unregisterSerializer( Serializer::ClassId() )
 

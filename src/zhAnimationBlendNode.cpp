@@ -20,32 +20,32 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#include "zhAnimationBlender.h"
+#include "zhAnimationBlendNode.h"
 #include "zhString.h"
 #include "zhMath.h"
 #include "zhSkeleton.h"
 #include "zhAnimation.h"
 #include "zhAnimationNode.h"
-#include "zhAnimationSampler.h"
+#include "zhAnimationSampleNode.h"
 
 namespace zh
 {
 
-AnimationBlender::AnimationBlender()
+AnimationBlendNode::AnimationBlendNode()
 : mParamEnabled(true), mAnimSet(NULL), mAnimSpaceId(0), mUseBlendCurves(true), mTWCurveTime(0)
 {
 }
 
-AnimationBlender::~AnimationBlender()
+AnimationBlendNode::~AnimationBlendNode()
 {
 }
 
-bool AnimationBlender::isLeaf() const
+bool AnimationBlendNode::isLeaf() const
 {
 	return false;
 }
 
-void AnimationBlender::setPlaying( bool playing )
+void AnimationBlendNode::setPlaying( bool playing )
 {
 	AnimationNode::setPlaying(playing);
 
@@ -58,17 +58,17 @@ void AnimationBlender::setPlaying( bool playing )
 	}
 }
 
-float AnimationBlender::getPlayTime() const
+float AnimationBlendNode::getPlayTime() const
 {
 	return getNormalizedPlayTime() * getPlayLength();
 }
 
-void AnimationBlender::setPlayTime( float time )
+void AnimationBlendNode::setPlayTime( float time )
 {
 	setNormalizedPlayTime( time/getPlayLength() );
 }
 
-float AnimationBlender::getNormalizedPlayTime() const
+float AnimationBlendNode::getNormalizedPlayTime() const
 {
 	AnimationSpace* anim_space = getAnimationSpace();
 	AnimationNode* cn = getMainChild();
@@ -86,7 +86,7 @@ float AnimationBlender::getNormalizedPlayTime() const
 	}
 }
 
-void AnimationBlender::setNormalizedPlayTime( float time )
+void AnimationBlendNode::setNormalizedPlayTime( float time )
 {
 	AnimationSpace* anim_space = getAnimationSpace();
 
@@ -107,7 +107,7 @@ void AnimationBlender::setNormalizedPlayTime( float time )
 	}
 }
 
-float AnimationBlender::getPlayLength() const
+float AnimationBlendNode::getPlayLength() const
 {
 	float play_length = 0;
 
@@ -121,12 +121,12 @@ float AnimationBlender::getPlayLength() const
 	return play_length;
 }
 
-const Skeleton::Situation& AnimationBlender::getOrigin() const
+const Skeleton::Situation& AnimationBlendNode::getOrigin() const
 {
 	return mOrigin;
 }
 
-void AnimationBlender::setOrigin( const Skeleton::Situation& origin )
+void AnimationBlendNode::setOrigin( const Skeleton::Situation& origin )
 {
 	AnimationSpace* anim_space = getAnimationSpace();
 
@@ -176,7 +176,7 @@ void AnimationBlender::setOrigin( const Skeleton::Situation& origin )
 	}
 }
 
-float AnimationBlender::getWeight( unsigned short nodeId ) const
+float AnimationBlendNode::getWeight( unsigned short nodeId ) const
 {
 	zhAssert( hasChild(nodeId) );
 
@@ -184,7 +184,7 @@ float AnimationBlender::getWeight( unsigned short nodeId ) const
 	return mWeights[banim_i];
 }
 
-float AnimationBlender::getWeight( const std::string& nodeName ) const
+float AnimationBlendNode::getWeight( const std::string& nodeName ) const
 {
 	zhAssert( hasChild(nodeName) );
 
@@ -192,7 +192,7 @@ float AnimationBlender::getWeight( const std::string& nodeName ) const
 	return mWeights[banim_i];
 }
 
-void AnimationBlender::setWeight( unsigned short nodeId, float weight )
+void AnimationBlendNode::setWeight( unsigned short nodeId, float weight )
 {
 	zhAssert( hasChild(nodeId) );
 
@@ -202,7 +202,7 @@ void AnimationBlender::setWeight( unsigned short nodeId, float weight )
 	_blendAnnotations();
 }
 
-void AnimationBlender::setWeight( const std::string& nodeName, float weight )
+void AnimationBlendNode::setWeight( const std::string& nodeName, float weight )
 {
 	zhAssert( hasChild(nodeName) );
 	
@@ -212,7 +212,7 @@ void AnimationBlender::setWeight( const std::string& nodeName, float weight )
 	_blendAnnotations();
 }
 
-void AnimationBlender::setAllWeights( float weight )
+void AnimationBlendNode::setAllWeights( float weight )
 {
 	for( unsigned int i = 0; i < mWeights.size(); ++i )
 		mWeights[i] = weight;
@@ -220,12 +220,12 @@ void AnimationBlender::setAllWeights( float weight )
 	_blendAnnotations();
 }
 
-const Vector& AnimationBlender::getWeights() const
+const Vector& AnimationBlendNode::getWeights() const
 {
 	return mWeights;
 }
 
-void AnimationBlender::setWeights( const Vector& weights )
+void AnimationBlendNode::setWeights( const Vector& weights )
 {
 	zhAssert( weights.size() == getNumChildren() );
 
@@ -245,7 +245,7 @@ void AnimationBlender::setWeights( const Vector& weights )
 	//
 }
 
-float AnimationBlender::getParam( const std::string& paramName ) const
+float AnimationBlendNode::getParam( const std::string& paramName ) const
 {
 	AnimationSpace* anim_space = getAnimationSpace();
 	if( anim_space == NULL || !anim_space->hasParametrization() )
@@ -259,7 +259,7 @@ float AnimationBlender::getParam( const std::string& paramName ) const
 	return mParams[param_i];
 }
 
-void AnimationBlender::setParam( const std::string& paramName, float param )
+void AnimationBlendNode::setParam( const std::string& paramName, float param )
 {
 	AnimationSpace* anim_space = getAnimationSpace();
 	if( !mParamEnabled || anim_space == NULL || !anim_space->hasParametrization() )
@@ -278,12 +278,12 @@ void AnimationBlender::setParam( const std::string& paramName, float param )
 	setWeights( animparam->sample(mParams) );
 }
 
-const Vector& AnimationBlender::getParams() const
+const Vector& AnimationBlendNode::getParams() const
 {
 	return mParams;
 }
 
-void AnimationBlender::setParams( const Vector& paramValues )
+void AnimationBlendNode::setParams( const Vector& paramValues )
 {
 	AnimationSpace* anim_space = getAnimationSpace();
 	if( !mParamEnabled || anim_space == NULL || !anim_space->hasParametrization() )
@@ -301,27 +301,27 @@ void AnimationBlender::setParams( const Vector& paramValues )
 	setWeights( animparam->sample(mParams) );
 }
 
-bool AnimationBlender::getParamEnabled() const
+bool AnimationBlendNode::getParamEnabled() const
 {
 	return mParamEnabled;
 }
 
-void AnimationBlender::setParamEnabled( bool enabled )
+void AnimationBlendNode::setParamEnabled( bool enabled )
 {
 	mParamEnabled = enabled;
 }
 
-AnimationSetPtr AnimationBlender::getAnimationSet() const
+AnimationSetPtr AnimationBlendNode::getAnimationSet() const
 {
 	return mAnimSet;
 }
 
-unsigned short AnimationBlender::getAnimationSpaceId() const
+unsigned short AnimationBlendNode::getAnimationSpaceId() const
 {
 	return mAnimSpaceId;
 }
 
-AnimationSpace* AnimationBlender::getAnimationSpace() const
+AnimationSpace* AnimationBlendNode::getAnimationSpace() const
 {
 	if( mAnimSet == NULL || !mAnimSet->hasAnimationSpace(mAnimSpaceId) )
 		return NULL;
@@ -329,7 +329,7 @@ AnimationSpace* AnimationBlender::getAnimationSpace() const
 	return mAnimSet->getAnimationSpace(mAnimSpaceId);
 }
 
-void AnimationBlender::setAnimationSpace( AnimationSetPtr animSet, unsigned short animSpaceId )
+void AnimationBlendNode::setAnimationSpace( AnimationSetPtr animSet, unsigned short animSpaceId )
 {
 	zhAssert( animSet != NULL );
 
@@ -352,18 +352,18 @@ void AnimationBlender::setAnimationSpace( AnimationSetPtr animSet, unsigned shor
 		{
 			AnimationNode* child = child_i.next();
 
-			if( child->isClass( AnimationSampler::ClassId() ) )
+			if( child->isClass( AnimationSampleNode::ClassId() ) )
 			{
-				AnimationSampler* snode = static_cast<AnimationSampler*>(child);
+				AnimationSampleNode* snode = static_cast<AnimationSampleNode*>(child);
 				if( snode->getAnimationId() == banim->getId() )
 				{
 					mChildrenToBaseAnims[ child->getId() ] = banim_i;
 					break;
 				}
 			}
-			else if( child->isClass( AnimationBlender::ClassId() ) )
+			else if( child->isClass( AnimationBlendNode::ClassId() ) )
 			{
-				AnimationBlender* bnode = static_cast<AnimationBlender*>(child);
+				AnimationBlendNode* bnode = static_cast<AnimationBlendNode*>(child);
 				if( bnode->getAnimationSpaceId() == banim->getId() )
 				{
 					mChildrenToBaseAnims[ child->getId() ] = banim_i;
@@ -382,17 +382,17 @@ void AnimationBlender::setAnimationSpace( AnimationSetPtr animSet, unsigned shor
 	_initAnnotations();
 }
 
-bool AnimationBlender::getUseBlendCurves() const
+bool AnimationBlendNode::getUseBlendCurves() const
 {
 	return mUseBlendCurves;
 }
 
-void AnimationBlender::setUseBlendCurves( bool useBlendCurves )
+void AnimationBlendNode::setUseBlendCurves( bool useBlendCurves )
 {
 	mUseBlendCurves = useBlendCurves;
 }
 
-Skeleton::Situation AnimationBlender::_sampleMover() const
+Skeleton::Situation AnimationBlendNode::_sampleMover() const
 {
 	// TODO: this is reasonably accurate only when not using blend curves, but whatever
 
@@ -422,27 +422,18 @@ Skeleton::Situation AnimationBlender::_sampleMover() const
 	return mv;
 }
 
-size_t AnimationBlender::_calcMemoryUsage() const
-{
-	return 0;
-}
-
-void AnimationBlender::_unload()
-{
-}
-
-void AnimationBlender::_clone( AnimationNode* clonePtr, bool shareData ) const
+void AnimationBlendNode::_clone( AnimationNode* clonePtr, bool shareData ) const
 {
 	zhAssert( clonePtr != NULL );
 	zhAssert( getClassId() == clonePtr->getClassId() );
 
 	AnimationNode::_clone( clonePtr, shareData );
 
-	zhLog( "AnimationBlender", "_clone",
-		"Cloning AnimationBlender %s %u, %s.",
+	zhLog( "AnimationBlendNode", "_clone",
+		"Cloning AnimationBlendNode %s %u, %s.",
 		getClassName().c_str(), mId, mName.c_str() );
 
-	AnimationBlender* clone = static_cast<AnimationBlender*>( clonePtr );
+	AnimationBlendNode* clone = static_cast<AnimationBlendNode*>( clonePtr );
 
 	// clone data members
 
@@ -459,7 +450,7 @@ void AnimationBlender::_clone( AnimationNode* clonePtr, bool shareData ) const
 	clone->mUseBlendCurves = mUseBlendCurves;
 }
 
-void AnimationBlender::_updateNode( float dt )
+void AnimationBlendNode::_updateNode( float dt )
 {
 	AnimationSpace* anim_space = getAnimationSpace();
 	float play_length = getPlayLength();
@@ -528,7 +519,7 @@ void AnimationBlender::_updateNode( float dt )
 	}
 }
 
-void AnimationBlender::_applyNode( float weight, const std::set<unsigned short>& boneMask ) const
+void AnimationBlendNode::_applyNode( float weight, const std::set<unsigned short>& boneMask ) const
 {
 
 	// Apply child nodes		
@@ -570,7 +561,7 @@ void AnimationBlender::_applyNode( float weight, const std::set<unsigned short>&
 	// TODO*/
 }
 
-void AnimationBlender::_initAnnotations()
+void AnimationBlendNode::_initAnnotations()
 {
 	AnimationSpace* anim_space = getAnimationSpace();
 	zhAssert( anim_space != NULL );
@@ -727,7 +718,7 @@ void AnimationBlender::_initAnnotations()
 	_blendAnnotations();
 }
 
-void AnimationBlender::_blendAnnotations()
+void AnimationBlendNode::_blendAnnotations()
 {
 	AnimationSpace* anim_space = getAnimationSpace();
 	zhAssert( anim_space != NULL );
@@ -811,7 +802,7 @@ void AnimationBlender::_blendAnnotations()
 	}
 }
 
-void AnimationBlender::_getTWCurvePosition( float u, unsigned int& cpi, float& t ) const
+void AnimationBlendNode::_getTWCurvePosition( float u, unsigned int& cpi, float& t ) const
 {
 	cpi = (unsigned int)u;
 	t = u - cpi;

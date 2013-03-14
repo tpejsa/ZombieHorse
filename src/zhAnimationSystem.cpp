@@ -29,6 +29,9 @@ SOFTWARE.
 #include "zhZHALoader.h"
 #include "zhZHASerializer.h"
 #include "zhBVHLoader.h"
+#include "zhRootIKSolver.h"
+#include "zhPostureIKSolver.h"
+#include "zhLimbIKSolver.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -60,13 +63,22 @@ bool AnimationSystem::init( const std::string& cfgPath )
 	zhRegister_ResourceSerializer( getAnimationManager(), ZHASerializer );
 	zhRegister_ResourceLoader( getAnimationManager(), BVHLoader );
 
-	// register animation nodes and bone controllers
-	zhRegister_AnimationNode( AnimationSampler );
-	zhRegister_AnimationNode( AnimationBlender );
-	zhRegister_AnimationNode( AnimationTransitionBlender );
+	// register animation nodes
+	zhRegister_AnimationNode(AnimationSampleNode);
+	zhRegister_AnimationNode(AnimationBlendNode);
+	zhRegister_AnimationNode(AnimationQueueNode);
+
+	// register IK solvers
+	zhRegister_IKSolver(RootIKSolver);
+	zhRegister_IKSolver(PostureIKSolver);
+	zhRegister_IKSolver(LimbIKSolver);
 
 	// load config.xml (configuration settings, res. dirs, plugin dir, plugins)
 	// TODO
+
+	// Create the environment "skeleton"
+	Skeleton* skel = createSkeleton("Environment");
+	skel->createBone( 0, "Root" );
 
 	zhSetErrorCode( SystemError_None );
 	return true;
@@ -142,6 +154,35 @@ unsigned int AnimationSystem::getNumSkeletons() const
 	return mSkeletons.size();
 }
 
+Skeleton* AnimationSystem::createIKSolversOnSkeleton( const std::string& name )
+{
+	zhAssert( hasSkeleton(name) );
+
+	zhLog( "AnimationSystem", "createIKSolversOnSkeleton",
+		"Creating default IK solvers on skeleton %s.", name.c_str() );
+
+	Skeleton* skel = getSkeleton(name);
+	if( skel->hasBoneWithTag(BT_Root) )
+		skel->createIKSolver( RootIKSolver::ClassId(), 0, "RootIK", BT_Root, BT_Root );
+	if( skel->hasBoneWithTag(BT_Root) && skel->hasBoneWithTag(BT_Chest) )
+		skel->createIKSolver( PostureIKSolver::ClassId(), 0, "PostureIK", BT_Root, BT_Chest );
+	if( skel->hasBoneWithTag(BT_LShoulder) && skel->hasBoneWithTag(BT_LWrist) )
+		skel->createIKSolver( LimbIKSolver::ClassId(), 0, "LArmIK", BT_LShoulder, BT_LWrist );
+	if( skel->hasBoneWithTag(BT_RShoulder) && skel->hasBoneWithTag(BT_RWrist) )
+		skel->createIKSolver( LimbIKSolver::ClassId(), 0, "RArmIK", BT_RShoulder, BT_RWrist );
+	if( skel->hasBoneWithTag(BT_LHip) && skel->hasBoneWithTag(BT_LAnkle) )
+		skel->createIKSolver( LimbIKSolver::ClassId(), 0, "LLegIK", BT_LHip, BT_LAnkle );
+	if( skel->hasBoneWithTag(BT_RHip) && skel->hasBoneWithTag(BT_RAnkle) )
+		skel->createIKSolver( LimbIKSolver::ClassId(), 0, "RLegIK", BT_RHip, BT_RAnkle );
+	
+	return skel;
+}
+
+Skeleton* AnimationSystem::getEnvironment() const
+{
+	return getSkeleton("Environment");
+}
+
 AnimationSetPtr AnimationSystem::loadAnimationSet( const std::string& path, const std::string& skel )
 {
 	zhLog( "AnimationSystem", "loadAnimationSet",
@@ -183,7 +224,7 @@ AnimationSetPtr AnimationSystem::loadAnimationSet( const std::string& path, cons
 	// Add animation nodes to tree
 	if( mAnimTree->getRoot() == NULL )
 	{
-		mAnimTree->createNode( AnimationTransitionBlender::ClassId(), 0, "Root" );
+		mAnimTree->createNode( AnimationQueueNode::ClassId(), 0, "Root" );
 		mAnimTree->setRoot("Root");
 	}
 	AnimationSet::AnimationConstIterator anim_i = anim_set->getAnimationConstIterator();
@@ -194,10 +235,13 @@ AnimationSetPtr AnimationSystem::loadAnimationSet( const std::string& path, cons
 		if( mAnimTree->hasNode(node_name) )
 			continue;
 
-		AnimationSampler* node = static_cast<AnimationSampler*>(
-			mAnimTree->createNode( AnimationSampler::ClassId(), mAnimTree->getNumNodes(), node_name )
+		AnimationSampleNode* node = static_cast<AnimationSampleNode*>(
+			mAnimTree->createNode( AnimationSampleNode::ClassId(), mAnimTree->getNumNodes(), node_name )
 			);
 		node->setAnimation( anim->getAnimationSet(), anim->getId() );
+		Skeleton* skel = getSkeleton( anim_set->getName() );
+		if( skel != NULL )
+			node->createAdaptor(skel);
 		mAnimTree->getNode("Root")->addChild(node);
 	}
 	// TODO: Add nodes under correct retargetting node (specified by skel param.)
@@ -318,8 +362,8 @@ Animation* AnimationSystem::createAnimationFromSegment( const std::string& newAn
 	}
 
 	// Add the new animation to the animation tree
-	AnimationSampler* node = static_cast<AnimationSampler*>(
-		mAnimTree->createNode( AnimationSampler::ClassId(), mAnimTree->getNumNodes(), anim->getFullName() )
+	AnimationSampleNode* node = static_cast<AnimationSampleNode*>(
+		mAnimTree->createNode( AnimationSampleNode::ClassId(), mAnimTree->getNumNodes(), anim->getFullName() )
 		);
 	node->setAnimation( anim->getAnimationSet(), anim->getId() );
 	mAnimTree->getNode("Root")->addChild(node);
@@ -410,8 +454,8 @@ void AnimationSystem::playAnimation( const std::string& animName )
 
 	// Play the animation
 	mAnimTree->setApplyMover();
-	AnimationTransitionBlender* root =
-		static_cast<AnimationTransitionBlender*>( mAnimTree->getRoot() );
+	AnimationQueueNode* root =
+		static_cast<AnimationQueueNode*>( mAnimTree->getRoot() );
 	root->addTransition(animName);
 	root->setDefaultNode((zh::AnimationNode*)NULL);
 	root->setPlaying();
@@ -430,8 +474,8 @@ void AnimationSystem::playAnimationNow( const std::string& animName )
 
 	// Play the animation
 	mAnimTree->setApplyMover(false);
-	AnimationTransitionBlender* root =
-		static_cast<AnimationTransitionBlender*>( mAnimTree->getRoot() );
+	AnimationQueueNode* root =
+		static_cast<AnimationQueueNode*>( mAnimTree->getRoot() );
 	root->setDefaultNode(animName);
 	root->setPlaying();
 }
@@ -442,7 +486,7 @@ void AnimationSystem::stopAnimation()
 	if( root != NULL )
 	{
 		root->setPlaying(false);
-		static_cast<AnimationTransitionBlender*>(root)->removeAllTransitions();
+		static_cast<AnimationQueueNode*>(root)->removeAllTransitions();
 	}
 }
 
@@ -452,9 +496,9 @@ Animation* AnimationSystem::getCurrentAnimation() const
 	while( node_i.hasMore() )
 	{
 		AnimationNode* node = node_i.next();
-		if( node->getClassId() == AnimationSampler::ClassId() &&
+		if( node->getClassId() == AnimationSampleNode::ClassId() &&
 			node->getPlaying() )
-			return static_cast<AnimationSampler*>(node)->getAnimation();
+			return static_cast<AnimationSampleNode*>(node)->getAnimation();
 	}
 
 	return NULL;
@@ -543,7 +587,17 @@ AnimationTree* AnimationSystem::getAnimationTree() const
 	return mAnimTree;
 }
 
-MemoryPool* AnimationSystem::getMemoryPool() const
+AnimationSystem::AnimationNodeFactory& AnimationSystem::_getAnimationNodeFactory()
+{
+	return mAnimNodeFact;
+}
+
+AnimationSystem::IKSolverFactory& AnimationSystem::_getIKSolverFactory()
+{
+	return mIKSolverFact;
+}
+
+MemoryPool* AnimationSystem::_getMemoryPool() const
 {
 	return MemoryPool::Instance();
 }

@@ -112,7 +112,7 @@ public:
 	/**
 	* Gets the animation track class ID.
 	*/
-	static AnimationTrackClass ClassId() { return AnimationTrack_Bone; }
+	static AnimationTrackClass ClassId() { return AT_Bone; }
 
 	/**
 	* Gets the animation track class ID.

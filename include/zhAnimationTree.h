@@ -29,9 +29,10 @@ SOFTWARE.
 #include "zhSkeleton.h"
 #include "zhAnimationSet.h"
 #include "zhAnimationNode.h"
-#include "zhAnimationSampler.h"
-#include "zhAnimationBlender.h"
-#include "zhAnimationTransitionBlender.h"
+#include "zhAnimationSampleNode.h"
+#include "zhAnimationBlendNode.h"
+#include "zhAnimationQueueNode.h"
+#include "zhAnimationAdaptor.h"
 
 namespace zh
 {
@@ -48,8 +49,6 @@ public:
 
 	typedef MapIterator< std::map<unsigned short, AnimationNode*> > NodeIterator;
 	typedef MapConstIterator< std::map<unsigned short, AnimationNode*> > NodeConstIterator;
-
-	typedef ObjectFactory< AnimationNode, unsigned short > NodeFactory;
 
 	/**
 	* Constructor.
@@ -218,7 +217,7 @@ public:
 	* so far.
 	*
 	* @remark This property is useful for additive blending and is used
-	* e.g. in AnimationSampler::_applyNode().
+	* e.g. in AnimationSampleNode::_applyNode().
 	*/
 	virtual float _getTotalWeight() const;
 
@@ -248,11 +247,6 @@ public:
 	*/
 	virtual void _setPrevSituation( const Skeleton::Situation& sit );
 
-	/**
-	* Gets the factory that produces nodes for the animation tree.
-	*/
-	virtual NodeFactory* _getNodeFactory() const;
-
 protected:
 
 	std::string mName;
@@ -263,9 +257,6 @@ protected:
 	float mTotalWeight;
 	mutable Skeleton* mCurSkel;
 	mutable Skeleton::Situation mPrevSit;
-
-	NodeFactory* mNodeFact;
-
 };
 
 }

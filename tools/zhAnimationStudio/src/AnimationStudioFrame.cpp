@@ -772,10 +772,10 @@ void AnimationStudioFrame::OnMenu_ToolsBuildTransitions( wxCommandEvent& evt )
 
 	if( gApp->getCurrentAnimationNode() != NULL )
 	{
-		if( gApp->getCurrentAnimationNode()->getClassId() == AnimationBlender::ClassId() )
-			src_panim = static_cast<AnimationBlender*>( gApp->getCurrentAnimationNode() )->getAnimationSpace();
-		else if( gApp->getCurrentAnimationNode()->getClassId() == AnimationSampler::ClassId() )
-			src_anim = static_cast<AnimationSampler*>( gApp->getCurrentAnimationNode() )->getAnimation();
+		if( gApp->getCurrentAnimationNode()->getClassId() == AnimationBlendNode::ClassId() )
+			src_panim = static_cast<AnimationBlendNode*>( gApp->getCurrentAnimationNode() )->getAnimationSpace();
+		else if( gApp->getCurrentAnimationNode()->getClassId() == AnimationSampleNode::ClassId() )
+			src_anim = static_cast<AnimationSampleNode*>( gApp->getCurrentAnimationNode() )->getAnimation();
 	}
 
 	if( src_panim == NULL && src_anim == NULL )

@@ -1,0 +1,16 @@
+Coding style guidelines for ZombieHorse project:
+* When in doubt, follow the style of the existing codebase (there are plenty of examples of how to do things)
+* CamelCase notation for identifiers (myIdentifier)
+* Class member variables are prefixed with 'm' (mMyMemberVar)
+* Don't use global variables
+* If you must use global variables, prefix them with 'g' (gMyGlobalVar)
+* Every brace is in its own line
+* All code files are prefixed with zh (zhVector3.h)
+* All code files must have MIT license on the top
+* Header files must have include guards (see existing examples to see what they must look like), followed by #include directives, followed by all #defines, followed by namespace, followed by definitions of classes/structs, ending with namespace and include guard closing
+* All #defines are prefixed with zh and use CamelCase (#define zhMyMacro)
+* Any class/struct that should be part of the API must have the zhDeclSpec macro in its declaration (class zhDeclSpec AnimationNode)
+* Names of functions that are public or protected, but not intended to be called by clients, should begin with underscore (virtual void _unload())
+* Any class, struct, function etc. that is part of the API should be documented using doxygen format
+* Write const-correct code (const std:string& getName() const)
+* Pass arguments by reference unless they are primitive type (void setName( const std::string& name ))

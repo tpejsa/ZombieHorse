@@ -55,15 +55,17 @@ enum SystemError
 */
 class zhDeclSpec AnimationSystem : public Singleton<AnimationSystem>
 {
-
 	friend class Singleton<AnimationSystem>;
-
+	
 public:
 
 	zhDeclare_ErrorState
 	
 	typedef MapIterator< std::map<std::string, Skeleton*> > SkeletonIterator;
 	typedef MapConstIterator< std::map<std::string, Skeleton*> > SkeletonConstIterator;
+
+	typedef ObjectFactory<AnimationNode, unsigned short> AnimationNodeFactory;
+	typedef ObjectFactory<IKSolver, unsigned short> IKSolverFactory;
 
 private:
 
@@ -109,7 +111,8 @@ public:
 	void deleteAllSkeletons();
 
 	/**
-	* Returns true if the skeleton with the specified name exists, false otherwise.
+	* Returns true if the skeleton with the specified name exists,
+	* false otherwise.
 	*/
 	bool hasSkeleton( const std::string& name ) const;
 
@@ -134,6 +137,21 @@ public:
 	unsigned int getNumSkeletons() const;
 
 	/**
+	* Create a set of default IK solvers on the specified skeleton.
+	*
+	* @param name Skeleton name.
+	* @return Pointer to the skeleton.
+	* @remark Skeleton bones must be tagged in order to correctly
+	* create the solvers.
+	*/
+	Skeleton* createIKSolversOnSkeleton( const std::string& name );
+
+	/**
+	* Get the "skeleton" representing the environment.
+	*/
+	Skeleton* getEnvironment() const;
+
+	/**
 	* Loads an animation set from a file (BVH, ZHA...)
 	*
 	* @param path Animation set path.
@@ -145,7 +163,8 @@ public:
 	* as one of the existing ones, you can specify that skeleton and thus
 	* avoid spurious retargetting.
 	*/
-	AnimationSetPtr loadAnimationSet( const std::string& path, const std::string& skel = "" );
+	AnimationSetPtr loadAnimationSet( const std::string& path,
+		const std::string& skel = "" );
 
 	// TODO: add serialization support
 
@@ -326,9 +345,19 @@ public:
 	// TODO: add functions for end-effector specification and cleanup
 
 	/**
+	* Gets the factory that produces nodes for animation trees.
+	*/
+	AnimationNodeFactory& _getAnimationNodeFactory();
+
+	/**
+	* Gets the factory that produces IK solvers for skeletons.
+	*/
+	IKSolverFactory& _getIKSolverFactory();
+
+	/**
 	* Gets a pointer to the memory pool.
 	*/
-	MemoryPool* getMemoryPool() const;
+	MemoryPool* _getMemoryPool() const;
 
 	/**
 	* Parses the fully-qualified animation name to obtain animation set name
@@ -343,6 +372,8 @@ private:
 	Skeleton* mOutSkel;
 	AnimationTree* mAnimTree;
 
+	AnimationNodeFactory mAnimNodeFact;
+	IKSolverFactory mIKSolverFact;
 };
 
 }

@@ -30,6 +30,26 @@ SOFTWARE.
 namespace zh
 {
 
+class Skeleton;
+
+enum BoneTag
+{
+	BT_Root,
+	BT_Chest,
+	BT_LShoulder,
+	BT_LElbow,
+	BT_LWrist,
+	BT_RShoulder,
+	BT_RElbow,
+	BT_RWrist,
+	BT_LHip,
+	BT_LKnee,
+	BT_LAnkle,
+	BT_RHip,
+	BT_RKnee,
+	BT_RAnkle
+};
+
 /**
 * Skeleton bone.
 */
@@ -44,7 +64,7 @@ public:
 	/**
 	* Constructor.
 	*/
-	Bone( unsigned short id, const std::string& name );
+	Bone( unsigned short id, const std::string& name, Skeleton* skel );
 
 	/**
 	* Destructor.
@@ -273,10 +293,30 @@ public:
 	*/
 	ChildConstIterator getChildConstIterator() const;
 
+	/**
+	* Finds a chain of bones in the skeleton starting at this bone.
+	*
+	* @param endBone Chain end bone.
+	* @param chain Bone chain.
+	* @return true if a chain has been found, false otherwise.
+	*/
+	bool findChain( Bone* endBone, std::vector<Bone*>& chain );
+
+	/**
+	* Adds a semantic tag to the bone.
+	*/
+	void tag( BoneTag tag );
+
+	/**
+	* Removes all semantic tags from the bone.
+	*/
+	void untag();
+
 private:
 
 	unsigned short mId;
 	std::string mName;
+	Skeleton* mSkel;
 	Bone* mParent;
 	std::map<unsigned short, Bone*> mChildrenById;
 	std::map<std::string, Bone*> mChildrenByName;
