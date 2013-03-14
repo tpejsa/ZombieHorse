@@ -212,7 +212,7 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 	mAuiMgr.AddPane( mWndTimeline, wndTimeline_pi );*/
 
 	// Add project view window to AUI manager
-	mWndProjectView->SetSize( 272, size.GetHeight() );
+	mWndProjectView->SetSize( 172, size.GetHeight() );
 	wxAuiPaneInfo wndProjectView_pi;
 	wndProjectView_pi.Left();
 	wndProjectView_pi.Floatable();
@@ -221,7 +221,7 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 	mAuiMgr.AddPane( mWndProjectView, wndProjectView_pi );
 
 	// Add animation sequence window to AUI manager
-	mWndAnimSequence->SetSize( 272, size.GetHeight() );
+	mWndAnimSequence->SetSize( 172, size.GetHeight() );
 	wxAuiPaneInfo wndAnimSeq_pi;
 	wndAnimSeq_pi.Left();
 	wndAnimSeq_pi.Floatable();
@@ -230,7 +230,7 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 	mAuiMgr.AddPane( mWndAnimSequence, wndAnimSeq_pi );
 
 	// Add motion visualization window to AUI manager
-	mWndMotionVis->SetSize( 272, size.GetHeight() );
+	mWndMotionVis->SetSize( 172, size.GetHeight() );
 	wxAuiPaneInfo wndMotionVis_pi;
 	wndMotionVis_pi.Right();
 	wndMotionVis_pi.Floatable();

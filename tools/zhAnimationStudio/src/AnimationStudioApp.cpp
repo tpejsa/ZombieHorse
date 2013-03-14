@@ -358,7 +358,7 @@ bool AnimationStudioApp::init( wxWindow* wnd )
 	// Load ZombieHorse resources
 	// TODO: enable loading of all resources once Haixiang fixes parsing performance
 	boost::filesystem::recursive_directory_iterator end;
-	for( boost::filesystem::recursive_directory_iterator dir("./test_data");
+	for( boost::filesystem::recursive_directory_iterator dir("../../samples/data/animations");
 		dir != end; ++dir )
 	{
 		boost::filesystem::directory_entry bdir = (*dir);
