@@ -268,6 +268,11 @@ public:
 	bool hasBoneWithTag( BoneTag tag ) const;
 
 	/**
+	* Get the list of tags on the specified bone.
+	*/
+	void findTagsOnBone( Bone* bone, std::vector<BoneTag>& tags ) const;
+
+	/**
 	* Create an IK solver on this skeleton.
 	*
 	* @param classId IK solver class ID.

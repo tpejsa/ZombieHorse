@@ -43,6 +43,11 @@ Bone::~Bone()
 {
 }
 
+Skeleton* Bone::getSkeleton() const
+{
+	return mSkel;
+}
+
 const Vector3& Bone::getPosition() const
 {
 	return mPos;

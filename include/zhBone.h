@@ -83,6 +83,11 @@ public:
 	~Bone();
 
 	/**
+	* Get the owner skeleton.
+	*/
+	Skeleton* getSkeleton() const;
+
+	/**
 	* Gets the name of the bone.
 	*/
 	unsigned short getId() const { return mId; }

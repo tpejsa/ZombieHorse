@@ -19,3 +19,42 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
+
+#ifndef _EditSkeletonWindow_h__
+#define _EditSkeletonWindow_h__
+
+#include "AnimationStudio.h"
+
+enum
+{
+	ID_slHeight,
+	ID_slTrunkSize,
+	ID_slArmLength,
+	ID_slLegLength
+};
+
+class EditSkeletonWindow : public wxWindow
+{
+
+public:
+
+	EditSkeletonWindow( wxWindow *parent, wxWindowID id );
+
+	/**
+	* Updates the edit skeleton window contents.
+	*/
+	void refresh();
+
+	void OnSlider_Height( wxScrollEvent& evt );
+	void OnSlider_TrunkSize( wxScrollEvent& evt );
+	void OnSlider_ArmLength( wxScrollEvent& evt );
+	void OnSlider_LegLength( wxScrollEvent& evt );
+
+	DECLARE_EVENT_TABLE()
+
+private:
+
+	wxSlider *mSlHeight, *mSlTrunkSize, *mSlArmLength, *mSlLegLength;
+};
+
+#endif // _EditSkeletonWindow_h__

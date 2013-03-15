@@ -324,6 +324,18 @@ bool Skeleton::hasBoneWithTag( BoneTag tag ) const
 	return mBonesByTag.count(tag) > 0;
 }
 
+void Skeleton::findTagsOnBone( Bone* bone, std::vector<BoneTag>& tags ) const
+{
+	zhAssert( bone != NULL && hasBone(bone->getId()) );
+
+	for( std::map<BoneTag, Bone*>::const_iterator bone_i = mBonesByTag.begin();
+		bone_i != mBonesByTag.end(); ++bone_i )
+	{
+		if( bone_i->second->getId() == bone->getId() )
+			tags.push_back(bone_i->first);
+	}
+}
+
 IKSolver* Skeleton::createIKSolver( unsigned long classId, unsigned short id,
 	const std::string& name, BoneTag startBone, BoneTag endBone )
 {
