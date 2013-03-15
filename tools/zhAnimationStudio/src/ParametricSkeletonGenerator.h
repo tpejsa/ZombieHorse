@@ -7,50 +7,53 @@
 struct BoneGroup{
 	std::string Name;
 	std::vector<std::pair<zh::BoneTag,zh::BoneTag>> BoneChains;//First is the start chain tag,Second is the end chain tag
-	bool operator==(BoneGroup b){
+	bool operator==(const BoneGroup& b)const{
 		return this->Name == b.Name;
 	};
-	bool operator>(BoneGroup b){
+	bool operator>(const BoneGroup& b)const{
 		return this->Name > b.Name;
 	};
-	private void getChain(zh::Bone* bone,std::pair<zh::BoneTag,zh::BoneTag>,std::vector<zh::Bone*>& chain){
-		//use dijkstra algorithm to calculate the chain between two arbirary bones.
-		//TODO!!!!!!
-		return;
+	bool operator<(const BoneGroup& b)const{
+		return this->Name < b.Name;
 	};
-	private bool searchChain(zh::Bone* bone,std::pair<zh::BoneTag,zh::BoneTag>){
-		//Current version the begining must be an ancester of the end
-		return true;
-	}
-	bool contain(zh::Bone* bone){
-		for(std::vector<std::pair<zh::BoneTag,zh::BoneTag>>::iterator i = BoneChains.begin();i != BoneChains.end();++i){
+	bool contain(zh::Bone* bone)const{
+		for(std::vector<std::pair<zh::BoneTag,zh::BoneTag>>::const_iterator i = BoneChains.begin();i != BoneChains.end();++i){
 			if(searchChain(bone,*i)){
 				return true;
 			}
 		}
 		return false;
 	}
+	void getChain(zh::Bone* bone,std::pair<zh::BoneTag,zh::BoneTag>,std::vector<zh::Bone*>& chain)const{
+		//use dijkstra algorithm to calculate the chain between two arbirary bones.
+		//TODO!!!!!!
+		return;
+	};
+	bool searchChain(zh::Bone* bone,std::pair<zh::BoneTag,zh::BoneTag>)const{
+		//Current version the begining must be an ancester of the end
+		return true;
+	}
 };
 struct SkeletonParameters{
 	double scaleGlobal;
-	std::unordered_map<zh::BoneTag,double> tagScales;
-	std::unordered_map<BoneGroup,double> groupScales;
+	std::map<zh::BoneTag,double> tagScales;
+	std::map<BoneGroup,double> groupScales;
 	SkeletonParameters(){
 		tagScales.clear();
 		groupScales.clear();
 		scaleGlobal = 1.0;
 	}
-	double operator[](const zh::Bone* bone)const{
+	double operator[](zh::Bone* bone)const{
 		double groupScales = 1.0;
-		for(std::unordered_map<BoneGroup,double>::iterator iter = groupScales.begin(); iter != groupScales.end(); ++iter){
-			if(iter->first->contain(bone)){
+		for(std::map<BoneGroup,double>::const_iterator iter = this -> groupScales.begin(); iter != this -> groupScales.end(); ++iter){
+			if(iter->first.contain(bone)){
 				groupScales *= iter->second;
 			}
 		}
 		return 1.0 * groupScales;
 	};
 	double operator[](const BoneGroup& groupName)const{
-		std::unordered_map<BoneGroup,double>::const_iterator result = groupScales.find(groupName);
+		std::map<BoneGroup,double>::const_iterator result = groupScales.find(groupName);
 		if(result != groupScales.end()){
 			return result->second;
 		}
