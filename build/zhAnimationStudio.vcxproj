@@ -20,6 +20,7 @@
     <ClInclude Include="..\tools\zhAnimationStudio\src\BuildMotionGraphDialog.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\DefineAnimParamDialog.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\DotSceneLoader.h" />
+    <ClInclude Include="..\tools\zhAnimationStudio\src\EditSkeletonWindow.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\MatchGraphView.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\MatchGraphViewDialog.h" />
     <ClInclude Include="..\tools\zhAnimationStudio\src\MatchWebViewDialog.h" />
@@ -43,6 +44,7 @@
     <ClCompile Include="..\tools\zhAnimationStudio\src\BuildMotionGraphDialog.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\DefineAnimParamDialog.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\DotSceneLoader.cpp" />
+    <ClCompile Include="..\tools\zhAnimationStudio\src\EditSkeletonWindow.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\MatchGraphView.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\MatchGraphViewDialog.cpp" />
     <ClCompile Include="..\tools\zhAnimationStudio\src\MatchWebViewDialog.cpp" />

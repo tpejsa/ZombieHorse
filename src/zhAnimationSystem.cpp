@@ -78,6 +78,7 @@ bool AnimationSystem::init( const std::string& cfgPath )
 
 	// Create the environment "skeleton"
 	Skeleton* skel = createSkeleton("Environment");
+	mOutSkel = NULL;
 	skel->createBone( 0, "Root" );
 
 	zhSetErrorCode( SystemError_None );
@@ -165,15 +166,15 @@ Skeleton* AnimationSystem::createIKSolversOnSkeleton( const std::string& name )
 	if( skel->hasBoneWithTag(BT_Root) )
 		skel->createIKSolver( RootIKSolver::ClassId(), 0, "RootIK", BT_Root, BT_Root );
 	if( skel->hasBoneWithTag(BT_Root) && skel->hasBoneWithTag(BT_Chest) )
-		skel->createIKSolver( PostureIKSolver::ClassId(), 0, "PostureIK", BT_Root, BT_Chest );
+		skel->createIKSolver( PostureIKSolver::ClassId(), 1, "PostureIK", BT_Root, BT_Chest );
 	if( skel->hasBoneWithTag(BT_LShoulder) && skel->hasBoneWithTag(BT_LWrist) )
-		skel->createIKSolver( LimbIKSolver::ClassId(), 0, "LArmIK", BT_LShoulder, BT_LWrist );
+		skel->createIKSolver( LimbIKSolver::ClassId(), 2, "LArmIK", BT_LShoulder, BT_LWrist );
 	if( skel->hasBoneWithTag(BT_RShoulder) && skel->hasBoneWithTag(BT_RWrist) )
-		skel->createIKSolver( LimbIKSolver::ClassId(), 0, "RArmIK", BT_RShoulder, BT_RWrist );
+		skel->createIKSolver( LimbIKSolver::ClassId(), 3, "RArmIK", BT_RShoulder, BT_RWrist );
 	if( skel->hasBoneWithTag(BT_LHip) && skel->hasBoneWithTag(BT_LAnkle) )
-		skel->createIKSolver( LimbIKSolver::ClassId(), 0, "LLegIK", BT_LHip, BT_LAnkle );
+		skel->createIKSolver( LimbIKSolver::ClassId(), 4, "LLegIK", BT_LHip, BT_LAnkle );
 	if( skel->hasBoneWithTag(BT_RHip) && skel->hasBoneWithTag(BT_RAnkle) )
-		skel->createIKSolver( LimbIKSolver::ClassId(), 0, "RLegIK", BT_RHip, BT_RAnkle );
+		skel->createIKSolver( LimbIKSolver::ClassId(), 5, "RLegIK", BT_RHip, BT_RAnkle );
 	
 	return skel;
 }
@@ -435,7 +436,7 @@ Skeleton* AnimationSystem::getOutputSkeleton() const
 
 void AnimationSystem::setOutputSkeleton( const std::string& name )
 {
-	zhAssert( hasSkeleton(name) );
+	zhAssert( hasSkeleton(name) && name != "Environment" );
 
 	mOutSkel = getSkeleton(name);
 	

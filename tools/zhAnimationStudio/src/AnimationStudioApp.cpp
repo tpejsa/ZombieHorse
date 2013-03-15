@@ -71,13 +71,18 @@ SceneManager* AnimationStudioApp::getSceneManager() const
 
 zh::Skeleton* AnimationStudioApp::selectSkeleton( const string& name )
 {
-	if( !zhAnimationSystem->hasSkeleton(name) )
+	if( !zhAnimationSystem->hasSkeleton(name) || name == "Environment" )
 	{
 		// Can't find skeleton by that name
 		wxMessageBox( "Unable to find skeleton " + name + ".",
 			"Error", wxOK | wxICON_EXCLAMATION );
 		return NULL;
 	}
+
+	// Reset all motion and environment visualization
+	displayJointMarkers( std::set<std::string>(), false );
+	traceJointPaths( std::set<std::string>(), false );
+	deleteAllEnvironmentObjects();
 
 	zhAnimationSystem->stopAnimation();
 	zhAnimationSystem->setOutputSkeleton(name);
@@ -100,6 +105,11 @@ void AnimationStudioApp::removeSkeleton( const string& name )
 
 zh::Animation* AnimationStudioApp::selectAnimation( const string& anim )
 {
+	// Reset all motion and environment visualization
+	displayJointMarkers( std::set<std::string>(), false );
+	traceJointPaths( std::set<std::string>(), false );
+	deleteAllEnvironmentObjects();
+
 	if( zhAnimationSystem->getOutputSkeleton() == NULL )
 	{
 		if( zhAnimationSystem->getNumSkeletons() > 0 )
@@ -115,11 +125,6 @@ zh::Animation* AnimationStudioApp::selectAnimation( const string& anim )
 	float minx, maxx, miny, maxy, minz, maxz;
 	mCurAnim->computeAnimationBounds( minx, maxx, miny, maxy, minz, maxz );
 	// TODO
-
-	// Refresh joint traces
-	traceJointPaths( std::set<std::string>(), false );
-	if( !mTracedJoints.empty() )
-		traceJointPaths(mTracedJoints);
 
 	return mCurAnim;
 }
@@ -155,8 +160,8 @@ void AnimationStudioApp::displayJointMarkers( const std::set<std::string>& boneN
 			bone_names.begin(), bone_names.end(), std::inserter( results, results.end() ) );
 		mJointsWithMarkers = results;
 
-		for( std::set<std::string>::const_iterator jmi = boneNames.begin();
-			jmi != boneNames.end(); ++jmi )
+		for( std::set<std::string>::const_iterator jmi = bone_names.begin();
+			jmi != bone_names.end(); ++jmi )
 			mFrmMain->getOgreWindow()->deletePrettyObject("Marker"+*jmi);
 	}
 	else
@@ -213,8 +218,8 @@ void AnimationStudioApp::traceJointPaths( const std::set<std::string>& boneNames
 		mTracedJoints = results;
 		mTracedJointAnim = NULL;
 
-		for( std::set<std::string>::const_iterator jmi = boneNames.begin();
-			jmi != boneNames.end(); ++jmi )
+		for( std::set<std::string>::const_iterator jmi = bone_names.begin();
+			jmi != bone_names.end(); ++jmi )
 			mFrmMain->getOgreWindow()->deletePrettyObject("Trace"+*jmi);
 	}
 	else
@@ -251,6 +256,45 @@ void AnimationStudioApp::traceJointPath( const std::string& boneName, bool enabl
 bool AnimationStudioApp::hasJointTrace( const std::string& boneName ) const
 {
 	return mTracedJoints.count(boneName) > 0;
+}
+
+zh::Bone* AnimationStudioApp::createEnvironmentObject(
+	const std::string& name, const zh::Vector3& pos )
+{
+	// Create the bone representing the "object"
+	zh::Skeleton* env = zhAnimationSystem->getEnvironment();
+	unsigned short obj_id = 0;
+	while( env->hasBone(obj_id) ) ++obj_id;
+	zh::Bone* obj = env->createBone( obj_id, name );
+	env->getRoot()->addChild(obj);
+	obj->setInitialPosition(pos);
+
+	// Show the object in the scene
+	std::vector<Ogre::Vector3> pts;
+	pts.push_back( zhOgreVector3(pos) );
+	mFrmMain->getOgreWindow()->createPrettyObject( "EnvObj"+obj->getName(),
+		Ogre::RenderOperation::OT_POINT_LIST, pts,
+		zhSkeleton_EnvObjColor, zhSkeleton_MarkerSize );
+
+	return obj;
+}
+
+void AnimationStudioApp::deleteEnvironmentObject( const std::string& name )
+{
+	// Delete the bone representing the "object"
+	zh::Skeleton* env = zhAnimationSystem->getEnvironment();
+	if( !env->hasBone(name) ) return;
+	env->deleteBone(name);
+
+	// Remove object from the scene
+	mFrmMain->getOgreWindow()->deletePrettyObject( "EnvObj"+name );
+}
+
+void AnimationStudioApp::deleteAllEnvironmentObjects()
+{
+	zh::Skeleton* env = zhAnimationSystem->getEnvironment();
+	while( env->getNumBones() > 0 )
+		deleteEnvironmentObject( env->getBoneIterator().next()->getName() );
 }
 
 void AnimationStudioApp::useConstFrameRate( bool useConstFR )
@@ -346,7 +390,8 @@ bool AnimationStudioApp::init( wxWindow* wnd )
 	TextureManager::getSingleton().setDefaultNumMipmaps(5);
 	if( !loadResourceLocations() ||
 		!createFrameListener() ||
-		!createScene() )
+		!createScene() ||
+		!mFrmMain->getOgreWindow()->init() )
 		return false;
 
 	if( !initZombieHorse() )
@@ -372,19 +417,53 @@ bool AnimationStudioApp::init( wxWindow* wnd )
 			zhAnimationSystem->loadAnimationSet(path);
 	}
 
-	// Set default output skeleton
+	// Auto-tag all skeletons and create IK solvers on them
+	// TODO: one day we'll have a config file or script that specifies these things
+	AnimationSystem::SkeletonIterator skel_i = zhAnimationSystem->getSkeletonIterator();
+	while( skel_i.hasMore() )
+	{
+		zh::Skeleton* skel = skel_i.next();
+		
+		if( skel->hasBone("0Hips") ) skel->getBone("0Hips")->tag(BT_Root);
+		if( skel->hasBone("2LeftHip") ) skel->getBone("2LeftHip")->tag(BT_LHip);
+		if( skel->hasBone("3LeftKnee") ) skel->getBone("3LeftKnee")->tag(BT_LKnee);
+		if( skel->hasBone("4LeftAnkle") ) skel->getBone("4LeftAnkle")->tag(BT_LAnkle);
+		if( skel->hasBone("8RightHip") ) skel->getBone("8RightHip")->tag(BT_RHip);
+		if( skel->hasBone("9RightKnee") ) skel->getBone("9RightKnee")->tag(BT_RKnee);
+		if( skel->hasBone("10RightAnkle") ) skel->getBone("10RightAnkle")->tag(BT_RAnkle);
+		if( skel->hasBone("21LeftShoulder") ) skel->getBone("21LeftShoulder")->tag(BT_LShoulder);
+		if( skel->hasBone("22LeftElbow") ) skel->getBone("22LeftElbow")->tag(BT_LElbow);
+		if( skel->hasBone("23LeftWrist") ) skel->getBone("23LeftWrist")->tag(BT_LWrist);
+		if( skel->hasBone("30RightShoulder") ) skel->getBone("30RightShoulder")->tag(BT_RShoulder);
+		if( skel->hasBone("31RightElbow") ) skel->getBone("31RightElbow")->tag(BT_RElbow);
+		if( skel->hasBone("32RightWrist") ) skel->getBone("32RightWrist")->tag(BT_RWrist);
+		
+		zhAnimationSystem->createIKSolversOnSkeleton( skel->getName() );
+	}
+
 	zh::Skeleton* out_skel = zhAnimationSystem->getOutputSkeleton();
+	if( out_skel == NULL )
+	{
+		// No skeletons or animations to be found
+		wxMessageBox( "No animations found in the project directory. This application will now exit.",
+			"Warning", wxOK | wxICON_WARNING );
+		ExitMainLoop();
+	}
 
-		//testing scale system!!!!!
-		zh::Skeleton* skelTest = zhAnimationSystem->createSkeleton("testingScale");
-		SkeletonParameters p;
-		p.scaleGlobal = 2;
-		p.scaleBody = 3;
-		ParametricSkeletonGenerator(skelTest,out_skel,p);
-		//testing scale system!!!!!
+	// Create user-editable skeleton and set it as default
+	zh::Skeleton* skel = zhAnimationSystem->createSkeleton("TestFigure");
+	out_skel->_clone(skel);
+	zhAnimationSystem->createIKSolversOnSkeleton( skel->getName() );
+	zhAnimationSystem->setOutputSkeleton( skel->getName() );
+	mFrmMain->getOgreWindow()->setRenderSkeleton(skel);
 
-	if( out_skel != NULL )
-		mFrmMain->getOgreWindow()->setRenderSkeleton(out_skel);
+	/*//testing scale system!!!!!
+	zh::Skeleton* skelTest = zhAnimationSystem->createSkeleton("testingScale");
+	SkeletonParameters p;
+	p.scaleGlobal = 2;
+	p.scaleBody = 3;
+	ParametricSkeletonGenerator(skelTest,out_skel,p);
+	//testing scale system!!!!!*/
 
 	// Update window contents
 	mFrmMain->refresh();

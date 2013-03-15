@@ -284,19 +284,19 @@ public:
 	*
 	* @param id IK solver ID.
 	*/
-	virtual void deleteIKSolver( unsigned short id );
+	void deleteIKSolver( unsigned short id );
 
 	/**
 	* Delete the specified IK solver.
 	*
 	* @param name IK solver name.
 	*/
-	virtual void deleteIKSolver( const std::string& name );
+	void deleteIKSolver( const std::string& name );
 
 	/**
 	* Delete all solvers in the skeleton.
 	*/
-	virtual void deleteAllIKSolvers();
+	void deleteAllIKSolvers();
 
 	/**
 	* Check if the specified IK solver exists in the skeleton.
@@ -304,7 +304,7 @@ public:
 	* @param id IK solver ID.
 	* @return true if the solver exists, false otherwise.
 	*/
-	virtual bool hasIKSolver( unsigned short id ) const;
+	bool hasIKSolver( unsigned short id ) const;
 
 	/**
 	* Check if the specified IK solver exists in the skeleton.
@@ -312,7 +312,7 @@ public:
 	* @param name IK solver name.
 	* @return true if the solver exists, false otherwise.
 	*/
-	virtual bool hasIKSolver( const std::string& name ) const;
+	bool hasIKSolver( const std::string& name ) const;
 
 	/**
 	* Get a pointer to the specified IK solver.
@@ -320,7 +320,7 @@ public:
 	* @param id IK solver ID.
 	* @return Pointer to specified solver or NULL if the solver doesn't exist.
 	*/
-	virtual IKSolver* getIKSolver( unsigned short id ) const;
+	IKSolver* getIKSolver( unsigned short id ) const;
 
 	/**
 	* Get a pointer to the specified IK solver.
@@ -328,24 +328,31 @@ public:
 	* @param name IK solver name.
 	* @return Pointer to specified solver or NULL if the solver doesn't exist.
 	*/
-	virtual IKSolver* getIKSolver( const std::string& name ) const;
+	IKSolver* getIKSolver( const std::string& name ) const;
 
 	/**
 	* Get the number of IK solvers in the skeleton.
 	*/
-	virtual unsigned int getNumIKSolvers() const;
+	unsigned int getNumIKSolvers() const;
 
 	/**
 	* Get an iterator over the map of IK solvers
 	* in the skeleton.
 	*/
-	virtual IKSolverIterator getIKSolverIterator();
+	IKSolverIterator getIKSolverIterator();
 
 	/**
 	* Get an iterator over the map of IK solvers
 	* in the skeleton.
 	*/
-	virtual IKSolverConstIterator getIKSolverConstIterator() const;
+	IKSolverConstIterator getIKSolverConstIterator() const;
+
+	/**
+	* Creates a deep copy of the skeleton.
+	*
+	* @param clonePtr Pointer to the copy.
+	*/
+	void _clone( Skeleton* clonePtr ) const;
 
 	// Tagging functions, only called from Bone class
 	void _addBoneTag( BoneTag tag, unsigned short boneId );

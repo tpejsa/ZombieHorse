@@ -483,8 +483,12 @@ void AnimationNode::apply( float weight, const std::set<unsigned short>& boneMas
 
 	Skeleton* trg_skel = mOwner->_getCurrentSkeleton();
 	if( mAnimAdaptor != NULL )
+	{
 		// If we are retargetting motion, switch to the "original" skeleton
-		mOwner->_setCurrentSkeleton( mAnimAdaptor->getOriginalSkeleton() );
+		Skeleton* orig_skel = mAnimAdaptor->getOriginalSkeleton();
+		mOwner->_setCurrentSkeleton(orig_skel);
+		orig_skel->resetToInitialPose();
+	}
 
 	_applyNode( weight, jmts );
 	if( mAnnotsEnabled )
