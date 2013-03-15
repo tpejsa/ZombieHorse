@@ -26,8 +26,16 @@ SOFTWARE.
 
 OgreWindow::OgreWindow( wxWindow *parent, wxWindowID id )
 : wxWindow( parent, id, parent->GetPosition(), parent->GetSize(), wxBORDER_SIMPLE, "OgreWindow" ),
-mOutSkel(NULL), mRenderSkel(NULL), mCamFocus(zhCamera_Focus), mFPS(0)
+mOutSkel(NULL), mRenderSkel(NULL), mCamFocus(zhCamera_Focus),
+mRaySceneQuery(NULL), mFPS(0)
 {
+}
+
+bool OgreWindow::init()
+{
+	mRaySceneQuery = gApp->getSceneManager()->createRayQuery(Ogre::Ray());
+
+	return true;
 }
 
 float OgreWindow::getFrameRate() const
@@ -239,6 +247,11 @@ void OgreWindow::updateRenderSkeletonPose( zh::Skeleton* skel )
 	}
 }
 
+const Ogre::String& OgreWindow::getSelectedBone() const
+{
+	return mSelBone;
+}
+
 void OgreWindow::createPrettyObject( const Ogre::String& name,
 	Ogre::RenderOperation::OperationType objType, const std::vector<Ogre::Vector3>& points,
 	const Ogre::ColourValue& pColor, int pSize,
@@ -352,38 +365,48 @@ void OgreWindow::OnMouseMove( wxMouseEvent& evt )
 {
 	static long x0 = -1, y0 = -1;
 
+	Ogre::Camera* cam = gApp->getCamera();
+
+	// Compute mouse position and offset
+	float pos_x, pos_y;
 	float off_x, off_y;
-	if( evt.LeftIsDown() || evt.RightIsDown() )
+	long x, y, dx = 0, dy = 0;
+	int w, h;
+	this->GetSize( &w, &h );
+	x = evt.GetX();
+	y = evt.GetY();
+	if( x0 > -1 && y0 > -1 )
 	{
-		// Compute mouse offset
-
-		long x, y, dx = 0, dy = 0;
-		int w, h;
-		this->GetSize( &w, &h );
-		x = evt.GetX();
-		y = evt.GetY();
-
-		if( x0 > -1 && y0 > -1 )
-		{
-			dx = x - x0;
-			dy = y - y0;
-		}
-
-		off_x = ((float)dx)/w;
-		off_y = ((float)dy)/w;
-		x0 = x;
-		y0 = y;
+		dx = x - x0;
+		dy = y - y0;
 	}
+	pos_x = ((float)x)/w;
+	pos_y = ((float)y)/h;
+	off_x = ((float)dx)/w;
+	off_y = ((float)dy)/h;
+	x0 = x;
+	y0 = y;
 
 	if( evt.LeftIsDown() )
 	{
-		// Rotate camera
-		Ogre::Vector3 cam_pos = gApp->getCamera()->getPosition();
-		cam_pos = Ogre::Quaternion( Radian( off_x * Math::PI * zhCamera_RotSpeed ), Ogre::Vector3::UNIT_Y ) * cam_pos;
-		cam_pos = Ogre::Quaternion( - Radian( off_y * Math::PI * zhCamera_RotSpeed ),
-			Ogre::Vector3::UNIT_Y.crossProduct( gApp->getCamera()->getDirection() ) ) * cam_pos;
-		gApp->getCamera()->setPosition(cam_pos);
-		gApp->getCamera()->lookAt(mCamFocus);
+		if( ::wxGetKeyState(WXK_ALT) )
+		{
+			// Zoom camera
+			Ogre::Vector3 cam_pos = gApp->getCamera()->getPosition();
+			cam_pos = cam_pos + gApp->getCamera()->getDirection().normalisedCopy() * (-off_y) * zhCamera_TransSpeed * 3.f;
+			gApp->getCamera()->setPosition(cam_pos);
+			gApp->getCamera()->lookAt(mCamFocus);
+		}
+		else
+		{
+			// Rotate camera
+			Ogre::Vector3 cam_pos = gApp->getCamera()->getPosition();
+			cam_pos = Ogre::Quaternion( Radian( off_x * Math::PI * zhCamera_RotSpeed ), Ogre::Vector3::UNIT_Y ) * cam_pos;
+			cam_pos = Ogre::Quaternion( - Radian( off_y * Math::PI * zhCamera_RotSpeed ),
+				Ogre::Vector3::UNIT_Y.crossProduct( gApp->getCamera()->getDirection() ) ) * cam_pos;
+			cam->setPosition(cam_pos);
+			cam->lookAt(mCamFocus);
+		}
 	}
 	else if( evt.RightIsDown() )
 	{
@@ -392,22 +415,74 @@ void OgreWindow::OnMouseMove( wxMouseEvent& evt )
 		Ogre::Vector3 off = gApp->getCamera()->getOrientation() * ( Ogre::Vector3(off_x,-off_y,0) * zhCamera_TransSpeed );
 		cam_pos += off;
 		mCamFocus += off;
-		gApp->getCamera()->setPosition(cam_pos);
-		gApp->getCamera()->lookAt(mCamFocus);
+		cam->setPosition(cam_pos);
+		cam->lookAt(mCamFocus);
 	}
 	else
 	{
 		x0 = -1;
 		y0 = -1;
 	}
+
+	// Is the mouse pointing at any interesting objects?
+	Ogre::Ray ray = cam->getCameraToViewportRay( pos_x, pos_y );
+	mRaySceneQuery->setRay(ray);
+	Ogre::RaySceneQueryResult& result = mRaySceneQuery->execute();
+	Ogre::RaySceneQueryResult::iterator res_i = result.begin();
+	while( res_i != result.end() )
+	{
+		MovableObject* obj = res_i->movable;
+		++res_i;
+
+		/*zh::Skeleton* skel = zhAnimationSystem->getOutputSkeleton();
+		if( skel != NULL && skel->hasBone( obj->getName() )
+			highlightObject( obj->getName() );*/
+	}
 }
 
-void OgreWindow::OnMouseWheel( wxMouseEvent& evt )
+void OgreWindow::OnMouseLeftDown( wxMouseEvent& evt )
 {
-	Ogre::Vector3 cam_pos = gApp->getCamera()->getPosition();
-	cam_pos = cam_pos + gApp->getCamera()->getDirection().normalisedCopy() * evt.GetWheelRotation() / 10.f;
-	gApp->getCamera()->setPosition(cam_pos);
-	gApp->getCamera()->lookAt(mCamFocus);
+	Ogre::Camera* cam = gApp->getCamera();
+
+	// Compute mouse position
+	float pos_x, pos_y;
+	long x, y;
+	int w, h;
+	this->GetSize( &w, &h );
+	x = evt.GetX();
+	y = evt.GetY();
+	pos_x = ((float)x)/w;
+	pos_y = ((float)y)/h;
+
+	// Is the mouse pointing at any interesting objects?
+	Ogre::Ray ray = cam->getCameraToViewportRay( pos_x, pos_y );
+	mRaySceneQuery->setRay(ray);
+	Ogre::RaySceneQueryResult& result = mRaySceneQuery->execute();
+	Ogre::RaySceneQueryResult::iterator res_i = result.begin();
+	while( res_i != result.end() )
+	{
+		MovableObject* obj = res_i->movable;
+		++res_i;
+
+		zh::Skeleton* skel = zhAnimationSystem->getOutputSkeleton();
+		if( skel != NULL && skel->hasBone( obj->getName() ) )
+		{
+			// User has clicked on a bone
+			if( ::wxGetKeyState(WXK_SHIFT) )
+			{
+				// Create an environment object where user is pointing
+				Ogre::Vector3 pos = obj->getParentNode()->_getDerivedPosition();
+				unsigned short obj_id = 0;
+				while( zhAnimationSystem->getEnvironment()->hasBone( toString<unsigned short>(obj_id) ) ) ++obj_id;
+				gApp->createEnvironmentObject( toString<unsigned short>(obj_id), zhVector3(pos) );
+			}
+			else
+			{
+				// Just select the bone
+				mSelBone = obj->getName();
+			}
+		}
+	}
 }
 
 void OgreWindow::OnSize( wxSizeEvent& evt )
@@ -559,6 +634,6 @@ ManualObject* OgreWindow::_createBox( const Ogre::String& name, const Ogre::Stri
 
 BEGIN_EVENT_TABLE( OgreWindow, wxWindow )
 	EVT_MOTION( OgreWindow::OnMouseMove )
-	EVT_MOUSEWHEEL( OgreWindow::OnMouseWheel )
+	EVT_LEFT_DOWN( OgreWindow::OnMouseLeftDown )
 	EVT_SIZE( OgreWindow::OnSize )
 END_EVENT_TABLE()

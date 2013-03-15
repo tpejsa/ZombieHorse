@@ -160,6 +160,27 @@ public:
 	bool hasJointTrace( const std::string& boneName ) const;
 
 	/**
+	* Create a dummy environment object at the specified location.
+	*
+	* @param name Object name.
+	* @param pos Object position in world space.
+	* @return Pointer to the object.
+	*/
+	zh::Bone* createEnvironmentObject( const std::string& name, const zh::Vector3& pos );
+
+	/**
+	* Delete the specified environment object.
+	*
+	* @param name Object name.
+	*/
+	void deleteEnvironmentObject( const std::string& name );
+
+	/**
+	* Delete all environment objects.
+	*/
+	void deleteAllEnvironmentObjects();
+
+	/**
 	* Toggles rendering at constant framerate on/off.
 	*
 	* @remark Frame rate will be locked to the frame rate of the currently

@@ -309,6 +309,21 @@ void Skeleton::resetToInitialPose()
 		bone_i.next()->resetToInitialPose();
 }
 
+Bone* Skeleton::getBoneByTag( BoneTag tag ) const
+{
+	std::map<BoneTag, Bone*>::const_iterator bone_i = mBonesByTag.find(tag);
+	
+	if( bone_i != mBonesByTag.end() )
+		return bone_i->second;
+
+	return NULL;
+}
+
+bool Skeleton::hasBoneWithTag( BoneTag tag ) const
+{
+	return mBonesByTag.count(tag) > 0;
+}
+
 IKSolver* Skeleton::createIKSolver( unsigned long classId, unsigned short id,
 	const std::string& name, BoneTag startBone, BoneTag endBone )
 {
@@ -435,19 +450,37 @@ Skeleton::IKSolverConstIterator Skeleton::getIKSolverConstIterator() const
 	return IKSolverConstIterator(mIKSolversById);
 }
 
-Bone* Skeleton::getBoneByTag( BoneTag tag ) const
+void Skeleton::_clone( Skeleton* clonePtr ) const
 {
-	std::map<BoneTag, Bone*>::const_iterator bone_i = mBonesByTag.find(tag);
-	
-	if( bone_i != mBonesByTag.end() )
-		return bone_i->second;
+	zhAssert( clonePtr != NULL );
 
-	return NULL;
-}
+	// Copy bones
+	BoneConstIterator bone_i = getBoneConstIterator();
+	while( bone_i.hasMore() )
+	{
+		Bone* bone = bone_i.next();
+		Bone* cbone = clonePtr->createBone( bone->getId(), bone->getName() );
+		cbone->setInitialPosition( bone->getInitialPosition() );
+		cbone->setInitialOrientation( bone->getInitialOrientation() );
+		cbone->setInitialScale( bone->getInitialScale() );
+	}
 
-bool Skeleton::hasBoneWithTag( BoneTag tag ) const
-{
-	return mBonesByTag.count(tag) > 0;
+	// Reconstruct bone hierarchy
+	bone_i = getBoneConstIterator();
+	while( bone_i.hasMore() )
+	{
+		Bone* bone = bone_i.next();
+		Bone* cbone = clonePtr->getBone( bone->getId() );
+
+		Bone* parent = bone->getParent();
+		if( parent != NULL )
+			clonePtr->getBone( parent->getId() )->addChild(cbone);
+	}
+
+	// Copy bone tags
+	for( std::map<BoneTag, Bone*>::const_iterator bti = mBonesByTag.begin();
+		bti != mBonesByTag.end(); ++bti )
+		clonePtr->getBone( bti->second->getId() )->tag(bti->first);
 }
 
 void Skeleton::_addBoneTag( BoneTag tag, unsigned short boneId )

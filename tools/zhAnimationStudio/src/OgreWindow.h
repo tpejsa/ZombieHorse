@@ -33,6 +33,11 @@ public:
 	OgreWindow( wxWindow *parent, wxWindowID id );
 
 	/**
+	* Initialize OGRE render window.
+	*/
+	bool init();
+
+	/**
 	* Gets the current frame rate of the application.
 	*/
 	float getFrameRate() const;
@@ -71,6 +76,11 @@ public:
 	* Updates the render skeleton pose.
 	*/
 	void updateRenderSkeletonPose( zh::Skeleton* skel );
+
+	/**
+	* Get the name of the currently selected bone segment in the scene.
+	*/
+	const Ogre::String& getSelectedBone() const;
 
 	/**
 	* Creates a pretty object that can be used for visualizing things.
@@ -129,9 +139,9 @@ public:
 	void OnMouseMove( wxMouseEvent& evt );
 
 	/**
-	* Event handler for mouse wheel movement.
+	* Event handler for mouse left button down.
 	*/
-	void OnMouseWheel( wxMouseEvent& evt );
+	void OnMouseLeftDown( wxMouseEvent& evt );
 
 	/**
 	* Event handler for size changes.
@@ -150,6 +160,9 @@ private:
 	zh::Skeleton* mOutSkel; // ZombieHorse output skeleton
 	Ogre::SceneNode* mRenderSkel;
 	Ogre::Vector3 mCamFocus;
+	Ogre::RaySceneQuery* mRaySceneQuery;
+	Ogre::String mSelBone; // Currently selected bone
+
 	Ogre::Timer mFPSTimer; ///< Timer (for computing FPS).
 	float mFPS; ///< FPS count.
 

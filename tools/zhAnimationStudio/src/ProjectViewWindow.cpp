@@ -145,6 +145,7 @@ void ProjectViewWindow::refresh()
 	while( !skel_i.end() )
 	{
 		zh::Skeleton* skel = skel_i.next();
+		if( skel->getName() == "Environment" ) continue;
 
 		wxTreeItemId trc_ch = trcProjTree->AppendItem( trc_skels, skel->getName(), -1, -1,
 			new wxTreeSkeletonData(skel) );
