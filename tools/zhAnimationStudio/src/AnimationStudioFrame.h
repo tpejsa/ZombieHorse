@@ -33,6 +33,7 @@ class OgreWindow;
 class ProjectViewWindow;
 class MotionVisualizationWindow;
 class AnimSequenceWindow;
+class EditSkeletonWindow;
 
 enum
 {
@@ -85,7 +86,8 @@ enum
 	//ID_wndTimeline,
 	ID_wndProjectView,
 	ID_wndAnimSequence,
-	ID_wndMotionVis
+	ID_wndMotionVis,
+	ID_wndEditSkel
 };
 
 /**
@@ -125,6 +127,11 @@ public:
 	* Gets a pointer to the motion visualization window.
 	*/
 	MotionVisualizationWindow* getMotionVisualizationWindow() const;
+
+	/**
+	* Get a pointer to the edit skeleton window.
+	*/
+	EditSkeletonWindow* getEditSkeletonWindow() const;
 
 	/**
 	* true if an animation segment is selected,
@@ -195,6 +202,7 @@ protected:
 	ProjectViewWindow* mWndProjectView;
 	MotionVisualizationWindow* mWndMotionVis;
 	AnimSequenceWindow* mWndAnimSequence;
+	EditSkeletonWindow* mWndEditSkel;
 };
 
 #endif // __AnimationStudioFrame_h__

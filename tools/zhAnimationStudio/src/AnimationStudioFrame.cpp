@@ -26,6 +26,7 @@ SOFTWARE.
 #include "ProjectViewWindow.h"
 #include "AnimSequenceWindow.h"
 #include "MotionVisualizationWindow.h"
+#include "EditSkeletonWindow.h"
 #include "OgreWindow.h"
 /*#include "NewResourceDialog.h"
 #include "BuildMotionGraphDialog.h"
@@ -40,7 +41,7 @@ AnimationStudioFrame::AnimationStudioFrame( wxWindowID id, const wxString &title
 : wxFrame( NULL, id, title, pos, size, wxDEFAULT_FRAME_STYLE, "frmAnimationStudio" ),
 mbMain(NULL), mTbPlayer(NULL), mTbEditor(NULL),
 mSelectMode(false), mSelectStart(0), mSelectEnd(-1000),
-mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
+mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL), mWndEditSkel(NULL)//, mWndTimeline(NULL)
 {
 	// init AUI manager
 	mAuiMgr.SetManagedWindow(this);
@@ -81,6 +82,7 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 	mWndProjectView = new ProjectViewWindow( this, ID_wndProjectView );
 	mWndAnimSequence = new AnimSequenceWindow( this, ID_wndAnimSequence );
 	mWndMotionVis = new MotionVisualizationWindow( this, ID_wndMotionVis );
+	mWndEditSkel = new EditSkeletonWindow( this, ID_wndEditSkel );
 
 	// Create main menu
 	mbMain = new wxMenuBar();
@@ -229,6 +231,15 @@ mWndOgre(NULL), mWndProjectView(NULL), mWndMotionVis(NULL)//, mWndTimeline(NULL)
 	wndAnimSeq_pi.Caption( "Animation Sequence" );
 	mAuiMgr.AddPane( mWndAnimSequence, wndAnimSeq_pi );
 
+	// Add edit skeleton window to AUI manager
+	mWndEditSkel->SetSize( 172, size.GetHeight() );
+	wxAuiPaneInfo wndEditSkel_pi;
+	wndEditSkel_pi.Right();
+	wndEditSkel_pi.Floatable();
+	wndEditSkel_pi.CloseButton(false);
+	wndEditSkel_pi.Caption( "Edit Skeleton" );
+	mAuiMgr.AddPane( mWndEditSkel, wndEditSkel_pi );
+
 	// Add motion visualization window to AUI manager
 	mWndMotionVis->SetSize( 172, size.GetHeight() );
 	wxAuiPaneInfo wndMotionVis_pi;
@@ -281,6 +292,11 @@ MotionVisualizationWindow* AnimationStudioFrame::getMotionVisualizationWindow() 
 	return mWndMotionVis;
 }
 
+EditSkeletonWindow* AnimationStudioFrame::getEditSkeletonWindow() const
+{
+	return mWndEditSkel;
+}
+
 bool AnimationStudioFrame::hasSelection() const
 {
 	return gApp->getCurrentAnimation() != NULL &&
@@ -300,6 +316,7 @@ void AnimationStudioFrame::refresh()
 {
 	mWndProjectView->refresh();
 	mWndMotionVis->refresh();
+	mWndEditSkel->refresh();
 }
 
 void AnimationStudioFrame::OnMenu_ViewShowSkel( wxCommandEvent& evt )

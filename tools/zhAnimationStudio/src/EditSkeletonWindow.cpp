@@ -26,29 +26,33 @@ EditSkeletonWindow::EditSkeletonWindow( wxWindow *parent, wxWindowID id )
 : wxWindow( parent, id, wxDefaultPosition, wxDefaultSize )
 {
 	mSlHeight = new wxSlider( this, ID_slHeight, 50, 1, 100,
-		wxPoint(5,20), wxSize(90,25) );
+		wxPoint(5,20), wxSize(162,25) );
 	mSlTrunkSize = new wxSlider( this, ID_slTrunkSize, 50, 1, 100,
-		wxPoint(5,75), wxSize(90,25) );
+		wxPoint(5,70), wxSize(162,25) );
 	mSlArmLength = new wxSlider( this, ID_slArmLength, 50, 1, 100,
-		wxPoint(5,120), wxSize(90,25) );
+		wxPoint(5,120), wxSize(162,25) );
 	mSlLegLength = new wxSlider( this, ID_slLegLength, 50, 1, 100,
-		wxPoint(5,175), wxSize(90,25) );
+		wxPoint(5,170), wxSize(162,25) );
 
 	wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
-	sizer->Add( new wxStaticText( this, -1, "Height", wxPoint(5,5), wxSize(90,10) ),
+	sizer->Add( new wxStaticText( this, -1, "Height", wxPoint(5,5), wxSize(162,16) ),
 		1, wxEXPAND | wxALL, 5 );
 	sizer->Add(mSlHeight);
-	sizer->Add( new wxStaticText( this, -1, "Trunk Size", wxPoint(5,50), wxSize(90,10) ),
+	sizer->Add( new wxStaticText( this, -1, "Trunk Size", wxPoint(5,55), wxSize(162,16) ),
 		1, wxEXPAND | wxALL, 5 );
 	sizer->Add(mSlTrunkSize);
-	sizer->Add( new wxStaticText( this, -1, "Arm Length", wxPoint(5,95), wxSize(90,10) ),
+	sizer->Add( new wxStaticText( this, -1, "Arm Length", wxPoint(5,105), wxSize(162,16) ),
 		1, wxEXPAND | wxALL, 5 );
 	sizer->Add(mSlArmLength);
-	sizer->Add( new wxStaticText( this, -1, "Leg Length", wxPoint(5,140), wxSize(90,10) ),
+	sizer->Add( new wxStaticText( this, -1, "Leg Length", wxPoint(5,155), wxSize(162,16) ),
 		1, wxEXPAND | wxALL, 5 );
 	sizer->Add(mSlLegLength);
 	SetSizer(sizer);
 	sizer->SetSizeHints(this);
+}
+
+void EditSkeletonWindow::refresh()
+{
 }
 
 void EditSkeletonWindow::OnSlider_Height( wxScrollEvent& evt )
