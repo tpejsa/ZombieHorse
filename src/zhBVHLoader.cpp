@@ -39,6 +39,66 @@ namespace zh
 	std::string nFramesReg("Frames:[ \t\v\f]+([0-9]+)");
 	std::string frameTimeReg("Frame Time:[ \t\v\f]+([0-9]*.[0-9]+)");
 	std::string keyFrameReg("[ \n\t\v\f]+(-?[0-9]*.[0-9]+)");
+	enum JointNames{
+		Hip,
+		Chest,
+		Shoulder,
+		Elbow,
+		Wrist,
+		Knee,
+		Ankle,
+		Collar,
+		Neck,
+		Head,
+		Fingers,
+		Thumb,
+		Toe
+	};
+	std::string jointNamesReg[] = {
+			"(H|h)ip",
+			"(C|c)hest",
+			"(S|s)houlder",
+			"(E|e)lbow",
+			"(W|w)rist",
+			"(K|k)nee",
+			"(A|a)nkle",
+			"(C|c)ollar",
+			"(N|n)eck",
+			"(H|h)ead",
+			"(F|f)ingers",
+			"(T|t)humb",
+			"(T|t)oe"
+	};
+	enum JointSides{
+		Center = 0,
+		Left = 1,
+		Right = 2
+	};
+	std::string jointSideReg[] = {
+			"(L|l)(eft)*",
+			"(R|r)(ight)*",
+	};
+	BoneTag ConvertTagAndSide(JointNames a,JointSides b){
+		return BoneTag(a + b * 100);
+	}
+	zh::BoneTag ParseTag(string Name){
+		//first test name
+		boost::cmatch what;
+		for(int i = Hip;i <= Toe;++i){
+			if(boost::regex_search(Name.c_str(), what, boost::regex(jointNamesReg[i]))){
+				string suffix;
+				suffix.assign(what.suffix().first,what.suffix().second);
+				string preffix;
+				preffix.assign(what.prefix().first,what.prefix().second);
+				for(int j = Left;j <= Right;++j){
+					if(boost::regex_search(suffix.c_str(), what, boost::regex(jointSideReg[j])) || boost::regex_search(preffix.c_str(), what, boost::regex(jointSideReg[j]))){
+						return ConvertTagAndSide(JointNames(i),JointSides(j));
+					}
+				}
+			}
+		}
+		return BT_UNIDENTIFIED;
+	}
 	enum CHANNELS{
 		Xposition,
 		Yposition,
@@ -78,7 +138,8 @@ namespace zh
 			}
 		}
 		zh::Bone* ConvertToBones(Skeleton* skel){
-			zh::Bone* parent = skel->createBone(jointID,boost::lexical_cast<string>(jointID) + name);
+			zh::Bone* parent = skel->createBone(jointID,boost::lexical_cast<string>(jointID)+ "_" + name);
+			parent->tag(ParseTag(name));
 			parent -> setInitialPosition(zh::Vector3(offsets[0],offsets[1],offsets[2]));
 			for(int i = 0;i < children.size();++i){
 				zh::Bone* tmp = children[i] -> ConvertToBones(skel);

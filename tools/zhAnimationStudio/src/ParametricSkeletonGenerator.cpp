@@ -3,10 +3,6 @@
 #include "ParametricSkeletonGenerator.h"
 #include "cstring"
 #include "boost\regex.hpp"
-std::string leftReg("((L|l)(E|e)(F|f)(T|t))|(l|L)");
-std::string rightReg("((R|r)(I|i)(G|g)(H|h)(T|t))|(r|R)");
-std::string armJointsReg("((E|e)lbow|(W|w)rist|(H|h)and|(F|f)ingers|(T|t)humb)");
-std::string bodyTagReg("((H|h)ip|(B|b)ack)|(C|c)hest|(N|n)eck|(H|h)ead)");
 BonePairClass ClassifyBonePair(zh::Bone* parent,zh::Bone* child){
 
 	return BODY;

@@ -34,20 +34,31 @@ class Skeleton;
 
 enum BoneTag
 {
-	BT_Root,
-	BT_Chest,
-	BT_LShoulder,
-	BT_LElbow,
-	BT_LWrist,
-	BT_RShoulder,
-	BT_RElbow,
-	BT_RWrist,
-	BT_LHip,
-	BT_LKnee,
-	BT_LAnkle,
-	BT_RHip,
-	BT_RKnee,
-	BT_RAnkle
+	BT_Root = 0,
+	BT_Chest = 1,
+	BT_LShoulder = 102,
+	BT_LElbow = 103,
+	BT_LWrist = 104,
+	BT_RShoulder = 202,
+	BT_RElbow = 203,
+	BT_RWrist = 204,
+	BT_LHip = 100,
+	BT_LKnee = 105,
+	BT_LAnkle = 106,
+	BT_RHip = 200,
+	BT_RKnee = 205,
+	BT_RAnkle = 206,
+	BT_LCollar= 107,
+	BT_RCollar= 207,
+	BT_Neck = 8,
+	BT_Head = 9,
+	BT_LFingers = 110,
+	BT_RFingers = 210,
+	BT_LThumb = 111,
+	BT_RThumb = 211,
+	BT_LToe = 112,
+	BT_RToe = 212,
+	BT_UNIDENTIFIED = 999
 };
 
 /**
