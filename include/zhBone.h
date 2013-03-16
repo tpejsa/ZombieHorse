@@ -35,7 +35,8 @@ class Skeleton;
 enum BoneTag
 {
 	BT_Root = 0,
-	BT_Chest = 1,
+	BT_LowerBack = 1,
+	BT_Chest = 2,
 	BT_LShoulder = 102,
 	BT_LElbow = 103,
 	BT_LWrist = 104,
@@ -58,7 +59,7 @@ enum BoneTag
 	BT_RThumb = 211,
 	BT_LToe = 112,
 	BT_RToe = 212,
-	BT_UNIDENTIFIED = 999
+	BT_Unknown = 999
 };
 
 /**

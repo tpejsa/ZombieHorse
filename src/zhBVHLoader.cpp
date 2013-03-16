@@ -97,7 +97,7 @@ namespace zh
 				}
 			}
 		}
-		return BT_UNIDENTIFIED;
+		return BT_Unknown;
 	}
 	enum CHANNELS{
 		Xposition,

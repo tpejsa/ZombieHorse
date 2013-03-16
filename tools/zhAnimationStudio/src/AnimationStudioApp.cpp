@@ -24,10 +24,9 @@ SOFTWARE.
 #include "AnimationStudioFrame.h"
 #include "ProjectViewWindow.h"
 #include "OgreWindow.h"
-#include "NewResourceDialog.h"
+//#include "NewResourceDialog.h"
 #include "DotSceneLoader.h"
 #include "zhOgreModelController.h"
-#include "ParametricSkeletonGenerator.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/tokenizer.hpp> // TODO: remove this?
@@ -48,6 +47,7 @@ AnimationStudioApp::AnimationStudioApp()
 mCurAnim(NULL), mAnimEnabled(true), mTracedJointAnim(NULL)
 {
 	mRenderTimer = new RenderTimer();
+	mParamSkelEditor = new ParamSkeletonEditor();
 }
 
 AnimationStudioApp::~AnimationStudioApp()
@@ -87,7 +87,8 @@ zh::Skeleton* AnimationStudioApp::selectSkeleton( const string& name )
 	zhAnimationSystem->stopAnimation();
 	zhAnimationSystem->setOutputSkeleton(name);
 	zh::Skeleton* skel = zhAnimationSystem->getOutputSkeleton();
-
+	
+	mParamSkelEditor->init(skel);
 	displayJointMarkers( std::set<std::string>(), false );
 	mFrmMain->getOgreWindow()->setRenderSkeleton(skel);
 	mFrmMain->refresh();
@@ -101,6 +102,11 @@ void AnimationStudioApp::removeSkeleton( const string& name )
 
 	// Update window contents
 	mFrmMain->refresh();
+}
+
+ParamSkeletonEditor* AnimationStudioApp::getParamSkeletonEditor() const
+{
+	return mParamSkelEditor;
 }
 
 zh::Animation* AnimationStudioApp::selectAnimation( const string& anim )
@@ -423,21 +429,24 @@ bool AnimationStudioApp::init( wxWindow* wnd )
 	while( skel_i.hasMore() )
 	{
 		zh::Skeleton* skel = skel_i.next();
-		
-		if( skel->hasBone("0Hips") ) skel->getBone("0Hips")->tag(BT_Root);
-		if( skel->hasBone("2LeftHip") ) skel->getBone("2LeftHip")->tag(BT_LHip);
-		if( skel->hasBone("3LeftKnee") ) skel->getBone("3LeftKnee")->tag(BT_LKnee);
-		if( skel->hasBone("4LeftAnkle") ) skel->getBone("4LeftAnkle")->tag(BT_LAnkle);
-		if( skel->hasBone("8RightHip") ) skel->getBone("8RightHip")->tag(BT_RHip);
-		if( skel->hasBone("9RightKnee") ) skel->getBone("9RightKnee")->tag(BT_RKnee);
-		if( skel->hasBone("10RightAnkle") ) skel->getBone("10RightAnkle")->tag(BT_RAnkle);
-		if( skel->hasBone("21LeftShoulder") ) skel->getBone("21LeftShoulder")->tag(BT_LShoulder);
-		if( skel->hasBone("22LeftElbow") ) skel->getBone("22LeftElbow")->tag(BT_LElbow);
-		if( skel->hasBone("23LeftWrist") ) skel->getBone("23LeftWrist")->tag(BT_LWrist);
-		if( skel->hasBone("30RightShoulder") ) skel->getBone("30RightShoulder")->tag(BT_RShoulder);
-		if( skel->hasBone("31RightElbow") ) skel->getBone("31RightElbow")->tag(BT_RElbow);
-		if( skel->hasBone("32RightWrist") ) skel->getBone("32RightWrist")->tag(BT_RWrist);
-		
+		// TODO: fix auto-tagging in BVHLoader...
+		skel->_removeAllBoneTags();
+		if( skel->hasBone("0_Hips") ) skel->getBone("0_Hips")->tag(BT_Root);
+		if( skel->hasBone("13_lowerback") ) skel->getBone("13_lowerback")->tag(BT_LowerBack);
+		if( skel->hasBone("15_Chest") ) skel->getBone("15_Chest")->tag(BT_Chest);
+		if( skel->hasBone("2_LeftHip") ) skel->getBone("2_LeftHip")->tag(BT_LHip);
+		if( skel->hasBone("3_LeftKnee") ) skel->getBone("3_LeftKnee")->tag(BT_LKnee);
+		if( skel->hasBone("4_LeftAnkle") ) skel->getBone("4_LeftAnkle")->tag(BT_LAnkle);
+		if( skel->hasBone("8_RightHip") ) skel->getBone("8_RightHip")->tag(BT_RHip);
+		if( skel->hasBone("9_RightKnee") ) skel->getBone("9_RightKnee")->tag(BT_RKnee);
+		if( skel->hasBone("10_RightAnkle") ) skel->getBone("10_RightAnkle")->tag(BT_RAnkle);
+		if( skel->hasBone("21_LeftShoulder") ) skel->getBone("21_LeftShoulder")->tag(BT_LShoulder);
+		if( skel->hasBone("22_LeftElbow") ) skel->getBone("22_LeftElbow")->tag(BT_LElbow);
+		if( skel->hasBone("23_LeftWrist") ) skel->getBone("23_LeftWrist")->tag(BT_LWrist);
+		if( skel->hasBone("30_RightShoulder") ) skel->getBone("30_RightShoulder")->tag(BT_RShoulder);
+		if( skel->hasBone("31_RightElbow") ) skel->getBone("31_RightElbow")->tag(BT_RElbow);
+		if( skel->hasBone("32_RightWrist") ) skel->getBone("32_RightWrist")->tag(BT_RWrist);
+		//
 		zhAnimationSystem->createIKSolversOnSkeleton( skel->getName() );
 	}
 
@@ -456,6 +465,7 @@ bool AnimationStudioApp::init( wxWindow* wnd )
 	zhAnimationSystem->createIKSolversOnSkeleton( skel->getName() );
 	zhAnimationSystem->setOutputSkeleton( skel->getName() );
 	mFrmMain->getOgreWindow()->setRenderSkeleton(skel);
+	mParamSkelEditor->init(skel);
 
 	/*//testing scale system!!!!!
 	zh::Skeleton* skelTest = zhAnimationSystem->createSkeleton("testingScale");

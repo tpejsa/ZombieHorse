@@ -21,6 +21,9 @@ SOFTWARE.
 ******************************************************************************/
 
 #include "EditSkeletonWindow.h"
+#include "AnimationStudioApp.h"
+#include "AnimationStudioFrame.h"
+#include "OgreWindow.h"
 
 EditSkeletonWindow::EditSkeletonWindow( wxWindow *parent, wxWindowID id )
 : wxWindow( parent, id, wxDefaultPosition, wxDefaultSize )
@@ -35,7 +38,7 @@ EditSkeletonWindow::EditSkeletonWindow( wxWindow *parent, wxWindowID id )
 		wxPoint(5,170), wxSize(162,25) );
 
 	wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
-	sizer->Add( new wxStaticText( this, -1, "Height", wxPoint(5,5), wxSize(162,16) ),
+	sizer->Add( new wxStaticText( this, -1, "Body Size", wxPoint(5,5), wxSize(162,16) ),
 		1, wxEXPAND | wxALL, 5 );
 	sizer->Add(mSlHeight);
 	sizer->Add( new wxStaticText( this, -1, "Trunk Size", wxPoint(5,55), wxSize(162,16) ),
@@ -57,18 +60,44 @@ void EditSkeletonWindow::refresh()
 
 void EditSkeletonWindow::OnSlider_Height( wxScrollEvent& evt )
 {
+	float scale = _computeScaleValue(evt.GetInt());
+	gApp->getParamSkeletonEditor()->scaleBody(scale);
 }
 
 void EditSkeletonWindow::OnSlider_TrunkSize( wxScrollEvent& evt )
 {
+	float scale = _computeScaleValue(evt.GetInt());
+	gApp->getParamSkeletonEditor()->scaleTrunk(scale);
 }
 
 void EditSkeletonWindow::OnSlider_ArmLength( wxScrollEvent& evt )
 {
+	float scale = _computeScaleValue(evt.GetInt());
+	gApp->getParamSkeletonEditor()->scaleArms(scale);
 }
 
 void EditSkeletonWindow::OnSlider_LegLength( wxScrollEvent& evt )
 {
+	float scale = _computeScaleValue(evt.GetInt());
+	gApp->getParamSkeletonEditor()->scaleLegs(scale);
+}
+
+float EditSkeletonWindow::_computeScaleValue( int sliderValue ) const
+{
+	float scale = 1;
+	float t = ((float)sliderValue)/100;
+	if( t < 0.5f )
+	{
+		t = 2*t;
+		scale = 0.1f + 0.9f*t;
+	}
+	else
+	{
+		t = 2*(t-0.5f);
+		scale = 1.f + 2.f*t;
+	}
+
+	return scale;
 }
 
 BEGIN_EVENT_TABLE( EditSkeletonWindow, wxWindow )

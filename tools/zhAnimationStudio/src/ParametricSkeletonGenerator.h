@@ -1,9 +1,10 @@
+#ifndef __ParametricSkeletonGenerator_h__
+#define __ParametricSkeletonGenerator_h__
+
 #include "zhBone.h"
 #include <map>
 #include <vector>
 #include <cstring>
-#ifndef __ParametricSkeletonGenerator_h__
-#define __ParametricSkeletonGenerator_h__
 struct BoneGroup{
 	std::string Name;
 	std::vector<std::pair<zh::BoneTag,zh::BoneTag>> BoneChains;//First is the start chain tag,Second is the end chain tag

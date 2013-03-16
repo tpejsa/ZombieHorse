@@ -24,6 +24,7 @@ SOFTWARE.
 #define __AnimationStudioApp_h__
 
 #include "AnimationStudio.h"
+#include "ParamSkeletonEditor.h"
 
 class AnimationStudioFrame;
 
@@ -92,6 +93,11 @@ public:
 	* @param name Skeleton name.
 	*/
 	void removeSkeleton( const string& name );
+
+	/**
+	* Gets the parametric skeleton editor.
+	*/
+	ParamSkeletonEditor* getParamSkeletonEditor() const;
 
 	/**
 	* Selects the animation clip with the specified name
@@ -247,6 +253,7 @@ protected:
 
 	zh::Animation* mCurAnim; ///< Currently selected animation.
 	bool mAnimEnabled; ///< Updates to the animation system enabled/disabled.
+	ParamSkeletonEditor* mParamSkelEditor;
 
 	// Motion visualization
 	std::set<std::string> mJointsWithMarkers;

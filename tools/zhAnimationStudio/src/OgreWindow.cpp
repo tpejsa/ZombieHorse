@@ -244,6 +244,15 @@ void OgreWindow::updateRenderSkeletonPose( zh::Skeleton* skel )
 
 		rbone->setPosition( zhOgreVector3(bone->getPosition()) );
 		rbone->setOrientation( zhOgreQuat(bone->getOrientation()) );
+		rbone->setScale( zhOgreVector3(bone->getScale()) );
+		if( bone->getParent() != NULL )
+		{
+			Ogre::SceneNode* parent = rbone->getParentSceneNode();
+			Ogre::SceneNode* parent_obj = (Ogre::SceneNode*)parent->getChild( parent->getName()+"Obj" );
+			parent_obj->setPosition( 0.5f*rbone->getPosition() );
+			parent_obj->setOrientation( Ogre::Vector3::UNIT_Y.getRotationTo(rbone->getPosition()) );
+			parent_obj->setScale( 1, 0.5f*rbone->getPosition().length()/zhSkeleton_BoneSize, 1 );
+		}
 	}
 }
 
@@ -497,6 +506,7 @@ Ogre::SceneNode* OgreWindow::_createRenderSkeleton( zh::Bone* bone,
 
 	SceneNode* rbone = renderParent->createChildSceneNode( bone->getName() );
 	rbone->setPosition( zhOgreVector3(bone->getInitialPosition()) );
+	rbone->setScale( zhOgreVector3(bone->getInitialScale()) );
 	SceneNode* rbone_obj = rbone->createChildSceneNode( rbone->getName() + "Obj" );
 	if( scene_mgr->hasManualObject(bone->getName()) )
 		scene_mgr->destroyManualObject(bone->getName());

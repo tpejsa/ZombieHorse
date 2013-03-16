@@ -61,9 +61,9 @@ void AnimationAdaptor::adapt( Skeleton* targetSkel )
 		Bone* orig_bone = bone_i.next();
 		Bone* trg_bone = targetSkel->getBone( orig_bone->getName() );
 		if( trg_bone == NULL ) continue;
-		trg_bone->setPosition( orig_bone->getPosition() );
+		if( trg_bone == targetSkel->getRoot() )
+			trg_bone->setPosition( orig_bone->getPosition() );
 		trg_bone->setOrientation( orig_bone->getOrientation() );
-		trg_bone->setScale( orig_bone->getScale() );
 	}
 	//
 }

@@ -54,6 +54,9 @@ public:
 
 private:
 
+	float _computeScaleValue( int sliderValue ) const;
+
+	std::map<std::string, zh::Vector3> mBonePosStored;
 	wxSlider *mSlHeight, *mSlTrunkSize, *mSlArmLength, *mSlLegLength;
 };
 

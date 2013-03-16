@@ -363,6 +363,7 @@ public:
 	void _addBoneTag( BoneTag tag, unsigned short boneId );
 	void _removeBoneTag( BoneTag tag );
 	void _removeBoneTagsFromBone( unsigned short boneId );
+	void _removeAllBoneTags();
 
 private:
 

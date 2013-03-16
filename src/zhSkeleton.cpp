@@ -521,4 +521,9 @@ void Skeleton::_removeBoneTagsFromBone( unsigned short boneId )
 		_removeBoneTag(*tag_j);
 }
 
+void Skeleton::_removeAllBoneTags()
+{
+	mBonesByTag.clear();
+}
+
 }
