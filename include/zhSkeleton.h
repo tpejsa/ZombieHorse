@@ -353,6 +353,11 @@ public:
 	IKSolverConstIterator getIKSolverConstIterator() const;
 
 	/**
+	* Executes all IK solvers in order of priority.
+	*/
+	void solveIK();
+
+	/**
 	* Creates a deep copy of the skeleton.
 	*
 	* @param clonePtr Pointer to the copy.

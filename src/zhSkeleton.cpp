@@ -462,6 +462,23 @@ Skeleton::IKSolverConstIterator Skeleton::getIKSolverConstIterator() const
 	return IKSolverConstIterator(mIKSolversById);
 }
 
+void Skeleton::solveIK()
+{
+	// Get all solvers sorted by their priority
+	std::multimap<unsigned short, IKSolver*> solvers;
+	IKSolverIterator solver_i = getIKSolverIterator();
+	while( solver_i.hasMore() )
+	{
+		IKSolver* solver = solver_i.next();
+		solvers.insert( std::make_pair( solver->getPriority(), solver ) );
+	}
+
+	// Execute the solvers in correct order
+	for( std::multimap<unsigned short, IKSolver*>::iterator psolver_i = solvers.begin();
+		psolver_i != solvers.end(); ++psolver_i )
+		psolver_i->second->solve();
+}
+
 void Skeleton::_clone( Skeleton* clonePtr ) const
 {
 	zhAssert( clonePtr != NULL );

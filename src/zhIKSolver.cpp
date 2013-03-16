@@ -26,9 +26,8 @@ SOFTWARE.
 namespace zh
 {
 
-IKSolver::IKSolver()
+IKSolver::IKSolver() : mSkel(NULL), mPriority(5)
 {
-	mSkel = NULL;
 }
 
 IKSolver::~IKSolver()
@@ -65,6 +64,16 @@ IKSolver::BoneIterator IKSolver::getBoneIterator()
 IKSolver::BoneConstIterator IKSolver::getBoneConstIterator() const
 {
 	return BoneConstIterator(mChain);
+}
+
+unsigned short IKSolver::getPriority() const
+{
+	return mPriority;
+}
+
+void IKSolver::setPriority( unsigned short priority )
+{
+	mPriority = priority;
 }
 
 bool IKSolver::hasGoal( unsigned short boneId ) const

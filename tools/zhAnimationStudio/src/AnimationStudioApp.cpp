@@ -82,7 +82,6 @@ zh::Skeleton* AnimationStudioApp::selectSkeleton( const string& name )
 	// Reset all motion and environment visualization
 	displayJointMarkers( std::set<std::string>(), false );
 	traceJointPaths( std::set<std::string>(), false );
-	deleteAllEnvironmentObjects();
 
 	zhAnimationSystem->stopAnimation();
 	zhAnimationSystem->setOutputSkeleton(name);
@@ -301,6 +300,7 @@ void AnimationStudioApp::deleteAllEnvironmentObjects()
 	zh::Skeleton* env = zhAnimationSystem->getEnvironment();
 	while( env->getNumBones() > 0 )
 		deleteEnvironmentObject( env->getBoneIterator().next()->getName() );
+	env->createBone(0,"Root");
 }
 
 void AnimationStudioApp::useConstFrameRate( bool useConstFR )

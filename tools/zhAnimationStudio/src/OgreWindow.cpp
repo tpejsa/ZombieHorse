@@ -481,7 +481,7 @@ void OgreWindow::OnMouseLeftDown( wxMouseEvent& evt )
 			{
 				// Create an environment object where user is pointing
 				Ogre::Vector3 pos = obj->getParentNode()->_getDerivedPosition();
-				unsigned short obj_id = 0;
+				unsigned short obj_id = 1;
 				while( zhAnimationSystem->getEnvironment()->hasBone( toString<unsigned short>(obj_id) ) ) ++obj_id;
 				gApp->createEnvironmentObject( toString<unsigned short>(obj_id), zhVector3(pos) );
 			}

@@ -152,6 +152,11 @@ public:
 	Skeleton* getEnvironment() const;
 
 	/**
+	* Get the ground height at the specified x-z position.
+	*/
+	float getGroundHeightAt( float posX, float posZ ) const;
+
+	/**
 	* Loads an animation set from a file (BVH, ZHA...)
 	*
 	* @param path Animation set path.

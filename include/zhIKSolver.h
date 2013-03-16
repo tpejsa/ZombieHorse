@@ -59,7 +59,7 @@ struct IKGoal
 
 	IKGoal() : boneId(0), weight(0) { }
 
-	IKGoal( unsigned short boneId, const Vector3& pos, float weight )
+	IKGoal( unsigned short boneId, const Vector3& position, float weight )
 	{
 		this->boneId = boneId;
 		this->position = position;
@@ -130,6 +130,28 @@ public:
 	* @return Bone iterator.
 	*/
 	virtual BoneConstIterator getBoneConstIterator() const;
+
+	/**
+	* Get the IK solver priority, which determines the order in which solvers
+	* are executed.
+	*
+	* @remark Default value is 5, but can differ in a concrete IKSolver
+	* implementation. For instance, RootIKSolver has default priority 1,
+	* since it is typically executed first, while LimbIKSolver has default
+	* priority 10, since it is typically executed last.
+	*/
+	virtual unsigned short getPriority() const;
+
+	/**
+	* Set the IK solver priority, which determines the order in which solvers
+	* are executed.
+	*
+	* @remark Default value is 5, but can differ in a concrete IKSolver
+	* implementation. For instance, RootIKSolver has default priority 1,
+	* since it is typically executed first, while LimbIKSolver has default
+	* priority 10, since it is typically executed last.
+	*/
+	virtual void setPriority( unsigned short priority );
 
 	/**
 	* Check if a positional goal is defined on the specified end-effector.
@@ -219,6 +241,7 @@ protected:
 	std::string mName;
 	std::vector<Bone*> mChain;
 	Skeleton* mSkel;
+	unsigned short mPriority;
 	std::map<unsigned short, IKGoal> mGoals;
 };
 

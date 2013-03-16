@@ -27,6 +27,7 @@ namespace zh
 
 RootIKSolver::RootIKSolver()
 {
+	mPriority = 1;
 }
 
 RootIKSolver::~RootIKSolver()

@@ -184,6 +184,12 @@ Skeleton* AnimationSystem::getEnvironment() const
 	return getSkeleton("Environment");
 }
 
+float AnimationSystem::getGroundHeightAt( float posX, float posZ ) const
+{
+	// TODO: one day there will be different ground heights!
+	return 0;
+}
+
 AnimationSetPtr AnimationSystem::loadAnimationSet( const std::string& path, const std::string& skel )
 {
 	zhLog( "AnimationSystem", "loadAnimationSet",

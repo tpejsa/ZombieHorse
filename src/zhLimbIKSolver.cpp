@@ -27,6 +27,7 @@ namespace zh
 
 LimbIKSolver::LimbIKSolver()
 {
+	mPriority = 10;
 }
 
 LimbIKSolver::~LimbIKSolver()

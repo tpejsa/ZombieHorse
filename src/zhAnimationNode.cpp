@@ -503,7 +503,8 @@ void AnimationNode::apply( float weight, const std::set<unsigned short>& boneMas
 		// If we are retargetting motion, we can now switch to
 		// "target" skeleton, and adapt the current pose
 		mOwner->_setCurrentSkeleton(trg_skel);
-		mAnimAdaptor->adapt(trg_skel);
+		if( mAnimAdaptor->getOriginalSkeleton() != trg_skel )
+			mAnimAdaptor->adapt(trg_skel);
 	}
 }
 

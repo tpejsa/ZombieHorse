@@ -25,12 +25,12 @@ SOFTWARE.
 
 #include "zhPrereq.h"
 #include "zhIterators.h"
+#include "zhSkeleton.h"
 
 namespace zh
 {
 
 class AnimationNode;
-class Skeleton;
 
 /**
 * @brief Class representing an animation retargetting system.
@@ -71,6 +71,18 @@ public:
 	AnimationNode* getAnimationNode() const;
 
 	/**
+	* Get prediction factor, which measures how much predicted motion
+	* influences retargetting results.
+	*/
+	float getPredictionFactor() const;
+
+	/**
+	* Set prediction factor, which measures how much predicted motion
+	* influences retargetting results.
+	*/
+	void setPredictionFactor( float predFact );
+
+	/**
 	* Adapt the animation that's playing on the original skeleton
 	* to the target skeleton.
 	*
@@ -80,9 +92,15 @@ public:
 
 protected:
 
+	void _computeIKGoals( Skeleton* targetSkel ) const;
+	float _computeIKGoalWeight(Bone* endEff) const;
+	float _computeEnvObjDistance( Bone* endEff, Bone* envObj ) const;
+	float _computeGroundDistance(Bone* endEff) const;
+
 	Skeleton* mOrigSkel;
 	AnimationNode* mAnimNode;
-
+	std::vector<BoneTag> mEndEffectors;
+	float mPredFact;
 };
 
 }
