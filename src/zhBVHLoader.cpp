@@ -52,7 +52,8 @@ namespace zh
 		Head,
 		Fingers,
 		Thumb,
-		Toe
+		Toe,
+		LowerBack
 	};
 	std::string jointNamesReg[] = {
 			"(H|h)ip",
@@ -67,7 +68,8 @@ namespace zh
 			"(H|h)ead",
 			"(F|f)ingers",
 			"(T|t)humb",
-			"(T|t)oe"
+			"(T|t)oe",
+			"(L|l)ower(B|b)ack"
 	};
 	enum JointSides{
 		Center = 0,
@@ -84,17 +86,18 @@ namespace zh
 	zh::BoneTag ParseTag(string Name){
 		//first test name
 		boost::cmatch what;
-		for(int i = Hip;i <= Toe;++i){
+		for(int i = Hip;i <= LowerBack;++i){
 			if(boost::regex_search(Name.c_str(), what, boost::regex(jointNamesReg[i]))){
 				string suffix;
 				suffix.assign(what.suffix().first,what.suffix().second);
 				string preffix;
 				preffix.assign(what.prefix().first,what.prefix().second);
 				for(int j = Left;j <= Right;++j){
-					if(boost::regex_search(suffix.c_str(), what, boost::regex(jointSideReg[j])) || boost::regex_search(preffix.c_str(), what, boost::regex(jointSideReg[j]))){
+					if(boost::regex_search(suffix.c_str(), what, boost::regex(jointSideReg[j - 1])) || boost::regex_search(preffix.c_str(), what, boost::regex(jointSideReg[j - 1]))){
 						return ConvertTagAndSide(JointNames(i),JointSides(j));
 					}
 				}
+				return ConvertTagAndSide(JointNames(i),JointSides(Center));
 			}
 		}
 		return BT_Unknown;
