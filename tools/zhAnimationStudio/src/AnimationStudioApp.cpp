@@ -459,7 +459,7 @@ bool AnimationStudioApp::init( wxWindow* wnd )
 	{
 		zh::Skeleton* skel = skel_i.next();
 		// TODO: fix auto-tagging in BVHLoader...
-		skel->_removeAllBoneTags();
+		/*skel->_removeAllBoneTags();
 		if( skel->hasBone("0_Hips") ) skel->getBone("0_Hips")->tag(BT_Root);
 		if( skel->hasBone("13_lowerback") ) skel->getBone("13_lowerback")->tag(BT_LowerBack);
 		if( skel->hasBone("15_Chest") ) skel->getBone("15_Chest")->tag(BT_Chest);
@@ -474,7 +474,7 @@ bool AnimationStudioApp::init( wxWindow* wnd )
 		if( skel->hasBone("23_LeftWrist") ) skel->getBone("23_LeftWrist")->tag(BT_LWrist);
 		if( skel->hasBone("30_RightShoulder") ) skel->getBone("30_RightShoulder")->tag(BT_RShoulder);
 		if( skel->hasBone("31_RightElbow") ) skel->getBone("31_RightElbow")->tag(BT_RElbow);
-		if( skel->hasBone("32_RightWrist") ) skel->getBone("32_RightWrist")->tag(BT_RWrist);
+		if( skel->hasBone("32_RightWrist") ) skel->getBone("32_RightWrist")->tag(BT_RWrist);*/
 		//
 		zhAnimationSystem->createIKSolversOnSkeleton( skel->getName() );
 	}
