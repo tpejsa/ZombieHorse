@@ -273,6 +273,7 @@ zh::Bone* AnimationStudioApp::createEnvironmentObject(
 	zh::Bone* obj = env->createBone( obj_id, name );
 	env->getRoot()->addChild(obj);
 	obj->setInitialPosition(pos);
+	obj->resetToInitialPose();
 
 	// Show the object in the scene
 	std::vector<Ogre::Vector3> pts;
@@ -341,6 +342,34 @@ void AnimationStudioApp::resize( unsigned int width, unsigned int height )
 {
 	if( mRenderWnd )
 		mRenderWnd->windowMovedOrResized();
+}
+
+int AnimationStudioApp::FilterEvent( wxEvent& evt )
+{
+	if( evt.GetEventType() == wxEVT_KEY_DOWN )
+	{
+		int kc = ((wxKeyEvent&)evt).GetKeyCode();
+		if( kc == WXK_F9 )
+		{
+			// Toggle root IK
+			_toggleIK( RootIKSolver::ClassId() );
+			return true;
+		}
+		else if( kc == WXK_F10 )
+		{
+			// Toggle posture IK
+			_toggleIK( PostureIKSolver::ClassId() );
+			return true;
+		}
+		else if( kc == WXK_F11 )
+		{
+			// Toggle limb IK
+			_toggleIK( LimbIKSolver::ClassId() );
+			return true;
+		}
+    }
+ 
+    return -1;
 }
 
 bool AnimationStudioApp::OnInit()
@@ -604,6 +633,21 @@ bool AnimationStudioApp::initZombieHorse()
 	zhAnimationSearchSystem->init();
 
 	return true;
+}
+
+void AnimationStudioApp::_toggleIK( unsigned long solverClassId )
+{
+	zh::Skeleton* skel = zhAnimationSystem->getOutputSkeleton();
+	if( skel != NULL && skel->getNumIKSolvers() > 0 )
+	{
+		zh::Skeleton::IKSolverIterator solver_i = skel->getIKSolverIterator();
+		while( solver_i.hasMore() )
+		{
+			IKSolver* solver = solver_i.next();
+			if( solver->getClassId() == solverClassId )
+				solver->setEnabled( !solver->getEnabled() );
+		}
+	}
 }
 
 void AnimationStudioApp::_computeJointTracePath( const std::string& boneName,

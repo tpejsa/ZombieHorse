@@ -251,6 +251,22 @@ public:
 	virtual AnimationAdaptor* getAdaptor() const;
 
 	/**
+	* Check if animation adaptation is enabled on this node
+	* (otherwise original animation is applied directly to the target
+	* skeleton).
+	*
+	* @return true if adaptation is enabled, false otherwise.
+	*/
+	virtual bool getAdaptationEnabled() const;
+
+	/**
+	* Enable/disable animation adaptation on this node.
+	*
+	* @param enabled If true, adaptation will be enabled.
+	*/
+	virtual void setAdaptationEnabled( bool enabled = true );
+
+	/**
 	* Gets the play status of this animation node and its children.
 	*
 	* @return true if this animation node is playing, false otherwise.
@@ -470,6 +486,7 @@ protected:
 	std::map<std::string, AnimationNode*> mChildrenByName;
 	mutable AnimationNode* mMainChild;
 	AnimationAdaptor* mAnimAdaptor;
+	bool mAdaptEnabled;
 
 	bool mPlaying;
 	bool mPaused;

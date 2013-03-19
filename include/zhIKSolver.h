@@ -27,6 +27,7 @@ SOFTWARE.
 #include "zhIterators.h"
 #include "zhObjectFactory.h"
 #include "zhMath.h"
+#include "zhLogger.h"
 
 #define zhRootIKSolver_ClassId 1
 #define zhRootIKSolver_ClassName "RootIKSolver"
@@ -103,6 +104,20 @@ public:
 	* @return Pointer to the owning skeleton.
 	*/
 	virtual Skeleton* getSkeleton() const;
+
+	/**
+	* Check if the IK solver is enabled.
+	*
+	* @return true if the solver is enabled, false otherwise.
+	*/
+	virtual bool getEnabled() const;
+
+	/**
+	* Enable/disable the IK solver.
+	*
+	* @param enabled If true, the solver will be enabled, otherwise it will be disabled.
+	*/
+	virtual void setEnabled( bool enabled = true );
 
 	/**
 	* Get a bone in the IK chain.
@@ -241,6 +256,7 @@ protected:
 	std::string mName;
 	std::vector<Bone*> mChain;
 	Skeleton* mSkel;
+	bool mEnabled;
 	unsigned short mPriority;
 	std::map<unsigned short, IKGoal> mGoals;
 };

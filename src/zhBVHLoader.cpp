@@ -79,7 +79,7 @@ namespace zh
 			"(R|r)(ight)*",
 	};
 	BoneTag ConvertTagAndSide(JointNames a,JointSides b){
-		return BoneTag(a + b * 100);
+		return BoneTag(a + (b+1) * 100);
 	}
 	zh::BoneTag ParseTag(string Name){
 		//first test name

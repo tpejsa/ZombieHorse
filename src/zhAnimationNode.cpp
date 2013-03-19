@@ -30,7 +30,8 @@ namespace zh
 
 AnimationNode::AnimationNode()
 : mName(""), mOwner(NULL), mParent(NULL), mMainChild(NULL), mAnimAdaptor(NULL),
-mPlaying(true), mPaused(false), mPlayRate(1), mAnnotsEnabled(true)
+mAdaptEnabled(true), mPlaying(true), mPaused(false), mPlayRate(1),
+mAnnotsEnabled(true)
 {
 	mTransAnnots = new TransitionAnnotationContainer();
 	mParamTransAnnots = new ParamTransitionAnnotationContainer();
@@ -288,6 +289,16 @@ AnimationAdaptor* AnimationNode::getAdaptor() const
 	return mAnimAdaptor;
 }
 
+bool AnimationNode::getAdaptationEnabled() const
+{
+	return mAdaptEnabled;
+}
+
+void AnimationNode::setAdaptationEnabled( bool enabled )
+{
+	mAdaptEnabled = enabled;
+}
+
 bool AnimationNode::getPlaying() const
 {
 	return mPlaying;
@@ -482,7 +493,7 @@ void AnimationNode::apply( float weight, const std::set<unsigned short>& boneMas
 		);
 
 	Skeleton* trg_skel = mOwner->_getCurrentSkeleton();
-	if( mAnimAdaptor != NULL )
+	if( mAnimAdaptor != NULL && mAdaptEnabled )
 	{
 		// If we are retargetting motion, switch to the "original" skeleton
 		Skeleton* orig_skel = mAnimAdaptor->getOriginalSkeleton();
@@ -498,7 +509,7 @@ void AnimationNode::apply( float weight, const std::set<unsigned short>& boneMas
 		// update cumulative blend weight
 		mOwner->_setTotalWeight( mOwner->_getTotalWeight() + weight );
 
-	if( mAnimAdaptor != NULL )
+	if( mAnimAdaptor != NULL && mAdaptEnabled )
 	{
 		// If we are retargetting motion, we can now switch to
 		// "target" skeleton, and adapt the current pose

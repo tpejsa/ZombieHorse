@@ -33,6 +33,8 @@ namespace zh
 #define zhRoundf(x) ( floor( (x) + 0.5f ) ) // rounds a float number
 #define zhRoundi(x) ( int( (x) + 0.5f ) ) // rounds a float number and returns an integer
 #define zhRoundi64(x) ( Int64( (x) + 0.5f ) ) // rounds a float number and returns a 64-bit integer
+#define zhClamp01(x) ( (x) < 0 ? 0 : ( (x) > 1 ? 1 : (x) ) )
+#define zhClamp(x,l,r) ( (x) < l ? l : ( (x) > r ? r : (x) ) )
 
 #define zhE 2.71828182f
 #define zhPI 3.14159265f

@@ -127,7 +127,7 @@ float Vector3::distanceSq( const Vector3& v ) const
 
 float Vector3::angle( const Vector3& v ) const
 {
-	return acos( this->dot(v) );
+	return acos( zhClamp(this->dot(v),-1,1) );
 }
 
 bool Vector3::operator ==( const Vector3& v ) const
@@ -306,7 +306,7 @@ Vector3 Vector3::getRotated( const Quat& rot ) const
 	return result;
 }
 
-Quat Vector3::getRotation( const Vector3& v ) const
+Quat Vector3::getRotationTo( const Vector3& v ) const
 {
 	Quat rot;
 	Vector3 v1 = *this;

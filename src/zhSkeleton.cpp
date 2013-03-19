@@ -476,7 +476,11 @@ void Skeleton::solveIK()
 	// Execute the solvers in correct order
 	for( std::multimap<unsigned short, IKSolver*>::iterator psolver_i = solvers.begin();
 		psolver_i != solvers.end(); ++psolver_i )
-		psolver_i->second->solve();
+	{
+		IKSolver* solver = psolver_i->second;
+		if( solver->getEnabled() )
+			solver->solve();
+	}
 }
 
 void Skeleton::_clone( Skeleton* clonePtr ) const

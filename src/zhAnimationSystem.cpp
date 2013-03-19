@@ -251,6 +251,7 @@ AnimationSetPtr AnimationSystem::loadAnimationSet( const std::string& path, cons
 			node->createAdaptor(skel);
 		mAnimTree->getNode("Root")->addChild(node);
 	}
+	mAnimTree->getNode("Root")->setPlaying(false);
 	// TODO: Add nodes under correct retargetting node (specified by skel param.)
 
 	zhLog( "AnimationSystem", "loadAnimationSet",

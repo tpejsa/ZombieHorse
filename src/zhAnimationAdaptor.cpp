@@ -139,13 +139,6 @@ float AnimationAdaptor::_computeEnvObjDistance( Bone* endEff, Bone* envObj ) con
 	// TODO: there should be some reasonable and principled way of specifying
 	// the normalization factor, but this will do for now
 	float dnorm = 5.f;
-	zh::Skeleton* trg_skel = endEff->getSkeleton();
-	if( trg_skel->hasBoneWithTag(BT_Chest) )
-	{
-		Vector3 root_pos = trg_skel->getRoot()->getWorldPosition();
-		Vector3 chest_pos = trg_skel->getBoneByTag(BT_Chest)->getWorldPosition();
-		dnorm =  root_pos.distance(chest_pos);
-	}
 	//
 	dist /= dnorm;
 
@@ -163,13 +156,6 @@ float AnimationAdaptor::_computeGroundDistance(Bone* endEff) const
 	// TODO: there should be some reasonable and principled way of specifying
 	// the normalization factor, but this will do for now
 	float dnorm = 5.f;
-	zh::Skeleton* trg_skel = endEff->getSkeleton();
-	if( trg_skel->hasBoneWithTag(BT_Chest) )
-	{
-		Vector3 root_pos = trg_skel->getRoot()->getWorldPosition();
-		Vector3 chest_pos = trg_skel->getBoneByTag(BT_Chest)->getWorldPosition();
-		dnorm = root_pos.distance(chest_pos);
-	}
 	//
 	dist /= dnorm;
 

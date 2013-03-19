@@ -21,6 +21,7 @@ SOFTWARE.
 ******************************************************************************/
 
 #include "zhRootIKSolver.h"
+#include "zhSkeleton.h"
 
 namespace zh
 {
@@ -36,6 +37,32 @@ RootIKSolver::~RootIKSolver()
 
 void RootIKSolver::solve()
 {
+	zhAssert( getNumBones() > 0 );
+	Bone* root = getBone(0);
+	zhAssert( root->getSkeleton()->getRoot() == root );
+
+	// Compute end-effector goal displacements
+	Vector3 disp(0,0,0);
+	float w = 0;
+	GoalConstIterator goal_i = getGoalConstIterator();
+	while( goal_i.hasMore() )
+	{
+		const IKGoal& goal = goal_i.next();
+		Vector3 goal_wpos = goal.position;
+		Vector3 cur_wpos = mSkel->getBone(goal.boneId)->getWorldPosition();
+		disp += ( goal_wpos - cur_wpos )*goal.weight;
+		w += goal.weight;
+	}
+	if( zhEqualf(w,0) )
+		// None of the goals are important, nothing to solve here
+		return;
+	disp /= w;
+
+	// Displace root to get the end-effectors closer to goals
+	root->translate(disp);
+
+	// TODO: compute intersections of end-effector reachable areas (spheres),
+	// and project the displaced root into the intersection region
 }
 
 }

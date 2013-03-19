@@ -210,6 +210,11 @@ public:
 	void resize( unsigned int width, unsigned int height );
 
 	/**
+	* For handling application-wide keyboard events
+	*/
+	int FilterEvent( wxEvent& evt );
+
+	/**
 	* This method is called on application initialization.
 	*/
 	bool OnInit();
@@ -237,6 +242,8 @@ protected:
 	bool createScene(); ///< Creates the default scene.
 	bool destroyScene(); ///< Destroys the default scene.
 	bool initZombieHorse(); ///< Initializes ZombieHorse system.
+
+	void _toggleIK( unsigned long solverClassId );
 
 	// Compute joint trace path (piecewise linear) for the specified set of bones and the current animation...
 	void _computeJointTracePath( const std::string& boneName, std::vector<Ogre::Vector3>& path );

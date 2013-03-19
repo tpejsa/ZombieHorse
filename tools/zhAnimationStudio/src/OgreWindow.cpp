@@ -375,6 +375,8 @@ void OgreWindow::OnMouseMove( wxMouseEvent& evt )
 	static long x0 = -1, y0 = -1;
 
 	Ogre::Camera* cam = gApp->getCamera();
+	if( cam == NULL )
+		return;
 
 	// Compute mouse position and offset
 	float pos_x, pos_y;
@@ -452,6 +454,8 @@ void OgreWindow::OnMouseMove( wxMouseEvent& evt )
 void OgreWindow::OnMouseLeftDown( wxMouseEvent& evt )
 {
 	Ogre::Camera* cam = gApp->getCamera();
+	if( cam == NULL )
+		return;
 
 	// Compute mouse position
 	float pos_x, pos_y;
@@ -480,10 +484,11 @@ void OgreWindow::OnMouseLeftDown( wxMouseEvent& evt )
 			if( ::wxGetKeyState(WXK_SHIFT) )
 			{
 				// Create an environment object where user is pointing
-				Ogre::Vector3 pos = obj->getParentNode()->_getDerivedPosition();
+				zh::Bone* bone = skel->getBone(obj->getName());
+				zh::Vector3 pos = bone->getWorldPosition();
 				unsigned short obj_id = 1;
 				while( zhAnimationSystem->getEnvironment()->hasBone( toString<unsigned short>(obj_id) ) ) ++obj_id;
-				gApp->createEnvironmentObject( toString<unsigned short>(obj_id), zhVector3(pos) );
+				gApp->createEnvironmentObject( toString<unsigned short>(obj_id), pos );
 			}
 			else
 			{

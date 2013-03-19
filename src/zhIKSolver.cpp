@@ -26,7 +26,7 @@ SOFTWARE.
 namespace zh
 {
 
-IKSolver::IKSolver() : mSkel(NULL), mPriority(5)
+IKSolver::IKSolver() : mSkel(NULL), mEnabled(true), mPriority(5)
 {
 }
 
@@ -42,6 +42,16 @@ const std::string& IKSolver::getName() const
 Skeleton* IKSolver::getSkeleton() const
 {
 	return mSkel;
+}
+
+bool IKSolver::getEnabled() const
+{
+	return mEnabled;
+}
+
+void IKSolver::setEnabled( bool enabled )
+{
+	mEnabled = enabled;
 }
 
 Bone* IKSolver::getBone( unsigned int index ) const

@@ -98,7 +98,7 @@ public:
 	Vector3 mul( const Matrix4& mat ) const; ///< Multiply the current vector with a matrix.
 	Vector3& rotate( const Quat& rot ); ///< Rotates the current vector with the specified quaternion.
 	Vector3 getRotated( const Quat& rot ) const; ///< Gets the current vector rotated with the specified quaternion.
-	Quat getRotation( const Vector3& v ) const; ///< Gets the rotation between two vectors.
+	Quat getRotationTo( const Vector3& v ) const; ///< Gets the rotation between two vectors.
 	
 	static const Vector3 Null;
 	static const Vector3 XAxis;
