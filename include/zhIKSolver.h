@@ -159,6 +159,22 @@ public:
 	virtual BoneConstIterator getBoneConstIterator() const;
 
 	/**
+	* Find a bone by ID.
+	*
+	* @param boneId Bone Id.
+	* @return Pointer to the bone.
+	*/
+	virtual Bone* findBone( unsigned short boneId ) const;
+
+	/**
+	* Find a bone by name.
+	*
+	* @param boneName Bone name.
+	* @return Pointer to the bone.
+	*/
+	virtual Bone* findBone( const std::string& boneName ) const;
+
+	/**
 	* Get the IK solver priority, which determines the order in which solvers
 	* are executed.
 	*

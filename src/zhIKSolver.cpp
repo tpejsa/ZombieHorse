@@ -92,6 +92,32 @@ IKSolver::BoneConstIterator IKSolver::getBoneConstIterator() const
 	return BoneConstIterator(mChain);
 }
 
+Bone* IKSolver::findBone( unsigned short boneId ) const
+{
+	BoneConstIterator bone_i = getBoneConstIterator();
+	while( bone_i.hasMore() )
+	{
+		Bone* bone = bone_i.next();
+		if( bone->getId() == boneId )
+			return bone;
+	}
+
+	return NULL;
+}
+
+Bone* IKSolver::findBone( const std::string& boneName ) const
+{
+	BoneConstIterator bone_i = getBoneConstIterator();
+	while( bone_i.hasMore() )
+	{
+		Bone* bone = bone_i.next();
+		if( bone->getName() == boneName )
+			return bone;
+	}
+
+	return NULL;
+}
+
 unsigned short IKSolver::getPriority() const
 {
 	return mPriority;
