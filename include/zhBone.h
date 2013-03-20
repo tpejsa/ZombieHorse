@@ -59,6 +59,8 @@ enum BoneTag
 	BT_LToe = 112,
 	BT_RToe = 212,
 	BT_LowerBack = 13,
+	BT_LHipJoint = 10,
+	BT_RHipJoint = 20,
 	BT_Unknown = 999
 };
 

@@ -252,6 +252,7 @@ protected:
 
 	AnimationStudioFrame* mFrmMain;
 	RenderTimer* mRenderTimer;
+	float mFrameTime;
 
 	Root *mOgreRoot; ///< OGRE system.
 	Camera* mCam; ///< Camera.

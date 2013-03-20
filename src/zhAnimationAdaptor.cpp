@@ -28,7 +28,7 @@ namespace zh
 {
 
 AnimationAdaptor::AnimationAdaptor( Skeleton* origSkel, AnimationNode* animNode ) :
-mOrigSkel(origSkel), mAnimNode(animNode), mPredFact(0.15f)
+mOrigSkel(origSkel), mAnimNode(animNode), mPredFact(0.f)
 {
 	zhAssert( animNode != NULL );
 
@@ -131,11 +131,22 @@ float AnimationAdaptor::_computeIKGoalWeight(Bone* endEff) const
 
 float AnimationAdaptor::_computeEnvObjDistance( Bone* endEff, Bone* envObj ) const
 {
+	// Compute current distance
 	float dist = endEff->getWorldPosition().distance( envObj->getWorldPosition() );
-	// TODO: in order to have prediction, we must compute derivative of distance,
-	// e.g. store distance for each end-effector and object pair at each frame, then 
-	// compute as difference from previous frame / delta_t
-	// dist += mPredFact*d_dist/delta_t
+
+	// Incorporate predicted distance
+	float d_dist = 0;
+	float dt = mAnimNode->_getDeltaTime();
+	std::map<std::pair<unsigned short, unsigned short>, float>::iterator pdist_i =
+		mPrevEnvObjDist.find( make_pair(endEff->getId(), envObj->getId()) );
+	if( pdist_i != mPrevEnvObjDist.end() && dt > .00001f )
+		// Estimate derivative of distance
+		d_dist = ( dist - pdist_i->second )/dt;
+	mPrevEnvObjDist[ make_pair(endEff->getId(), envObj->getId()) ] = dist; // Store current distance
+	dist += mPredFact*d_dist;
+	// TODO: fix prediction - frame rate needs to be constant to get good 1st derivative estimates
+
+	// Normalize distance
 	// TODO: there should be some reasonable and principled way of specifying
 	// the normalization factor, but this will do for now
 	float dnorm = 5.f;
@@ -147,12 +158,23 @@ float AnimationAdaptor::_computeEnvObjDistance( Bone* endEff, Bone* envObj ) con
 
 float AnimationAdaptor::_computeGroundDistance(Bone* endEff) const
 {
+	// Compute current distance
 	Vector3 ee_wpos = endEff->getWorldPosition();
 	float dist = fabs( ee_wpos.y - zhAnimationSystem->getGroundHeightAt( ee_wpos.x, ee_wpos.z ) );
-	// TODO: in order to have prediction, we must compute derivative of distance,
-	// e.g. store distance for each end-effector and object pair at each frame, then 
-	// compute as difference from previous frame / delta_t
-	// dist += mPredFact*d_dist/delta_t
+
+	// Incorporate predicted distance
+	float d_dist = 0;
+	float dt = mAnimNode->_getDeltaTime();
+	std::map<unsigned short, float>::iterator pdist_i =
+		mPrevGroundDist.find(endEff->getId());
+	if( pdist_i != mPrevGroundDist.end() && dt > .00001f )
+		// Estimate derivative of distance
+		d_dist = ( dist - pdist_i->second )*60;
+	mPrevGroundDist[endEff->getId()] = dist; // Store current distance
+	dist += mPredFact*d_dist;
+	// TODO: fix prediction - frame rate needs to be constant to get good 1st derivative estimates
+
+	// Normalize distance
 	// TODO: there should be some reasonable and principled way of specifying
 	// the normalization factor, but this will do for now
 	float dnorm = 5.f;

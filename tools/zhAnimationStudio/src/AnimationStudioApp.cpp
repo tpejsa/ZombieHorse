@@ -47,6 +47,7 @@ AnimationStudioApp::AnimationStudioApp()
 mCurAnim(NULL), mAnimEnabled(true), mTracedJointAnim(NULL)
 {
 	mRenderTimer = new RenderTimer();
+	mFrameTime = 1.f/60.f;
 	mParamSkelEditor = new ParamSkeletonEditor();
 }
 
@@ -125,6 +126,7 @@ zh::Animation* AnimationStudioApp::selectAnimation( const string& anim )
 
 	zhAnimationSystem->stopAnimation();
 	mCurAnim = zhAnimationSystem->getAnimation(anim);
+	useConstFrameRate();
 
 	// Position camera so that the whole motion is visible
 	float minx, maxx, miny, maxy, minz, maxz;
@@ -299,17 +301,32 @@ void AnimationStudioApp::deleteEnvironmentObject( const std::string& name )
 void AnimationStudioApp::deleteAllEnvironmentObjects()
 {
 	zh::Skeleton* env = zhAnimationSystem->getEnvironment();
-	while( env->getNumBones() > 0 )
-		deleteEnvironmentObject( env->getBoneIterator().next()->getName() );
-	env->createBone(0,"Root");
+	zh::Skeleton::BoneIterator obj_i = env->getBoneIterator();
+	std::vector<std::string> objnames;
+	while( obj_i.hasMore() )
+	{
+		zh::Bone* obj = obj_i.next();
+		if( obj->getName() != "Root" )
+			objnames.push_back(obj->getName());
+	}
+
+	for( std::vector<std::string>::iterator name_i = objnames.begin();
+		name_i != objnames.end(); ++name_i )
+		deleteEnvironmentObject(*name_i);
 }
 
 void AnimationStudioApp::useConstFrameRate( bool useConstFR )
 {
 	mRenderTimer->Stop();
 	zh::Animation* cur_anim = getCurrentAnimation();
-	if( useConstFR && cur_anim != NULL && cur_anim->getFrameRate() >= 20 )
-		mRenderTimer->Start( 1000.f/cur_anim->getFrameRate() );
+	if(useConstFR)
+	{
+		if( cur_anim != NULL && cur_anim->getFrameRate() >= 20 )
+			mFrameTime = 1.f/cur_anim->getFrameRate();
+		else
+			mFrameTime = 1.f/60.f;
+		mRenderTimer->Start(1000.f*mFrameTime);
+	}
 }
 
 bool AnimationStudioApp::frameStarted( const FrameEvent& evt )
@@ -324,8 +341,10 @@ bool AnimationStudioApp::frameStarted( const FrameEvent& evt )
 	}
 
 	if( mAnimEnabled )
+	{
 		// Update the ZombieHorse system
-		zhAnimationSystem->update( evt.timeSinceLastFrame );
+		zhAnimationSystem->update(evt.timeSinceLastFrame);
+	}
 
 	// Apply updated pose to the skeleton in viewport
 	mFrmMain->getOgreWindow()->updateRenderSkeletonPose( zhAnimationSystem->getOutputSkeleton() );
@@ -365,6 +384,24 @@ int AnimationStudioApp::FilterEvent( wxEvent& evt )
 		{
 			// Toggle limb IK
 			_toggleIK( LimbIKSolver::ClassId() );
+			return true;
+		}
+		else if( kc == WXK_F12 )
+		{
+			// Toggle prediction
+			zh::Animation* anim = zhAnimationSystem->getCurrentAnimation();
+			if( anim != NULL )
+			{
+				AnimationNode* node = zhAnimationSystem->getAnimationTree()->getNode( anim->getFullName() );
+				AnimationAdaptor* adapt = node->getAdaptor();
+				if( node->getAdaptor() != NULL )
+				{
+					if( adapt->getPredictionFactor() > 0 )
+						adapt->setPredictionFactor(0);
+					else
+						adapt->setPredictionFactor(0.15f);
+				}
+			}
 			return true;
 		}
     }
@@ -459,7 +496,7 @@ bool AnimationStudioApp::init( wxWindow* wnd )
 	{
 		zh::Skeleton* skel = skel_i.next();
 		// TODO: fix auto-tagging in BVHLoader...
-		/*skel->_removeAllBoneTags();
+		skel->_removeAllBoneTags();
 		if( skel->hasBone("0_Hips") ) skel->getBone("0_Hips")->tag(BT_Root);
 		if( skel->hasBone("13_lowerback") ) skel->getBone("13_lowerback")->tag(BT_LowerBack);
 		if( skel->hasBone("15_Chest") ) skel->getBone("15_Chest")->tag(BT_Chest);
@@ -474,7 +511,9 @@ bool AnimationStudioApp::init( wxWindow* wnd )
 		if( skel->hasBone("23_LeftWrist") ) skel->getBone("23_LeftWrist")->tag(BT_LWrist);
 		if( skel->hasBone("30_RightShoulder") ) skel->getBone("30_RightShoulder")->tag(BT_RShoulder);
 		if( skel->hasBone("31_RightElbow") ) skel->getBone("31_RightElbow")->tag(BT_RElbow);
-		if( skel->hasBone("32_RightWrist") ) skel->getBone("32_RightWrist")->tag(BT_RWrist);*/
+		if( skel->hasBone("32_RightWrist") ) skel->getBone("32_RightWrist")->tag(BT_RWrist);
+		if( skel->hasBone("1_LHipJoint") ) skel->getBone("1_LHipJoint")->tag(BT_LHipJoint);
+		if( skel->hasBone("7_RHipJoint") ) skel->getBone("7_RHipJoint")->tag(BT_RHipJoint);
 		//
 		zhAnimationSystem->createIKSolversOnSkeleton( skel->getName() );
 	}

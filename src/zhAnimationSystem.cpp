@@ -166,7 +166,17 @@ Skeleton* AnimationSystem::createIKSolversOnSkeleton( const std::string& name )
 	if( skel->hasBoneWithTag(BT_Root) )
 		skel->createIKSolver( RootIKSolver::ClassId(), 0, "RootIK", BT_Root, BT_Root );
 	if( skel->hasBoneWithTag(BT_Root) && skel->hasBoneWithTag(BT_Chest) )
-		skel->createIKSolver( PostureIKSolver::ClassId(), 1, "PostureIK", BT_Root, BT_Chest );
+	{
+		IKSolver* solver = skel->createIKSolver( PostureIKSolver::ClassId(), 1, "PostureIK", BT_Root, BT_Chest );
+		if( skel->hasBoneWithTag(BT_LCollar) )
+			solver->pushBone( skel->getBoneByTag(BT_LCollar) );
+		if( skel->hasBoneWithTag(BT_RCollar) )
+			solver->pushBone( skel->getBoneByTag(BT_RCollar) );
+		if( skel->hasBoneWithTag(BT_LHipJoint) )
+			solver->pushBone( skel->getBoneByTag(BT_LHipJoint) );
+		if( skel->hasBoneWithTag(BT_RHipJoint) )
+			solver->pushBone( skel->getBoneByTag(BT_RHipJoint) );
+	}
 	if( skel->hasBoneWithTag(BT_LShoulder) && skel->hasBoneWithTag(BT_LWrist) )
 		skel->createIKSolver( LimbIKSolver::ClassId(), 2, "LArmIK", BT_LShoulder, BT_LWrist );
 	if( skel->hasBoneWithTag(BT_RShoulder) && skel->hasBoneWithTag(BT_RWrist) )

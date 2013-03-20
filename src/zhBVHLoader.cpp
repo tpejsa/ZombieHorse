@@ -152,6 +152,8 @@ namespace zh
 			return parent;
 		}
 		bool ConvertToAnimation(Animation* mAnim){
+			if( frameTime > 0.00001f )
+				mAnim->setFrameRate( zhRoundi(1.f/frameTime) );
 			BoneAnimationTrack* root_tr = mAnim->createBoneTrack(jointID);
 			for(int i = 0;i < nFrames;++i){
 				TransformKeyFrame* tkf = static_cast<TransformKeyFrame*>(root_tr->createKeyFrame(i * frameTime));

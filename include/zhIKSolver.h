@@ -120,6 +120,18 @@ public:
 	virtual void setEnabled( bool enabled = true );
 
 	/**
+	* Add a bone to the end of the chain.
+	*
+	* @param bone Pointer to the bone.
+	*/
+	virtual void pushBone( Bone* bone );
+
+	/**
+	* Remove a bone from the end of the chain.
+	*/
+	virtual void popBone();
+
+	/**
 	* Get a bone in the IK chain.
 	*
 	* @param index Index of the bone in the chain.

@@ -101,6 +101,8 @@ protected:
 	AnimationNode* mAnimNode;
 	std::vector<BoneTag> mEndEffectors;
 	float mPredFact;
+	mutable std::map<std::pair<unsigned short, unsigned short>, float> mPrevEnvObjDist;
+	mutable std::map<unsigned short, float> mPrevGroundDist;
 };
 
 }

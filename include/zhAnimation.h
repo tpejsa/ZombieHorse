@@ -153,10 +153,16 @@ public:
 	float getLength() const;
 
 	/**
-	* Gets the animation frame rate (valid only for uniform sampling
+	* Get the animation frame rate (valid only for uniform sampling
 	* animations, like motion capture data).
 	*/
 	int getFrameRate() const;
+
+	/**
+	* Set the animation frame rate (valid only for uniform sampling
+	* animations, like motion capture data).
+	*/
+	void setFrameRate( int frameRate );
 
 	/**
 	* Applies the animation to the specified skeleton.
@@ -215,9 +221,9 @@ private:
 	unsigned short mId;
 	std::string mName;
 	AnimationSetPtr mAnimSet;
-
 	std::map<unsigned short, BoneAnimationTrack*> mBoneTracks;
 	KFInterpolationMethod mInterpMethod;
+	int mFrameRate;
 
 	TransitionAnnotationContainer* mTransAnnots;
 	ParamTransitionAnnotationContainer* mParamTransAnnots;

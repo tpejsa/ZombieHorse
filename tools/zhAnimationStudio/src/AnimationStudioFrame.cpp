@@ -934,10 +934,22 @@ void AnimationStudioFrame::OnTool_Stop( wxCommandEvent& evt )
 
 void AnimationStudioFrame::OnTool_StepPrev( wxCommandEvent& evt )
 {
+	zh::Animation* anim = zhAnimationSystem->getCurrentAnimation();
+	if( anim == NULL || !zhAnimationSystem->isAnimationPaused() )
+		return;
+
+	zhAnimationSystem->setAnimationTime(
+		zhAnimationSystem->getAnimationTime() - 1.f/anim->getFrameRate() );
 }
 
 void AnimationStudioFrame::OnTool_StepNext( wxCommandEvent& evt )
 {
+	zh::Animation* anim = zhAnimationSystem->getCurrentAnimation();
+	if( anim == NULL || !zhAnimationSystem->isAnimationPaused() )
+		return;
+
+	zhAnimationSystem->setAnimationTime(
+		zhAnimationSystem->getAnimationTime() + 1.f/anim->getFrameRate() );
 }
 
 void AnimationStudioFrame::OnScroll_PlaySlider( wxScrollEvent& evt )

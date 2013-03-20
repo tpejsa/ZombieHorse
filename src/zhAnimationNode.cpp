@@ -473,11 +473,11 @@ void AnimationNode::update( float dt )
 
 	if( mPaused )
 		dt = 0;
+	else
+		// Store elapsed time
+		mDt = dt;
 
 	_updateNode( dt * getPlayRate() );
-
-	// store elapsed time
-	mDt = dt;
 }
 
 void AnimationNode::apply( float weight, const std::set<unsigned short>& boneMask ) const
@@ -517,6 +517,16 @@ void AnimationNode::apply( float weight, const std::set<unsigned short>& boneMas
 		if( mAnimAdaptor->getOriginalSkeleton() != trg_skel )
 			mAnimAdaptor->adapt(trg_skel);
 	}
+}
+
+float AnimationNode::_getPrevTime() const
+{
+	return getPlayTime() - mDt;
+}
+
+float AnimationNode::_getDeltaTime() const
+{
+	return mDt;
 }
 
 void AnimationNode::_clone( AnimationNode* clonePtr, bool shareData ) const
@@ -595,11 +605,6 @@ void AnimationNode::_applyNode( float weight, const std::set<unsigned short>& bo
 	ChildConstIterator ci = getChildConstIterator();
 	while( !ci.end() )
 		ci.next()->apply( weight, boneMask );
-}
-
-float AnimationNode::_getPrevTime() const
-{
-	return getPlayTime() - mDt;
 }
 
 void AnimationNode::_applyAnnotations() const

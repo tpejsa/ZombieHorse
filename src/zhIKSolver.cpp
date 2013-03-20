@@ -54,6 +54,22 @@ void IKSolver::setEnabled( bool enabled )
 	mEnabled = enabled;
 }
 
+void IKSolver::pushBone( Bone* bone )
+{
+	zhAssert( bone != NULL );
+	zhAssert( bone->getSkeleton() == mSkel );
+
+	mChain.push_back(bone);
+}
+
+void IKSolver::popBone()
+{
+	if( getNumBones() <= 0 )
+		return;
+
+	mChain.pop_back();
+}
+
 Bone* IKSolver::getBone( unsigned int index ) const
 {
 	zhAssert( index < getNumBones() );

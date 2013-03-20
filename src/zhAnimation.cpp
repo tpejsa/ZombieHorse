@@ -29,7 +29,7 @@ namespace zh
 const std::set<unsigned short> Animation::EmptyBoneMask;
 
 Animation::Animation( unsigned short id, const std::string& name, AnimationSetPtr animSet )
-: mId(id), mName(name), mAnimSet(animSet), mInterpMethod(KFInterp_Spline)
+: mId(id), mName(name), mAnimSet(animSet), mInterpMethod(KFInterp_Spline), mFrameRate(60)
 {
 	zhAssert( animSet != NULL );
 
@@ -162,21 +162,12 @@ float Animation::getLength() const
 
 int Animation::getFrameRate() const
 {
-	float cur_length = 0, length = 0;
-	int num_fr = 0;
+	return mFrameRate;
+}
 
-	BoneTrackConstIterator bti = getBoneTrackConstIterator();
-	while( !bti.end() )
-	{
-		BoneAnimationTrack* bat = bti.next();
-		if( ( cur_length = bat->getLength() ) > length )
-		{
-			length = cur_length;
-			num_fr = bat->getNumKeyFrames();
-		}
-	}
-
-	return length > 0 ? zhRoundi(num_fr/length) : 0;
+void Animation::setFrameRate( int frameRate )
+{
+	mFrameRate = frameRate;
 }
 
 void Animation::apply( Skeleton* skel, float time, float weight, float scale,

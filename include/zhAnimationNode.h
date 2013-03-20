@@ -419,6 +419,16 @@ public:
 	virtual void apply( float weight = 1.f, const std::set<unsigned short>& boneMask = Animation::EmptyBoneMask ) const;
 
 	/**
+	* Get the previous play time of this animation node.
+	*/
+	virtual float _getPrevTime() const;
+
+	/**
+	* Get the delta time of the current frame.
+	*/
+	virtual float _getDeltaTime() const;
+
+	/**
 	* Samples this animation's mover channel at the current time.
 	*
 	* @return Mover value (with origin transformation applied)
@@ -465,11 +475,6 @@ protected:
 	* @param boneMask Bone mask. Animation is not applied to masked bones.
 	*/
 	virtual void _applyNode( float weight = 1.f, const std::set<unsigned short>& boneMask = Animation::EmptyBoneMask ) const;
-
-	/**
-	* Gets the previous play time of this animation node.
-	*/
-	virtual float _getPrevTime() const;
 
 	/**
 	* Determines which annotations are active, which are no longer active,
