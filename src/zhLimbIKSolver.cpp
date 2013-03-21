@@ -43,10 +43,10 @@ void LimbIKSolver::solve()
 	Bone* shoulder = getBone(0);
 	Bone* elbow = getBone(1);
 	Bone* wrist = getBone(2);
-	Quat sq0 = shoulder->getOrientation();
-	Quat swq0 = shoulder->getWorldOrientation();
-	Quat eq0 = elbow->getOrientation();
-	Quat wq0 = wrist->getOrientation();
+	Quat lcl_sq0 = shoulder->getOrientation();
+	Quat sq0 = shoulder->getWorldOrientation();
+	Quat lcl_eq0 = elbow->getOrientation();
+	//Quat wq0 = wrist->getOrientation();
 	zhAssert( hasGoal(wrist->getId()) );
 	const IKGoal& goal = getGoal(wrist->getId());
 
@@ -66,38 +66,41 @@ void LimbIKSolver::solve()
 	float eth = cur_es.angle(cur_ew);
 	float goal_coseth = ( les*les + lew*lew - goal_l*goal_l )/( 2.f*les*lew );
 	float goal_eth = acos( zhClamp(goal_coseth,-1,1) );
-	Quat eq = elbow->getWorldOrientation()*Quat( mElbowAxis, eth-goal_eth );
-	elbow->setOrientation( shoulder->getWorldOrientation().getInverse()*eq );
+	Vector3 lcl_eax = mElbowAxis.getRotated( shoulder->getWorldOrientation().getInverse() );
+	elbow->rotate( Quat( lcl_eax, goal_eth-eth ) );
 
 	// Rotate shoulder to align wrist with goal
 	cur_n = ( wrist->getWorldPosition() - shoulder->getWorldPosition() ).getNormalized();
-	goal_n = goal_n.getNormalized();
-	Quat sq = shoulder->getWorldOrientation()*goal_n.getRotationTo(cur_n);
-	//shoulder->setOrientation( shoulder->getParent()->getWorldOrientation().getInverse()*sq );
+	goal_n.normalize();
+	Quat spqi = shoulder->getParent()->getWorldOrientation().getInverse();
+	Vector3 lcl_curn = cur_n.getRotated(spqi);
+	Vector3 lcl_goaln = goal_n.getRotated(spqi);
+	shoulder->rotate( lcl_curn.getRotationTo(lcl_goaln) );
+	Quat sq = shoulder->getWorldOrientation();
 
 	// Compute shoulder swivel angle
-	Quat swqref = sq;
-	float a = swq0.dot(swqref);
-	float b = swqref.w*goal_n.dot( Vector3(swq0.x, swq0.y, swq0.z) ) - 
-		swq0.w*goal_n.dot( Vector3(swqref.x, swqref.y, swqref.z) ) + 
-		Vector3(swq0.x, swq0.y, swq0.z).dot( goal_n.cross( Vector3(swqref.x, swqref.y, swqref.z) ) );
+	Quat sqref = sq;
+	float a = sq0.dot(sqref);
+	float b = sqref.w*goal_n.dot( Vector3(sq0.x, sq0.y, sq0.z) ) - 
+		sq0.w*goal_n.dot( Vector3(sqref.x, sqref.y, sqref.z) ) + 
+		Vector3(sq0.x, sq0.y, sq0.z).dot( goal_n.cross( Vector3(sqref.x, sqref.y, sqref.z) ) );
 	float alpha = atan2(a,b);
 	if( alpha == alpha )
 	{
-		Quat swq1 = Quat( goal_n, -2*alpha + zhPI )*swqref;
-		Quat swq2 = Quat( goal_n, -2*alpha - zhPI )*swqref;
-		if( swq0.dot(swq1) > swq0.dot(swq2) )
-			sq = swq1;
+		Quat sq1 = Quat( goal_n, -2*alpha + zhPI )*sqref;
+		Quat sq2 = Quat( goal_n, -2*alpha - zhPI )*sqref;
+		if( sq0.dot(sq1) > sq0.dot(sq2) )
+			sq = sq1;
 		else
-			sq = swq2;
+			sq = sq2;
 	}
 	shoulder->setOrientation( shoulder->getParent()->getWorldOrientation().getInverse()*sq );
 
 	// TODO: fix wrist/ankle
 
 	// Blend based on goal weight
-	shoulder->setOrientation( sq0.slerp( shoulder->getOrientation(), goal.weight ) );
-	elbow->setOrientation( eq0.slerp( elbow->getOrientation(), goal.weight ) );
+	shoulder->setOrientation( lcl_sq0.slerp( shoulder->getOrientation(), goal.weight ) );
+	elbow->setOrientation( lcl_eq0.slerp( elbow->getOrientation(), goal.weight ) );
 }
 
 }

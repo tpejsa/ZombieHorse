@@ -71,16 +71,28 @@ public:
 	AnimationNode* getAnimationNode() const;
 
 	/**
-	* Get prediction factor, which measures how much predicted motion
-	* influences retargetting results.
+	* Get prediction weight, which specifies how much predicted motion
+	* influences retargetting results (0 to 0.15 is a good value).
 	*/
-	float getPredictionFactor() const;
+	float getPredictionWeight() const;
 
 	/**
-	* Set prediction factor, which measures how much predicted motion
+	* Set prediction weight, which measures how much predicted motion
 	* influences retargetting results.
 	*/
-	void setPredictionFactor( float predFact );
+	void setPredictionWeight( float predWeight );
+
+	/**
+	* Get environment sensitivity, which specifies the distance at which
+	* environment objects begin to influence end-effector positioning.
+	*/
+	float getEnvironmentSensitivity() const;
+
+	/**
+	* Set environment sensitivity, which specifies the distance at which
+	* environment objects begin to influence end-effector positioning.
+	*/
+	void setEnvironmentSensitivity( float envSens );
 
 	/**
 	* Adapt the animation that's playing on the original skeleton
@@ -100,7 +112,8 @@ protected:
 	Skeleton* mOrigSkel;
 	AnimationNode* mAnimNode;
 	std::vector<BoneTag> mEndEffectors;
-	float mPredFact;
+	float mPredWeight;
+	float mEnvSens;
 	mutable std::map<std::pair<unsigned short, unsigned short>, float> mPrevEnvObjDist;
 	mutable std::map<unsigned short, float> mPrevGroundDist;
 };

@@ -109,8 +109,26 @@ ParamSkeletonEditor* AnimationStudioApp::getParamSkeletonEditor() const
 	return mParamSkelEditor;
 }
 
-zh::Animation* AnimationStudioApp::selectAnimation( const string& anim )
+zh::Animation* AnimationStudioApp::selectAnimation( const string& animName )
 {
+	// Write out environment to a file
+	zh::Animation* anim = getCurrentAnimation();
+	zh::Skeleton* env = zhAnimationSystem->getEnvironment();
+	if( anim != NULL && env->getNumBones() >= 2 )
+	{
+		std::string path = anim->getAnimationSet()->getPath() + ".env";
+		std::ofstream ofs(path);
+		zh::Skeleton::BoneConstIterator obj_i = env->getBoneConstIterator();
+		while( obj_i.hasMore() )
+		{
+			zh::Bone* obj = obj_i.next();
+			if( obj->getName() == "Root" )
+				continue;
+			zh::Vector3 pos = obj->getWorldPosition();
+			ofs << toString<zh::Vector3>(pos) << std::endl;
+		}
+	}
+
 	// Reset all motion and environment visualization
 	displayJointMarkers( std::set<std::string>(), false );
 	traceJointPaths( std::set<std::string>(), false );
@@ -125,13 +143,27 @@ zh::Animation* AnimationStudioApp::selectAnimation( const string& anim )
 	}
 
 	zhAnimationSystem->stopAnimation();
-	mCurAnim = zhAnimationSystem->getAnimation(anim);
+	mCurAnim = zhAnimationSystem->getAnimation(animName);
 	useConstFrameRate();
 
 	// Position camera so that the whole motion is visible
 	float minx, maxx, miny, maxy, minz, maxz;
 	mCurAnim->computeAnimationBounds( minx, maxx, miny, maxy, minz, maxz );
 	// TODO
+
+	// Load the environment associated with the animation
+	std::ifstream ifs( mCurAnim->getAnimationSet()->getPath() + ".env" );
+	unsigned short obj_id = 1;
+	while( ifs.good() && !ifs.eof() )
+	{
+		char line[4097];
+		ifs.getline( &line[0], 4096 );
+		std::string pos_str(line);
+		if( pos_str.length() <= 1 )
+			break;
+		zh::Vector3 pos = fromString<zh::Vector3>(pos_str);
+		createEnvironmentObject( toString<unsigned short>(obj_id++), pos );
+	}
 
 	return mCurAnim;
 }
@@ -396,10 +428,10 @@ int AnimationStudioApp::FilterEvent( wxEvent& evt )
 				AnimationAdaptor* adapt = node->getAdaptor();
 				if( node->getAdaptor() != NULL )
 				{
-					if( adapt->getPredictionFactor() > 0 )
-						adapt->setPredictionFactor(0);
+					if( adapt->getPredictionWeight() > 0 )
+						adapt->setPredictionWeight(0);
 					else
-						adapt->setPredictionFactor(0.15f);
+						adapt->setPredictionWeight(0.15f);
 				}
 			}
 			return true;
@@ -512,6 +544,8 @@ bool AnimationStudioApp::init( wxWindow* wnd )
 		if( skel->hasBone("30_RightShoulder") ) skel->getBone("30_RightShoulder")->tag(BT_RShoulder);
 		if( skel->hasBone("31_RightElbow") ) skel->getBone("31_RightElbow")->tag(BT_RElbow);
 		if( skel->hasBone("32_RightWrist") ) skel->getBone("32_RightWrist")->tag(BT_RWrist);
+		if( skel->hasBone("20_LeftCollar") ) skel->getBone("20_LeftCollar")->tag(BT_LCollar);
+		if( skel->hasBone("29_RightCollar") ) skel->getBone("29_RightCollar")->tag(BT_RCollar);
 		if( skel->hasBone("1_LHipJoint") ) skel->getBone("1_LHipJoint")->tag(BT_LHipJoint);
 		if( skel->hasBone("7_RHipJoint") ) skel->getBone("7_RHipJoint")->tag(BT_RHipJoint);
 		//

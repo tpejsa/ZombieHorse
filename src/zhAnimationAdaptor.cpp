@@ -28,7 +28,7 @@ namespace zh
 {
 
 AnimationAdaptor::AnimationAdaptor( Skeleton* origSkel, AnimationNode* animNode ) :
-mOrigSkel(origSkel), mAnimNode(animNode), mPredFact(0.f)
+mOrigSkel(origSkel), mAnimNode(animNode), mPredWeight(0.f), mEnvSens(20.f)
 {
 	zhAssert( animNode != NULL );
 
@@ -53,14 +53,24 @@ AnimationNode* AnimationAdaptor::getAnimationNode() const
 	return mAnimNode;
 }
 
-float AnimationAdaptor::getPredictionFactor() const
+float AnimationAdaptor::getPredictionWeight() const
 {
-	return mPredFact;
+	return mPredWeight;
 }
 
-void AnimationAdaptor::setPredictionFactor( float predFact )
+void AnimationAdaptor::setPredictionWeight( float predWeight )
 {
-	mPredFact = predFact >= 0 ? predFact : 0;
+	mPredWeight = predWeight >= 0 ? predWeight : 0;
+}
+
+float AnimationAdaptor::getEnvironmentSensitivity() const
+{
+	return mEnvSens;
+}
+
+void AnimationAdaptor::setEnvironmentSensitivity( float envSens )
+{
+	mEnvSens = envSens > .00001f ? envSens : 20.f;
 }
 
 void AnimationAdaptor::adapt( Skeleton* targetSkel )
@@ -143,15 +153,11 @@ float AnimationAdaptor::_computeEnvObjDistance( Bone* endEff, Bone* envObj ) con
 		// Estimate derivative of distance
 		d_dist = ( dist - pdist_i->second )/dt;
 	mPrevEnvObjDist[ make_pair(endEff->getId(), envObj->getId()) ] = dist; // Store current distance
-	dist += mPredFact*d_dist;
+	dist += mPredWeight*d_dist;
 	// TODO: fix prediction - frame rate needs to be constant to get good 1st derivative estimates
 
 	// Normalize distance
-	// TODO: there should be some reasonable and principled way of specifying
-	// the normalization factor, but this will do for now
-	float dnorm = 5.f;
-	//
-	dist /= dnorm;
+	dist /= mEnvSens;
 
 	return dist;
 }
@@ -171,15 +177,11 @@ float AnimationAdaptor::_computeGroundDistance(Bone* endEff) const
 		// Estimate derivative of distance
 		d_dist = ( dist - pdist_i->second )*60;
 	mPrevGroundDist[endEff->getId()] = dist; // Store current distance
-	dist += mPredFact*d_dist;
+	dist += mPredWeight*d_dist;
 	// TODO: fix prediction - frame rate needs to be constant to get good 1st derivative estimates
 
 	// Normalize distance
-	// TODO: there should be some reasonable and principled way of specifying
-	// the normalization factor, but this will do for now
-	float dnorm = 5.f;
-	//
-	dist /= dnorm;
+	dist /= mEnvSens;
 
 	return dist;
 }
