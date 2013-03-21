@@ -61,6 +61,25 @@ void RootIKSolver::solve()
 	// Displace root to get the end-effectors closer to goals
 	root->translate(disp);
 
+	// Compute end-effector reachable areas (spheres)
+	/*std::vector<std::pair<Vector3, float>> spheres;
+	goal_i = getGoalConstIterator();
+	while( goal_i.hasMore() )
+	{
+		const IKGoal& goal = goal_i.next();
+		if( zhEqualf(goal.weight,0) )
+			continue;
+
+		Bone* wrist = mSkel->getBone(goal.boneId);
+		Bone* elbow = wrist->getParent();
+		Bone* shoulder = elbow->getParent();
+		Vector3 center = goal.position + root->getWorldPosition() - shoulder->getWorldPosition();
+		float r = wrist->getWorldPosition().distance( elbow->getWorldPosition() ) + 
+			shoulder->getWorldPosition().distance( elbow->getWorldPosition() );
+		r /= goal.weight;
+		spheres.push_back( std::make_pair(center, r) );
+	}*/
+
 	// TODO: compute intersections of end-effector reachable areas (spheres),
 	// and project the displaced root into the intersection region
 }
