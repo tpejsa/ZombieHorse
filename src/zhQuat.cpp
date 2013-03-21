@@ -151,7 +151,7 @@ Quat Quat::getInverse() const
 
 Quat Quat::exp() const
 {
-	Quat q;
+	Quat q = *this;
 	float a = sqrt( x*x + y*y + z*z);
 	float sin_a = sin(a);
 
@@ -170,7 +170,7 @@ Quat Quat::exp() const
 
 Quat Quat::log() const
 {
-	Quat q;
+	Quat q= *this;
 
 	if( fabs(w) < 1.f )
 	{
