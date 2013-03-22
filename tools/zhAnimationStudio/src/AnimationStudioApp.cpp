@@ -363,14 +363,8 @@ void AnimationStudioApp::useConstFrameRate( bool useConstFR )
 
 bool AnimationStudioApp::frameStarted( const FrameEvent& evt )
 {
-	if( mCurAnim != mTracedJointAnim )
-	{
+	if( mCurAnim == NULL )
 		traceJointPaths( std::set<std::string>(), false ); // disable joint traces when no anim. selected
-
-		if( mCurAnim != NULL && !mTracedJoints.empty() )
-			// Animation changed, joint traces must be refreshed
-			traceJointPaths( mTracedJoints);
-	}
 
 	if( mAnimEnabled )
 	{

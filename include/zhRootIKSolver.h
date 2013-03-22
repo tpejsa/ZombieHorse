@@ -37,6 +37,32 @@ class zhDeclSpec RootIKSolver : public IKSolver
 
 public:
 
+	struct Sphere
+	{
+		Vector3 center;
+		float radius;
+
+		Sphere( const Vector3& center, float radius )
+		{
+			this->center = center;
+			this->radius = radius;
+		}
+	};
+
+	struct Circle
+	{
+		Vector3 center;
+		float radius;
+		Vector3 normal;
+
+		Circle( const Vector3& center, float radius, const Vector3& normal )
+		{
+			this->center = center;
+			this->radius = radius;
+			this->normal = normal;
+		}
+	};
+
 	zhDeclare_IKSolver( RootIKSolver, zhRootIKSolver_ClassId, zhRootIKSolver_ClassName )
 
 	/**
@@ -56,6 +82,18 @@ public:
 
 protected:
 
+	bool _isPointInSphere( const Sphere& sphere, const Vector3& pt ) const;
+	bool _isPointInSphereIntersection( const std::vector<Sphere>& spheres, const Vector3& pt ) const;
+	Vector3 _findClosestPointOnSphere( const Sphere& sphere, const Vector3& pt0 ) const;
+	bool _findClosestPointOnSphereIntersection( const std::vector<Sphere>& spheres,
+		const Vector3& pt0, Vector3& pt ) const;
+	void _computeSphereIntersectCircles( const std::vector<Sphere>& spheres, std::vector<Circle>& circles ) const;
+	Vector3 _findClosestPointOnCircle( const Circle& circle, const Vector3& pt0 ) const;
+	bool _findClosestPointOnSphereIntersectCircles( const std::vector<Sphere>& spheres, const std::vector<Circle>& circles,
+		const Vector3& pt0, Vector3& pt ) const;
+	void _computeSphereIntersectVertices( const std::vector<Circle>& circles, std::vector<Vector3>& vertices ) const;
+	bool _findClosestPointOnSphereIntersectVertices( const std::vector<Sphere>& spheres, const std::vector<Vector3>& vertices,
+		const Vector3& pt0, Vector3& pt ) const;
 };
 
 }

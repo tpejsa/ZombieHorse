@@ -23,7 +23,7 @@ SOFTWARE.
 #include "zhPostureIKSolver.h"
 #include"zhBone.h"
 #include"zhSkeleton.h"
-#include <Eigen/Eigen>
+
 namespace zh
 {
 
@@ -144,7 +144,7 @@ namespace zh
 			//try step
 			applyConfiguration(direction);
 			double tmp = energy();
-			if(tmp < energyO){
+			if(tmp <= energyO){
 				return lineSearchStepSize;
 			}
 			restoreSnapshot(index);

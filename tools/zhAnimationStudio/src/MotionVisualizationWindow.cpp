@@ -40,12 +40,11 @@ MotionVisualizationWindow::MotionVisualizationWindow( wxWindow* parent, wxWindow
 void MotionVisualizationWindow::refresh()
 {
 	zh::Skeleton* skel = zhAnimationSystem->getOutputSkeleton();
+	mClbJointMarkers->Clear();
+	mClbJointTraces->Clear();
 	if( skel == NULL )
 	{
 		// No skeleton currently selected
-		mClbJointMarkers->Clear();
-		mClbJointTraces->Clear();
-
 		return;
 	}
 
