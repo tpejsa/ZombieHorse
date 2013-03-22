@@ -35,6 +35,7 @@ namespace zh
 		maxIteration = 30;
 		countGoal = 0;
 		countBone = 0;
+		step = 0.0001;
 	}
 
 	PostureIKSolver::~PostureIKSolver()
@@ -144,7 +145,7 @@ namespace zh
 			//try step
 			applyConfiguration(direction);
 			double tmp = energy();
-			if(tmp <= energyO){
+			if(tmp < energyO || lineSearchStepSize < step){
 				return lineSearchStepSize;
 			}
 			restoreSnapshot(index);
@@ -156,7 +157,7 @@ namespace zh
 		for(int i = 0;i < maxIteration;++i){
 			computeGredient();
 			double tmp = gredient.length();
-			if(tmp > gredientThreshold){
+			if(tmp > this->gredientThreshold && lineSearchStepSize > step){
 				snapshot(1);
 				lineSearch(1, gredient.revert());
 			}else{
@@ -176,7 +177,6 @@ namespace zh
 		return energy;
 	}
 	void PostureIKSolver::computeGredient(){
-		double step = 0.0001;
 		double energyO = energy();
 		
 		gredient[0] = 0;

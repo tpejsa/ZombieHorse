@@ -98,6 +98,7 @@ namespace zh
 				return sqrt(length);
 			}
 		};
+		double step;
 		int countGoal;
 		int countBone;
 		bool initSolve;
