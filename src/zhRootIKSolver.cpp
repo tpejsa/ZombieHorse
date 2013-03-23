@@ -64,6 +64,9 @@ void RootIKSolver::solve()
 	//
 	return;
 	//
+
+	// TODO: this fancy root positioning seems unnecessary, so we disable it for now
+
 	// Compute end-effector reachable areas (spheres)
 	Vector3 root_pos = root->getWorldPosition();
 	std::vector<Sphere> spheres;
