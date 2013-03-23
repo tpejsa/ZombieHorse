@@ -219,7 +219,7 @@ namespace zh
 				gredient[boneCounter * 3 + 4] = (energy() - energyO) / step;
 				//z rotation
 				bone -> setOrientation(snap*(Quat(0,0,0,step).exp()));
-				gredient[boneCounter * 3 + 5] += (energy() - energyO) / step;
+				gredient[boneCounter * 3 + 5] = (energy() - energyO) / step;
 				//reset orientation
 				bone -> setOrientation(snap);
 				boneCounter++;

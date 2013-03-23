@@ -37,10 +37,30 @@ class zhDeclSpec RootIKSolver : public IKSolver
 
 public:
 
+	struct Plane
+	{
+		Vector3 point;
+		Vector3 normal;
+
+		Plane()
+		{
+		}
+
+		Plane( const Vector3& point, const Vector3& normal )
+		{
+			this->point = point;
+			this->normal = normal;
+		}
+	};
+
 	struct Sphere
 	{
 		Vector3 center;
 		float radius;
+
+		Sphere()
+		{
+		}
 
 		Sphere( const Vector3& center, float radius )
 		{
@@ -54,6 +74,11 @@ public:
 		Vector3 center;
 		float radius;
 		Vector3 normal;
+
+		Circle()
+		{
+			normal = Vector3(1,0,0);
+		}
 
 		Circle( const Vector3& center, float radius, const Vector3& normal )
 		{
@@ -83,15 +108,20 @@ public:
 protected:
 
 	bool _isPointInSphere( const Sphere& sphere, const Vector3& pt ) const;
-	bool _isPointInSphereIntersection( const std::vector<Sphere>& spheres, const Vector3& pt ) const;
+	bool _compute2SphereIntersection( const Sphere& sphere1, const Sphere& sphere2, Circle& circle ) const;
+	bool _compute3SphereIntersection( const Sphere& sphere1, const Sphere& sphere2, const Sphere& sphere3,
+		Vector3& v1, Vector3& v2 ) const;
+	bool _computeSpherePlaneIntersection( const Sphere& sphere, const Plane& plane, Circle& circle ) const;
 	Vector3 _findClosestPointOnSphere( const Sphere& sphere, const Vector3& pt0 ) const;
+	Vector3 _findClosestPointOnCircle( const Circle& circle, const Vector3& pt0 ) const;
+	
+	bool _isPointInSphereIntersection( const std::vector<Sphere>& spheres, const Vector3& pt ) const;
 	bool _findClosestPointOnSphereIntersection( const std::vector<Sphere>& spheres,
 		const Vector3& pt0, Vector3& pt ) const;
 	void _computeSphereIntersectCircles( const std::vector<Sphere>& spheres, std::vector<Circle>& circles ) const;
-	Vector3 _findClosestPointOnCircle( const Circle& circle, const Vector3& pt0 ) const;
 	bool _findClosestPointOnSphereIntersectCircles( const std::vector<Sphere>& spheres, const std::vector<Circle>& circles,
 		const Vector3& pt0, Vector3& pt ) const;
-	void _computeSphereIntersectVertices( const std::vector<Circle>& circles, std::vector<Vector3>& vertices ) const;
+	void _computeSphereIntersectVertices( const std::vector<Sphere>& spheres, std::vector<Vector3>& vertices ) const;
 	bool _findClosestPointOnSphereIntersectVertices( const std::vector<Sphere>& spheres, const std::vector<Vector3>& vertices,
 		const Vector3& pt0, Vector3& pt ) const;
 };

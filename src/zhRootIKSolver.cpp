@@ -86,25 +86,150 @@ void RootIKSolver::solve()
 		sphere_weights.push_back(goal.weight);
 	}
 
-	// Is the root in the reachable area?
-	size_t num_contain = 0;
-	for( std::vector<Sphere>::const_iterator sphere_i = spheres.begin();
-		sphere_i != spheres.end(); ++sphere_i )
+	Vector3 root_pos1 = root_pos;
+	while( !spheres.empty() )
 	{
-		if( _isPointInSphere(*sphere_i, root_pos) )
-			++num_contain;
-	}
-	if( num_contain == spheres.size() )
-		// All goals are reachable
-		return;
+		// Is the root in the reachable area?
+		size_t num_contain = 0;
+		for( std::vector<Sphere>::const_iterator sphere_i = spheres.begin();
+			sphere_i != spheres.end(); ++sphere_i )
+		{
+			if( _isPointInSphere(*sphere_i, root_pos) )
+				++num_contain;
+		}
+		if( num_contain == spheres.size() )
+			// All goals are reachable
+			break;
 
-	// TODO: compute intersections of end-effector reachable areas (spheres),
-	// and project the displaced root into the intersection region
+		// Try finding new root position on spheres
+		if( _findClosestPointOnSphereIntersection(spheres, root_pos, root_pos1) )
+			break;
+
+		// Try finding new root position on circles (sphere-sphere intersections)
+		std::vector<Circle> circles;
+		_computeSphereIntersectCircles(spheres, circles);
+		if( _findClosestPointOnSphereIntersectCircles(spheres, circles, root_pos, root_pos1) )
+			break;
+		
+		// Try finding new root position on vertices (multi-sphere intersections)
+		std::vector<Vector3> vertices;
+		_computeSphereIntersectVertices(spheres, vertices);
+		if( _findClosestPointOnSphereIntersectVertices(spheres, vertices, root_pos, root_pos1) )
+			break;
+
+		// Discard sphere with lowest end-effector weight
+		size_t min_i;
+		float min_w = FLT_MAX;
+		for( size_t sphere_i = 0; sphere_i < spheres.size(); ++sphere_i )
+		{
+			if( sphere_weights[sphere_i] < min_w )
+			{
+				min_i = sphere_i;
+				min_w = sphere_weights[sphere_i];
+			}
+		}
+		spheres.erase( spheres.begin() + min_i );
+		sphere_weights.erase( sphere_weights.begin() + min_i );
+	}
+
+	root->setPosition(root_pos1);
 }
 
 bool RootIKSolver::_isPointInSphere( const Sphere& sphere, const Vector3& pt ) const
 {
 	return (sphere.center - pt).lengthSq() <= sphere.radius*sphere.radius + 0.00001f;
+}
+
+bool RootIKSolver::_compute2SphereIntersection( const Sphere& sphere1,
+	const Sphere& sphere2,
+	Circle& circle ) const
+{
+	float d = sphere1.center.distance(sphere2.center);
+	if( d > sphere1.radius+sphere2.radius )
+		// Spheres don't intersect
+		return false;
+
+	// Compute circle radius
+	float d_2 = d*d;
+	float r1 = sphere1.radius;
+	float r1_2 = r1*r1;
+	float r2 = sphere2.radius;
+	float r2_2 = r2*r2;
+	float A = d_2 - r2_2 + r1_2;
+	circle.radius = 1.f/(2.f*d)*sqrt( 4.f*d_2*r1_2 - A*A );
+
+	// Compute circle normal
+	circle.normal = (sphere2.center-sphere1.center).getNormalized();
+
+	// Compute circle center
+	circle.center = sphere1.center + circle.normal*(d_2 - r2_2 + r1_2)/(2.f*d);
+
+	return true;
+}
+
+bool RootIKSolver::_compute3SphereIntersection( const Sphere& sphere1,
+	const Sphere& sphere2, const Sphere& sphere3,
+	Vector3& v1, Vector3& v2 ) const
+{
+	Circle circ1;
+	if( !_compute2SphereIntersection(sphere1, sphere2, circ1) )
+		// These spheres don't intersect
+		return false;
+
+	Circle circ2;
+	if( !_computeSpherePlaneIntersection(sphere3, Plane(circ1.center, circ1.normal), circ2) )
+		// These spheres don't intersect
+		return false;
+
+	Vector3 d = circ2.center - circ1.center;
+	float r1 = circ1.radius;
+	float r1_2 = r1*r1;
+	float r2 = circ2.radius;
+	float r2_2 = r2*r2;
+	float ld = d.length();
+	float ld_2 = ld*ld;
+	float A = r1_2 - r2_2 + ld_2;
+	float rv = sqrt( r1_2 - A*A/(4.f*ld_2) );
+	Vector3 cv = d*A/(2.f*ld_2) + circ1.center;
+	Vector3 u = circ1.normal.cross(d).getNormalized();
+
+	v1 = cv + u*rv;
+	v2 = cv - u*rv;
+
+	return true;
+}
+
+bool RootIKSolver::_computeSpherePlaneIntersection( const Sphere& sphere,
+	const Plane& plane, Circle& circle ) const
+{
+	Vector3 h = plane.normal * plane.normal.dot(plane.point - sphere.center);
+	circle.center = sphere.center + h;
+	float r_2 = sphere.radius*sphere.radius - h.lengthSq();
+	if( r_2 < 0 )
+		return false;
+	circle.radius = sqrt(r_2);
+
+	return true;
+}
+
+Vector3 RootIKSolver::_findClosestPointOnSphere( const Sphere& sphere, const Vector3& pt0 ) const
+{
+	return ( sphere.center + (pt0 - sphere.center).getNormalized()*sphere.radius );
+}
+
+Vector3 RootIKSolver::_findClosestPointOnCircle( const Circle& circle, const Vector3& pt0 ) const
+{
+	Vector3 pc = circle.center - pt0;
+	Vector3 cp = -pc;
+	Vector3 h = circle.normal*circle.normal.dot(pc);
+	Vector3 pt0p = pt0+h;
+	Vector3 cpt0p = pt0p - circle.center;
+	float d = cpt0p.length();
+	if( zhEqualf(d,0) )
+		// Any point on the circle is valid
+		return circle.center + Vector3::XAxis.cross(circle.normal)*circle.radius;
+	
+	return circle.center + cpt0p/d*circle.radius;
 }
 
 bool RootIKSolver::_isPointInSphereIntersection( const std::vector<Sphere>& spheres,
@@ -120,11 +245,6 @@ bool RootIKSolver::_isPointInSphereIntersection( const std::vector<Sphere>& sphe
 	return true;
 }
 
-Vector3 RootIKSolver::_findClosestPointOnSphere( const Sphere& sphere, const Vector3& pt0 ) const
-{
-	return ( sphere.center + (pt0 - sphere.center).getNormalized()*sphere.radius );
-}
-
 bool RootIKSolver::_findClosestPointOnSphereIntersection( const std::vector<Sphere>& spheres,
 	const Vector3& pt0, Vector3& pt ) const
 {
@@ -135,7 +255,7 @@ bool RootIKSolver::_findClosestPointOnSphereIntersection( const std::vector<Sphe
 
 	float min_dist = FLT_MAX;
 	bool found = false;
-	for( int pti = 0; pti < (int)spheres.size(); ++pti )
+	for( int pti = 0; pti < (int)closest_pts.size(); ++pti )
 	{
 		Vector3 cpt = closest_pts[pti];
 
@@ -162,29 +282,112 @@ bool RootIKSolver::_findClosestPointOnSphereIntersection( const std::vector<Sphe
 	return found;
 }
 
-void RootIKSolver::_computeSphereIntersectCircles( const std::vector<Sphere>& spheres, std::vector<Circle>& circles ) const
+void RootIKSolver::_computeSphereIntersectCircles( const std::vector<Sphere>& spheres,
+	std::vector<Circle>& circles ) const
 {
+	for( size_t sphere_i = 0; sphere_i < spheres.size(); ++sphere_i )
+	{
+		for( size_t sphere_j = sphere_i+1; sphere_j < spheres.size(); ++sphere_j )
+		{
+			Circle circle;
+			if( _compute2SphereIntersection( spheres[sphere_i], spheres[sphere_j], circle ) )
+				circles.push_back(circle);
+		}
+	}
 }
 
-Vector3 RootIKSolver::_findClosestPointOnCircle( const Circle& circle, const Vector3& pt0 ) const
-{
-	return Vector3();
-}
-
-bool RootIKSolver::_findClosestPointOnSphereIntersectCircles( const std::vector<Sphere>& spheres, const std::vector<Circle>& circles,
+bool RootIKSolver::_findClosestPointOnSphereIntersectCircles( const std::vector<Sphere>& spheres,
+	const std::vector<Circle>& circles,
 	const Vector3& pt0, Vector3& pt ) const
 {
-	return false;
+	std::vector<Vector3> closest_pts;
+	for( std::vector<Circle>::const_iterator circle_i = circles.begin();
+		circle_i != circles.end(); ++circle_i )
+		closest_pts.push_back( _findClosestPointOnCircle(*circle_i, pt0) );
+
+	float min_dist = FLT_MAX;
+	bool found = false;
+	for( int pti = 0; pti < (int)closest_pts.size(); ++pti )
+	{
+		Vector3 cpt = closest_pts[pti];
+
+		size_t num_contain = 0;
+		for( std::vector<Sphere>::const_iterator sphere_j = spheres.begin();
+			sphere_j != spheres.end(); ++sphere_j )
+		{
+			if( _isPointInSphere(*sphere_j, cpt) )
+				++num_contain;
+		}
+
+		if( num_contain == spheres.size() )
+		{
+			found = true;
+			float dist = pt0.distance(cpt);
+			if( dist < min_dist )
+			{
+				pt = cpt;
+				min_dist = dist;
+			}
+		}
+	}
+
+	return found;
 }
 
-void RootIKSolver::_computeSphereIntersectVertices( const std::vector<Circle>& circles, std::vector<Vector3>& vertices ) const
+void RootIKSolver::_computeSphereIntersectVertices( const std::vector<Sphere>& spheres,
+	std::vector<Vector3>& vertices ) const
 {
+	for( size_t sphere_i = 0; sphere_i < spheres.size(); ++sphere_i )
+	{
+		for( size_t sphere_j = sphere_i+1; sphere_j < spheres.size(); ++sphere_j )
+		{
+			for( size_t sphere_k = sphere_j+1; sphere_k < spheres.size(); ++sphere_k )
+			{
+				Sphere sphere1 = spheres[sphere_i];
+				Sphere sphere2 = spheres[sphere_j];
+				Sphere sphere3 = spheres[sphere_k];
+				Vector3 v1, v2;
+				if( _compute3SphereIntersection(sphere1, sphere2, sphere3, v1, v2) )
+				{
+					vertices.push_back(v1);
+					vertices.push_back(v2);
+				}
+			}
+		}
+	}
 }
 
-bool RootIKSolver::_findClosestPointOnSphereIntersectVertices( const std::vector<Sphere>& spheres, const std::vector<Vector3>& vertices,
+bool RootIKSolver::_findClosestPointOnSphereIntersectVertices( const std::vector<Sphere>& spheres,
+	const std::vector<Vector3>& vertices,
 	const Vector3& pt0, Vector3& pt ) const
 {
-	return false;
+	float min_dist = FLT_MAX;
+	bool found = false;
+	for( int pti = 0; pti < (int)vertices.size(); ++pti )
+	{
+		Vector3 cpt = vertices[pti];
+
+		size_t num_contain = 0;
+		for( std::vector<Sphere>::const_iterator sphere_j = spheres.begin();
+			sphere_j != spheres.end(); ++sphere_j )
+		{
+			if( _isPointInSphere(*sphere_j, cpt) )
+				++num_contain;
+		}
+
+		if( num_contain == spheres.size() )
+		{
+			found = true;
+			float dist = pt0.distance(cpt);
+			if( dist < min_dist )
+			{
+				pt = cpt;
+				min_dist = dist;
+			}
+		}
+	}
+
+	return found;
 }
 
 }
