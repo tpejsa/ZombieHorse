@@ -276,9 +276,10 @@ namespace zh
 		while(data[0] == ' ' || data[0] == '\t' || data[0] == '\n' || data[0] == '\r'){
 			data++;
 		}
-		while((data[0] <= '9' && data[0] >= '0') || data[0] == '.' || data[0] == '-'){
+		while((data[0] <= '9' && data[0] >= '0') || data[0] == '.' || data[0] == '-' || data[0] == 'e'){
 			result.insert(result.end(),1,*data++);
 		}
+
 		return std::atof(result.c_str());
 	}
 	bool parseMotion(std::string & motionContent){

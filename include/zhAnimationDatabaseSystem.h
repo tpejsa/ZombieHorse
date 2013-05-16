@@ -20,38 +20,39 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __zhAnimationSearchSystem_h__
-#define __zhAnimationSearchSystem_h__
+#ifndef __zhAnimationDatabaseSystem_h__
+#define __zhAnimationDatabaseSystem_h__
 
 #include "zhPrereq.h"
 #include "zhIterators.h"
 #include "zhSingleton.h"
 #include "zhError.h"
 #include "zhAnimationIndexManager.h"
-#include "zhAnimationSearchEvents.h"
+#include "zhAnimationDatabaseEvents.h"
 #include "zhParamAnimationBuilder.h"
+#include "zhAnimationFrame.h"
 
-#define zhAnimationSearchSystem AnimationSearchSystem::Instance()
+#define zhAnimationDatabaseSystem AnimationDatabaseSystem::Instance()
 
 namespace zh
 {
 
 enum SearchSystemError
 {
-	AnimSearchSystemError_None,
-	AnimSearchSystemError_FileNotFound
+	AnimDatabaseSystemError_None,
+	AnimDatabaseSystemError_FileNotFound
 };
 
 /**
 * @brief The animation search system, tasked with
 * managing animation indexes.
 */
-class zhDeclSpec AnimationSearchSystem : public Singleton<AnimationSearchSystem>,
+class zhDeclSpec AnimationDatabaseSystem : public Singleton<AnimationDatabaseSystem>,
 	public EventEmitter<MatchWebBuiltEvent>,
 	public EventEmitter<MatchFoundEvent>
 {
 
-	friend class Singleton<AnimationSearchSystem>;
+	friend class Singleton<AnimationDatabaseSystem>;
 
 public:
 
@@ -65,12 +66,12 @@ private:
 	/**
 	* Constructor.
 	*/
-	AnimationSearchSystem();
+	AnimationDatabaseSystem();
 
 	/**
 	* Destructor.
 	*/
-	~AnimationSearchSystem();
+	~AnimationDatabaseSystem();
 
 public:
 
@@ -80,10 +81,24 @@ public:
 	* @param cfgPath Configuration file path.
 	* @return true if initialization has been successful, false otherwise.
 	* Sets error codes:
-	* - AnimSearchSystemError_None - no errors
-	* - AnimSearchSystemError_FileNotFound - config. file not found or invalid
+	* - AnimDatabaseSystemError_None - no errors
+	* - AnimDatabaseSystemError_FileNotFound - config. file not found or invalid
 	*/
 	bool init( const std::string& cfgPath = "config.xml" );
+
+	/**
+	* Select a representative subset of frames from the current animation
+	* dabatase for training priors.
+	*
+	* @remark kd-clustering is used to select a representative frame set from
+	* all the currently loaded animations. Warning: this process takes a LONG time.
+	*/
+	void buildTrainSet();
+
+	/**
+	* Get a pointer to the current training set of animation frames.
+	*/
+	AnimationFrameSet* getTrainSet() const;
 
 	/**
 	* Gets a pointer to the animation index manager instance.
@@ -454,7 +469,10 @@ public:
 
 private:
 
+	void _computeFrameClusterCenters( AnimationFrameSet* frames, unsigned int numClusters );
 	void _parseLabelFilter( const std::string& labelFilter, std::vector<std::string>& labels ) const;
+
+	AnimationFrameSet* mTrainSet;
 
 	unsigned int mResampleFact;
 	float mWndLength;
@@ -477,4 +495,4 @@ private:
 
 }
 
-#endif // __zhAnimationSearchSystem_h__
+#endif // __zhAnimationDatabaseSystem_h__

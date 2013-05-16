@@ -423,7 +423,7 @@ void AnimationStudioFrame::OnMenu_ToolsBuildAnimIndex( wxCommandEvent& evt )
 	std::string name = newres_dlg.getName();
 	std::string dir = newres_dlg.getDirectory();
 
-	if( zhAnimationSearchSystem->getAnimationIndexManager()->hasResource(name) )
+	if( zhAnimationDatabaseSystem->getAnimationIndexManager()->hasResource(name) )
 	{
 		// duplicate resource name
 		wxMessageBox( "Animation index by the name " + name + " already exists!",
@@ -467,16 +467,16 @@ void AnimationStudioFrame::OnMenu_ToolsBuildAnimIndex( wxCommandEvent& evt )
 	}
 
 	// build anim. index
-	zhAnimationSearchSystem->setResampleFactor(resample_fact);
-	zhAnimationSearchSystem->setWindowLength(wnd_length);
-	zhAnimationSearchSystem->setMinDistance(min_dist);
-	zhAnimationSearchSystem->setMaxDistanceDiff(max_distdiff);
-	zhAnimationSearchSystem->setMinChainLength(min_chainlength);
-	zhAnimationSearchSystem->setMaxBridgeLength(max_bridgelength);
+	zhAnimationDatabaseSystem->setResampleFactor(resample_fact);
+	zhAnimationDatabaseSystem->setWindowLength(wnd_length);
+	zhAnimationDatabaseSystem->setMinDistance(min_dist);
+	zhAnimationDatabaseSystem->setMaxDistanceDiff(max_distdiff);
+	zhAnimationDatabaseSystem->setMinChainLength(min_chainlength);
+	zhAnimationDatabaseSystem->setMaxBridgeLength(max_bridgelength);
 	unsigned long id = 0;
-	while( zhAnimationSearchSystem->getAnimationIndexManager()->hasResource(id) ) ++id;
+	while( zhAnimationDatabaseSystem->getAnimationIndexManager()->hasResource(id) ) ++id;
 	wxStopWatch sw;
-	AnimationIndexPtr anim_index = zhAnimationSearchSystem->buildIndex( id, name, mdl, raw_anims, labelfilter );
+	AnimationIndexPtr anim_index = zhAnimationDatabaseSystem->buildIndex( id, name, mdl, raw_anims, labelfilter );
 	float build_time = sw.Time() / 1000.f;
 
 	// inform user
@@ -484,7 +484,7 @@ void AnimationStudioFrame::OnMenu_ToolsBuildAnimIndex( wxCommandEvent& evt )
 		"Build Complete", wxOK|wxICON_INFORMATION );
 
 	// write index to file
-	zhAnimationSearchSystem->getAnimationIndexManager()->serializeResource( anim_index->getId(), path );
+	zhAnimationDatabaseSystem->getAnimationIndexManager()->serializeResource( anim_index->getId(), path );
 
 	// add index to project
 	gApp->addAnimationIndex( gApp->getCurrentCharacter()->getId(), anim_index );
@@ -592,7 +592,7 @@ void AnimationStudioFrame::OnMenu_ToolsSearchAnimIndex( wxCommandEvent& evt )
 	AnimationSegment qanim = gApp->getAppFrame()->getSelection();
 
 	// search for similar anim. segments
-	MatchGraph* mg = zhAnimationSearchSystem->search(qanim);
+	MatchGraph* mg = zhAnimationDatabaseSystem->search(qanim);
 	if( mg == NULL )
 	{
 		wxMessageBox( "Selected animation is not indexed.", "Error",
@@ -666,10 +666,10 @@ void AnimationStudioFrame::OnMenu_ToolsSearchAnimIndex( wxCommandEvent& evt )
 	}
 
 	// build anim. space
-	zhAnimationSearchSystem->setBuildBlendCurves(build_regcurves);
-	zhAnimationSearchSystem->setMatchAnnots(match_annots);
-	zhAnimationSearchSystem->setKnotSpacing(knot_spacing);
-	AnimationSpace* anim_space = zhAnimationSearchSystem->buildAnimationSpace( id, name,
+	zhAnimationDatabaseSystem->setBuildBlendCurves(build_regcurves);
+	zhAnimationDatabaseSystem->setMatchAnnots(match_annots);
+	zhAnimationDatabaseSystem->setKnotSpacing(knot_spacing);
+	AnimationSpace* anim_space = zhAnimationDatabaseSystem->buildAnimationSpace( id, name,
 		mdl, anim_set, mg );
 
 	// add corresponding nodes to the internal animation tree
@@ -720,10 +720,10 @@ void AnimationStudioFrame::OnMenu_ToolsBuildMotionGraph( wxCommandEvent& evt )
 		min_dist = dlg.getMinDistance();
 
 	// build transitions
-	zhAnimationSearchSystem->setWindowLength(wnd_length);
-	zhAnimationSearchSystem->setMinDistance(min_dist);
+	zhAnimationDatabaseSystem->setWindowLength(wnd_length);
+	zhAnimationDatabaseSystem->setMinDistance(min_dist);
 	wxStopWatch sw;
-	zhAnimationSearchSystem->buildTransitions( mdl, ranims, labelfilter );
+	zhAnimationDatabaseSystem->buildTransitions( mdl, ranims, labelfilter );
 	float build_time = sw.Time() / 1000.f;
 
 	// inform user
@@ -832,8 +832,8 @@ void AnimationStudioFrame::OnMenu_ToolsBuildTransitions( wxCommandEvent& evt )
 	}
 
 	// TODO: show dialog for configuring transition build settings (e.g. motion distance threshold)
-	zhAnimationSearchSystem->setWindowLength(0.25f);
-	zhAnimationSearchSystem->setMinDistance(0.05f);
+	zhAnimationDatabaseSystem->setWindowLength(0.25f);
+	zhAnimationDatabaseSystem->setMinDistance(0.05f);
 	//
 	
 	// find transitions
@@ -843,18 +843,18 @@ void AnimationStudioFrame::OnMenu_ToolsBuildTransitions( wxCommandEvent& evt )
 		trg_panim = anim_set->getAnimationSpace(anim_name);
 
 		if( src_panim != NULL )
-			zhAnimationSearchSystem->buildTransitions( mdl, src_panim, trg_panim );
+			zhAnimationDatabaseSystem->buildTransitions( mdl, src_panim, trg_panim );
 		else
-			zhAnimationSearchSystem->buildTransitions( mdl, src_anim, trg_panim );
+			zhAnimationDatabaseSystem->buildTransitions( mdl, src_anim, trg_panim );
 	}
 	else
 	{
 		trg_anim = anim_set->getAnimation(anim_name);
 
 		if( src_panim != NULL )
-			zhAnimationSearchSystem->buildTransitions( mdl, src_panim, trg_anim );
+			zhAnimationDatabaseSystem->buildTransitions( mdl, src_panim, trg_anim );
 		else
-			zhAnimationSearchSystem->buildTransitions( mdl, src_anim, trg_anim );
+			zhAnimationDatabaseSystem->buildTransitions( mdl, src_anim, trg_anim );
 	}
 }
 

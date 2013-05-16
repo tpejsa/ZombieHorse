@@ -20,13 +20,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#include "zhAnimationSearchEvents.h"
-#include "zhAnimationSearchSystem.h"
+#include "zhAnimationDatabaseEvents.h"
+#include "zhAnimationDatabaseSystem.h"
 
 namespace zh
 {
 
-MatchWebBuiltEvent::MatchWebBuiltEvent( AnimationSearchSystem* system, MatchWeb* mw )
+MatchWebBuiltEvent::MatchWebBuiltEvent( AnimationDatabaseSystem* system, MatchWeb* mw )
 : Event<MatchWebBuiltEvent>(system)
 {
 	mMW = mw;
@@ -37,7 +37,7 @@ MatchWeb* MatchWebBuiltEvent::getMatchWeb() const
 	return mMW;
 }
 
-MatchFoundEvent::MatchFoundEvent( AnimationSearchSystem* system, MatchGraph::Node* match )
+MatchFoundEvent::MatchFoundEvent( AnimationDatabaseSystem* system, MatchGraph::Node* match )
 : Event<MatchFoundEvent>(system)
 {
 	mMatch = match;

@@ -48,8 +48,8 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\include;$(BOOST_HOME);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;zhNonClientBuild;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\include;$(BOOST_HOME);$(ANNHOME)\include;..\src\KMlocal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;WIN32;zhNonClientBuild;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Sync</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -60,9 +60,9 @@
       <DisableSpecificWarnings>4251;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>libboost_date_time-vc100-mt-gd-1_46_1.lib;libboost_thread-vc100-mt-gd-1_46_1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libboost_date_time-vc100-mt-gd-1_46_1.lib;libboost_thread-vc100-mt-gd-1_46_1.lib;ANN.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>..\bin\debug\zh_d.dll</OutputFile>
-      <AdditionalLibraryDirectories>$(BOOST_HOME)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(BOOST_HOME)\lib;$(ANNHOME)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Debug\zh_d.pdb</ProgramDatabaseFile>
       <LinkTimeCodeGeneration>
@@ -83,8 +83,8 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\include;$(BOOST_HOME);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;zhNonClientBuild;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\include;$(BOOST_HOME);$(ANNHOME)\include;..\src\KMlocal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;WIN32;zhNonClientBuild;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
@@ -94,9 +94,9 @@
       <DisableSpecificWarnings>4251;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>libboost_date_time-vc100-mt-1_46_1.lib;libboost_thread-vc100-mt-1_46_1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libboost_date_time-vc100-mt-1_46_1.lib;libboost_thread-vc100-mt-1_46_1.lib;ANN.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>..\bin\release\zh.dll</OutputFile>
-      <AdditionalLibraryDirectories>$(BOOST_HOME)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(BOOST_HOME)\lib;$(ANNHOME)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ProfileGuidedDatabase>
       </ProfileGuidedDatabase>
@@ -113,6 +113,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\include\zhAnimationAdaptor.h" />
+    <ClInclude Include="..\include\zhAnimationDatabaseEvents.h" />
+    <ClInclude Include="..\include\zhAnimationDatabaseSystem.h" />
+    <ClInclude Include="..\include\zhAnimationFrame.h" />
     <ClInclude Include="..\include\zhEnvironment.h" />
     <ClInclude Include="..\include\zhIKSolver.h" />
     <ClInclude Include="..\include\rapidxml.hpp" />
@@ -132,8 +135,6 @@
     <ClInclude Include="..\include\zhAnimationQueueNode.h" />
     <ClInclude Include="..\include\zhAnimationQueueNodeEvents.h" />
     <ClInclude Include="..\include\zhAnimationSampleNode.h" />
-    <ClInclude Include="..\include\zhAnimationSearchEvents.h" />
-    <ClInclude Include="..\include\zhAnimationSearchSystem.h" />
     <ClInclude Include="..\include\zhAnimationSegment.h" />
     <ClInclude Include="..\include\zhAnimationSet.h" />
     <ClInclude Include="..\include\zhAnimationSpace.h" />
@@ -186,9 +187,32 @@
     <ClInclude Include="..\include\zhZHASerializer.h" />
     <ClInclude Include="..\include\zhZHILoader.h" />
     <ClInclude Include="..\include\zhZHISerializer.h" />
+    <ClInclude Include="..\src\KMlocal\KCtree.h" />
+    <ClInclude Include="..\src\KMlocal\KCutil.h" />
+    <ClInclude Include="..\src\KMlocal\KMcenters.h" />
+    <ClInclude Include="..\src\KMlocal\KMdata.h" />
+    <ClInclude Include="..\src\KMlocal\KMeans.h" />
+    <ClInclude Include="..\src\KMlocal\KMfilterCenters.h" />
+    <ClInclude Include="..\src\KMlocal\KMlocal.h" />
+    <ClInclude Include="..\src\KMlocal\KMrand.h" />
+    <ClInclude Include="..\src\KMlocal\KMterm.h" />
+    <ClInclude Include="..\src\KMlocal\KM_ANN.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\KMlocal\KCtree.cpp" />
+    <ClCompile Include="..\src\KMlocal\KCutil.cpp" />
+    <ClCompile Include="..\src\KMlocal\KMcenters.cpp" />
+    <ClCompile Include="..\src\KMlocal\KMdata.cpp" />
+    <ClCompile Include="..\src\KMlocal\KMeans.cpp" />
+    <ClCompile Include="..\src\KMlocal\KMfilterCenters.cpp" />
+    <ClCompile Include="..\src\KMlocal\KMlocal.cpp" />
+    <ClCompile Include="..\src\KMlocal\KMrand.cpp" />
+    <ClCompile Include="..\src\KMlocal\KMterm.cpp" />
+    <ClCompile Include="..\src\KMlocal\KM_ANN.cpp" />
     <ClCompile Include="..\src\zhAnimationAdaptor.cpp" />
+    <ClCompile Include="..\src\zhAnimationDatabaseEvents.cpp" />
+    <ClCompile Include="..\src\zhAnimationDatabaseSystem.cpp" />
+    <ClCompile Include="..\src\zhAnimationFrame.cpp" />
     <ClCompile Include="..\src\zhIKSolver.cpp" />
     <ClCompile Include="..\src\zhAnimation.cpp" />
     <ClCompile Include="..\src\zhAnimationAnnotation.cpp" />
@@ -202,8 +226,6 @@
     <ClCompile Include="..\src\zhAnimationQueueNode.cpp" />
     <ClCompile Include="..\src\zhAnimationQueueNodeEvents.cpp" />
     <ClCompile Include="..\src\zhAnimationSampleNode.cpp" />
-    <ClCompile Include="..\src\zhAnimationSearchEvents.cpp" />
-    <ClCompile Include="..\src\zhAnimationSearchSystem.cpp" />
     <ClCompile Include="..\src\zhAnimationSegment.cpp" />
     <ClCompile Include="..\src\zhAnimationSet.cpp" />
     <ClCompile Include="..\src\zhAnimationSpace.cpp" />

@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#include "zhAnimationSearchSystem.h"
+#include "zhAnimationDatabaseSystem.h"
 #include "zhString.h"
 #include "zhAnimationSet.h"
 #include "zhAnimation.h"
@@ -33,29 +33,37 @@ SOFTWARE.
 #include "zhAnnotationMatchMaker.h"
 #include "zhDenseSamplingParamBuilder.h"
 #include "zhAnimationTransitionBuilder.h"
+#include "KMlocal.h"
+
 #include <boost/tokenizer.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_int.hpp>
+#include <boost/random/variate_generator.hpp>
 #include <cctype>
+#include <fstream>
 
 namespace zh
 {
 
-AnimationSearchSystem::AnimationSearchSystem()
+AnimationDatabaseSystem::AnimationDatabaseSystem()
 : mResampleFact(3), mWndLength(0.35f), mMinDist(0.05f), mMaxDistDiff(0.15f),
 mMinChainLength(0.25f), mMaxBridgeLength(1.f),
 mMaxOverlap(0.8f),
 mMatchAnnots(true), mBuildBlendCurves(true), mKnotSpacing(3),
 mMaxExtrap(0.15f), mMinSampleDist(0.00001f)
 {
+	mTrainSet = new AnimationFrameSet();
 }
 
-AnimationSearchSystem::~AnimationSearchSystem()
+AnimationDatabaseSystem::~AnimationDatabaseSystem()
 {
+	delete mTrainSet;
 	deleteAllMatchGraphs();
 }
 
-bool AnimationSearchSystem::init( const std::string& cfgPath )
+bool AnimationDatabaseSystem::init( const std::string& cfgPath )
 {
-	zhLog( "AnimationSearchSystem", "init",
+	zhLog( "AnimationDatabaseSystem", "init",
 		"Initializing animation search system. Using configuration file %s.",
 		cfgPath.c_str() );
 
@@ -69,11 +77,153 @@ bool AnimationSearchSystem::init( const std::string& cfgPath )
 	// load config.xml
 	// TODO
 
-	zhSetErrorCode( AnimSearchSystemError_None );
+	zhSetErrorCode( AnimDatabaseSystemError_None );
 	return true;
 }
 
-AnimationIndexPtr AnimationSearchSystem::buildIndex( unsigned long id, const std::string& name, Skeleton* skel,
+void AnimationDatabaseSystem::buildTrainSet()
+{
+	mTrainSet->removeAllFrames();
+
+	// Enumerate the animations in the database
+	std::vector<Animation*> anims;
+	typedef std::pair<unsigned int, unsigned int> FrameIndex;
+	std::vector<FrameIndex> frames; // unprocessed frames
+	unsigned int num_frames = 0; // number of unprocessed frames
+	unsigned int num_tracks = 0; // number of bone tracks
+	ResourceManager::ResourceConstIterator res_i =
+		zhAnimationSystem->getAnimationManager()->getResourceConstIterator();
+	unsigned int ani = 0;
+	while( res_i.hasMore() )
+	{
+		AnimationSetPtr animset = AnimationSetPtr::DynamicCast<Resource>(res_i.next());
+		AnimationSet::AnimationConstIterator anim_i = animset->getAnimationConstIterator();
+		while( anim_i.hasMore() )
+		{
+			Animation* anim = anim_i.next();
+			anims.push_back(anim);
+			num_tracks = num_tracks <= 0 ? anim->getNumBoneTracks() : num_tracks;
+			if( num_tracks != anim->getNumBoneTracks() )
+				// This animation has an incompatible skeleton!
+				continue;
+
+			BoneAnimationTrack* btr = anim->getBoneTrack(0);
+			unsigned int nkf = btr->getNumKeyFrames();
+			num_frames += nkf;
+			unsigned int fi = 0;
+			while( fi < nkf ) frames.push_back( FrameIndex(ani, fi++) );
+			++ani;
+		}
+	}
+	
+	// Select representative frame set
+	boost::mt19937 rng;
+	while( num_frames > 0 )
+	{
+		// Randomly select unprocessed frames from the database
+		unsigned int nrfi = zhARFSS_NumClusters*4;
+		if( num_frames < nrfi ) nrfi = num_frames;
+		for( unsigned int rfii = 0; rfii < nrfi; ++rfii )
+		{
+			boost::uniform_int<> rnd(0, (unsigned int)frames.size()-1);
+			boost::variate_generator<boost::mt19937&, boost::uniform_int<> > fi_rng(rng, rnd);
+			unsigned int fii = fi_rng();
+			FrameIndex fi = FrameIndex( frames[fii] ); // selected frame
+			mTrainSet->addFrame( AnimationFrame(anims[fi.first], fi.second) );
+			frames.erase(frames.begin() + fii);
+		}
+		num_frames -= nrfi;
+
+		// Do k-means clustering of frames, and keep centers as new frames
+		_computeFrameClusterCenters(mTrainSet, zhARFSS_NumClusters);
+	}
+
+	if( mTrainSet->getNumFrames() <= 0 )
+		return;
+
+	// Write out the representative frame set to a file
+	std::ofstream ofs("TrainSet.csv");
+	// Write out header
+	ofs << "p0x,";
+	ofs << "p0y,";
+	ofs << "p0z,";
+	ofs << "q0x,";
+	ofs << "q0y,";
+	ofs << "q0z,";
+	const AnimationFrame& fr0 = mTrainSet->getFrame(0);
+	for( unsigned int tri = 0; tri < (unsigned int)fr0.orientations.size(); ++tri )
+	{
+		ofs << "q" << tri+1 << "x,";
+		ofs << "q" << tri+1 << "y,";
+		ofs << "q" << tri+1 << "z";
+		if( tri < (unsigned int)fr0.orientations.size()-1 )
+			ofs << ",";
+		else
+			ofs << std::endl;
+	}
+	for( unsigned int fi = 0; fi < mTrainSet->getNumFrames(); ++fi )
+	{
+		const AnimationFrame& fr = mTrainSet->getFrame(fi);
+		ofs << fr.rootPosition.x << ",";
+		ofs << fr.rootPosition.y << ",";
+		ofs << fr.rootPosition.z << ",";
+		ofs << fr.rootOrientation.x << ",";
+		ofs << fr.rootOrientation.y << ",";
+		ofs << fr.rootOrientation.z << ",";
+		for( unsigned int tri = 0; tri < (unsigned int)fr0.orientations.size(); ++tri )
+		{
+			ofs << fr.orientations[tri].x << ",";
+			ofs << fr.orientations[tri].y << ",";
+			ofs << fr.orientations[tri].z;
+			if( tri < (unsigned int)fr0.orientations.size()-1 )
+				ofs << ",";
+			else
+				ofs << std::endl;
+		}
+	}
+	ofs.close();
+
+	// Write out training data
+	Skeleton* skel = zhAnimationSystem->getSkeletonConstIterator().next();
+	ofs = std::ofstream("TrainSet.svml");
+	mTrainSet->extractTargetPositions(skel);
+	for( unsigned int fri = 0; fri < mTrainSet->getNumFrames(); ++fri )
+	{
+		ofs << "1 ";
+		unsigned int ft = 1;
+		const AnimationFrame& fr = mTrainSet->getFrame(fri);
+		// Write out input values
+		for( unsigned int ii = 0; ii < (unsigned int)fr.targetPositions.size(); ++ii )
+		{
+			ofs << (ft++) << ":" << fr.targetPositions[ii].x << " ";
+			ofs << (ft++) << ":" << fr.targetPositions[ii].y << " ";
+			ofs << (ft++) << ":" << fr.targetPositions[ii].z << " ";
+		}
+		// Write out output values
+		ofs << (ft++) << ":" << fr.rootPosition.x << " ";
+		ofs << (ft++) << ":" << fr.rootPosition.y << " ";
+		ofs << (ft++) << ":" << fr.rootPosition.z << " ";
+		ofs << (ft++) << ":" << fr.rootOrientation.x << " ";
+		ofs << (ft++) << ":" << fr.rootOrientation.y << " ";
+		ofs << (ft++) << ":" << fr.rootOrientation.z << " ";
+		for( unsigned int oi = 0; oi < (unsigned int)fr.orientations.size(); ++oi )
+		{
+			ofs << (ft++) << ":" << fr.orientations[oi].x << " ";
+			ofs << (ft++) << ":" << fr.orientations[oi].y << " ";
+			std::string term = ( oi == (unsigned int)(fr.orientations.size()-1) ) ? "\n" : " ";
+			ofs << (ft++) << ":" << fr.orientations[oi].z << term;
+		}
+	}
+	ofs.close();
+	// TODO
+}
+
+AnimationFrameSet* AnimationDatabaseSystem::getTrainSet() const
+{
+	return mTrainSet;
+}
+
+AnimationIndexPtr AnimationDatabaseSystem::buildIndex( unsigned long id, const std::string& name, Skeleton* skel,
 													const std::string& labelFilter )
 {
 	std::vector<AnimationSetPtr> ranims;
@@ -89,7 +239,7 @@ AnimationIndexPtr AnimationSearchSystem::buildIndex( unsigned long id, const std
 	return buildIndex( id, name, skel, ranims, labelFilter );
 }
 
-AnimationIndexPtr AnimationSearchSystem::buildIndex( unsigned long id, const std::string& name, Skeleton* skel,
+AnimationIndexPtr AnimationDatabaseSystem::buildIndex( unsigned long id, const std::string& name, Skeleton* skel,
 													std::vector<AnimationSetPtr> rawAnims, const std::string& labelFilter )
 {
 	AnimationIndexManager* aimgr = getAnimationIndexManager();
@@ -148,7 +298,7 @@ AnimationIndexPtr AnimationSearchSystem::buildIndex( unsigned long id, const std
 	return anim_index;
 }
 
-MatchGraph* AnimationSearchSystem::search( const AnimationSegment& animSeg )
+MatchGraph* AnimationDatabaseSystem::search( const AnimationSegment& animSeg )
 {
 	deleteAllMatchGraphs();
 
@@ -176,7 +326,7 @@ MatchGraph* AnimationSearchSystem::search( const AnimationSegment& animSeg )
 	return best_mg;
 }
 
-MatchGraph* AnimationSearchSystem::search( unsigned long animIndexId, const AnimationSegment& animSeg )
+MatchGraph* AnimationDatabaseSystem::search( unsigned long animIndexId, const AnimationSegment& animSeg )
 {
 	zhAssert( getAnimationIndexManager()->hasResource(animIndexId) );
 
@@ -190,7 +340,7 @@ MatchGraph* AnimationSearchSystem::search( unsigned long animIndexId, const Anim
 	return mg;
 }
 
-MatchGraph* AnimationSearchSystem::search( const std::string& animIndexName, const AnimationSegment& animSeg )
+MatchGraph* AnimationDatabaseSystem::search( const std::string& animIndexName, const AnimationSegment& animSeg )
 {
 	zhAssert( getAnimationIndexManager()->hasResource(animIndexName) );
 
@@ -199,7 +349,7 @@ MatchGraph* AnimationSearchSystem::search( const std::string& animIndexName, con
 	return search( anim_index->getId(), animSeg );
 }
 
-void AnimationSearchSystem::deleteMatchGraph( unsigned int index )
+void AnimationDatabaseSystem::deleteMatchGraph( unsigned int index )
 {
 	zhAssert( index < mMatchGraphs.size() );
 
@@ -207,7 +357,7 @@ void AnimationSearchSystem::deleteMatchGraph( unsigned int index )
 	mMatchGraphs.erase( mMatchGraphs.begin() + index );
 }
 
-void AnimationSearchSystem::deleteAllMatchGraphs()
+void AnimationDatabaseSystem::deleteAllMatchGraphs()
 {
 	for( std::vector<MatchGraph*>::iterator mgi = mMatchGraphs.begin();
 		mgi != mMatchGraphs.end(); ++mgi )
@@ -216,29 +366,29 @@ void AnimationSearchSystem::deleteAllMatchGraphs()
 	mMatchGraphs.clear();
 }
 
-MatchGraph* AnimationSearchSystem::getMatchGraph( unsigned int index ) const
+MatchGraph* AnimationDatabaseSystem::getMatchGraph( unsigned int index ) const
 {
 	zhAssert( index < mMatchGraphs.size() );
 
 	return mMatchGraphs[index];
 }
 
-unsigned int AnimationSearchSystem::getNumMatchGraphs() const
+unsigned int AnimationDatabaseSystem::getNumMatchGraphs() const
 {
 	return mMatchGraphs.size();
 }
 
-AnimationSearchSystem::MatchGraphIterator AnimationSearchSystem::getMatchGraphIterator()
+AnimationDatabaseSystem::MatchGraphIterator AnimationDatabaseSystem::getMatchGraphIterator()
 {
 	return MatchGraphIterator(mMatchGraphs);
 }
 
-AnimationSearchSystem::MatchGraphConstIterator AnimationSearchSystem::getMatchGraphConstIterator() const
+AnimationDatabaseSystem::MatchGraphConstIterator AnimationDatabaseSystem::getMatchGraphConstIterator() const
 {
 	return MatchGraphConstIterator(mMatchGraphs);
 }
 
-AnimationSpace* AnimationSearchSystem::buildAnimationSpace( unsigned short id, const std::string& name,
+AnimationSpace* AnimationDatabaseSystem::buildAnimationSpace( unsigned short id, const std::string& name,
 														   Skeleton* skel, AnimationSetPtr animSet,
 														   MatchGraph* matches, unsigned short refNodeHandle ) const
 {
@@ -260,7 +410,7 @@ AnimationSpace* AnimationSearchSystem::buildAnimationSpace( unsigned short id, c
 	return anim_space;
 }
 
-void AnimationSearchSystem::computeAnnotMatches( AnimationSpace* animSpace ) const
+void AnimationDatabaseSystem::computeAnnotMatches( AnimationSpace* animSpace ) const
 {
 	zhAssert( animSpace != NULL );
 
@@ -268,7 +418,7 @@ void AnimationSearchSystem::computeAnnotMatches( AnimationSpace* animSpace ) con
 	mm->makeMatches();
 }
 
-void AnimationSearchSystem::parametrizeAnimSpace( Skeleton* skel, AnimationSpace* animSpace, const std::vector<AnimationParamSpec>& paramSpecs,
+void AnimationDatabaseSystem::parametrizeAnimSpace( Skeleton* skel, AnimationSpace* animSpace, const std::vector<AnimationParamSpec>& paramSpecs,
 												 AnimationParamClass paramClass )
 {
 	zhAssert( animSpace != NULL );
@@ -281,27 +431,27 @@ void AnimationSearchSystem::parametrizeAnimSpace( Skeleton* skel, AnimationSpace
 	delete pab;
 }
 
-float AnimationSearchSystem::getMaxExtrapolation() const
+float AnimationDatabaseSystem::getMaxExtrapolation() const
 {
 	return mMaxExtrap;
 }
 
-void AnimationSearchSystem::setMaxExtrapolation( float maxExtrap )
+void AnimationDatabaseSystem::setMaxExtrapolation( float maxExtrap )
 {
 	mMaxExtrap = maxExtrap;
 }
 
-float AnimationSearchSystem::getMinSampleDistance() const
+float AnimationDatabaseSystem::getMinSampleDistance() const
 {
 	return mMinSampleDist;
 }
 
-void AnimationSearchSystem::setMinSampleDistance( float minSampleDist )
+void AnimationDatabaseSystem::setMinSampleDistance( float minSampleDist )
 {
 	mMinSampleDist = minSampleDist;
 }
 
-void AnimationSearchSystem::buildTransitions( Skeleton* skel, const std::string& labelFilter )
+void AnimationDatabaseSystem::buildTransitions( Skeleton* skel, const std::string& labelFilter )
 {
 	std::vector<AnimationSetPtr> ranims;
 
@@ -316,7 +466,7 @@ void AnimationSearchSystem::buildTransitions( Skeleton* skel, const std::string&
 	return buildTransitions(skel, ranims, labelFilter );
 }
 
-void AnimationSearchSystem::buildTransitions( Skeleton* skel, std::vector<AnimationSetPtr> rawAnims,
+void AnimationDatabaseSystem::buildTransitions( Skeleton* skel, std::vector<AnimationSetPtr> rawAnims,
 											 const std::string& labelFilter )
 {
 	zhAssert( skel != NULL );
@@ -352,7 +502,7 @@ void AnimationSearchSystem::buildTransitions( Skeleton* skel, std::vector<Animat
 					}
 				}
 
-				if( skip )
+				if(skip)
 					continue;
 			}
 
@@ -373,7 +523,7 @@ void AnimationSearchSystem::buildTransitions( Skeleton* skel, std::vector<Animat
 	delete ptb;
 }
 
-unsigned int AnimationSearchSystem::buildTransitions( Skeleton* skel, AnimationSpace* srcAnim, AnimationSpace* trgAnim )
+unsigned int AnimationDatabaseSystem::buildTransitions( Skeleton* skel, AnimationSpace* srcAnim, AnimationSpace* trgAnim )
 {
 	zhAssert( skel != NULL );
 	zhAssert( srcAnim != NULL );
@@ -386,7 +536,7 @@ unsigned int AnimationSearchSystem::buildTransitions( Skeleton* skel, AnimationS
 	return num_built;
 }
 
-unsigned int AnimationSearchSystem::buildTransitions( Skeleton* skel, AnimationSpace* srcAnim, Animation* trgAnim )
+unsigned int AnimationDatabaseSystem::buildTransitions( Skeleton* skel, AnimationSpace* srcAnim, Animation* trgAnim )
 {
 	zhAssert( skel != NULL );
 	zhAssert( srcAnim != NULL );
@@ -399,7 +549,7 @@ unsigned int AnimationSearchSystem::buildTransitions( Skeleton* skel, AnimationS
 	return num_built;
 }
 
-unsigned int AnimationSearchSystem::buildTransitions( Skeleton* skel, Animation* srcAnim, AnimationSpace* trgAnim )
+unsigned int AnimationDatabaseSystem::buildTransitions( Skeleton* skel, Animation* srcAnim, AnimationSpace* trgAnim )
 {
 	zhAssert( skel != NULL );
 	zhAssert( srcAnim != NULL );
@@ -412,7 +562,7 @@ unsigned int AnimationSearchSystem::buildTransitions( Skeleton* skel, Animation*
 	return num_built;
 }
 
-unsigned int AnimationSearchSystem::buildTransitions( Skeleton* skel, Animation* srcAnim, Animation* trgAnim )
+unsigned int AnimationDatabaseSystem::buildTransitions( Skeleton* skel, Animation* srcAnim, Animation* trgAnim )
 {
 	zhAssert( skel != NULL );
 	zhAssert( srcAnim != NULL );
@@ -425,7 +575,66 @@ unsigned int AnimationSearchSystem::buildTransitions( Skeleton* skel, Animation*
 	return num_built;
 }
 
-void AnimationSearchSystem::_parseLabelFilter( const std::string& labelFilter, std::vector<std::string>& labels ) const
+void AnimationDatabaseSystem::_computeFrameClusterCenters( AnimationFrameSet* frames, unsigned int numClusters )
+{
+	zhAssert( frames != NULL && frames->getNumFrames() > 0 );
+
+	// Prepare data points
+	unsigned int ntr = frames->getNumTracks();
+	unsigned int nfr = frames->getNumFrames();
+	KMdata data(ntr, nfr);
+	for( unsigned int fri = 0; fri < nfr; ++fri )
+	{
+		const AnimationFrame& fr = frames->getFrame(fri);
+		data[fri][0] = fr.rootPosition.x;
+		data[fri][1] = fr.rootPosition.y;
+		data[fri][2] = fr.rootPosition.z;
+		data[fri][3] = fr.rootOrientation.x;
+		data[fri][4] = fr.rootOrientation.y;
+		data[fri][5] = fr.rootOrientation.z;
+		for( unsigned int qi = 0; qi < (unsigned int)fr.orientations.size(); ++qi )
+		{
+			data[fri][6+qi*3] = fr.orientations[qi].x;
+			data[fri][6+qi*3+1] = fr.orientations[qi].y;
+			data[fri][6+qi*3+2] = fr.orientations[qi].z;
+		}
+	}
+	data.buildKcTree();
+
+	// Perform k-means clustering
+	KMfilterCenters ctrs(numClusters, data);
+	KMterm term(100, 0, 0, 0, 0.1, 0.1, 3, 0.5, 10, 0.95);
+	KMlocalLloyds alg(ctrs, term);
+	ctrs = alg.execute();
+
+	// Add cluster centers as new frames
+	frames->removeAllFrames();
+	for( int ctri = 0; ctri < ctrs.getK(); ++ctri )
+	{
+		AnimationFrame fr;
+		fr.rootPosition.x = ctrs[ctri][0];
+		fr.rootPosition.y = ctrs[ctri][1];
+		fr.rootPosition.z = ctrs[ctri][2];
+		fr.rootOrientation.w = 0;
+		fr.rootOrientation.x = ctrs[ctri][3];
+		fr.rootOrientation.y = ctrs[ctri][4];
+		fr.rootOrientation.z = ctrs[ctri][5];
+
+		unsigned int nqtr = ctrs.getDim()/3-2;
+		fr.orientations = std::vector<Quat>(nqtr);
+		for( unsigned int qi = 0; qi < nqtr; ++qi )
+		{
+			fr.orientations[qi].w = 0;
+			fr.orientations[qi].x = ctrs[ctri][6+qi*3];
+			fr.orientations[qi].y = ctrs[ctri][6+qi*3+1];
+			fr.orientations[qi].z = ctrs[ctri][6+qi*3+2];
+		}
+
+		frames->addFrame(fr);
+	}
+}
+
+void AnimationDatabaseSystem::_parseLabelFilter( const std::string& labelFilter, std::vector<std::string>& labels ) const
 {
 	boost::char_separator<char> sep( ",;" );
 	boost::tokenizer< boost::char_separator<char> > label_tok( labelFilter, sep );

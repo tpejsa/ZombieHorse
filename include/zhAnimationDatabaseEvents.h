@@ -20,8 +20,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __zhAnimationSearchEvents_h__
-#define __zhAnimationSearchEvents_h__
+#ifndef __zhAnimationDatabaseEvents_h__
+#define __zhAnimationDatabaseEvents_h__
 
 #include "zhPrereq.h"
 #include "zhEvent.h"
@@ -30,7 +30,7 @@ SOFTWARE.
 namespace zh
 {
 
-class AnimationSearchSystem;
+class AnimationDatabaseSystem;
 
 class zhDeclSpec MatchWebBuiltEvent : public Event<MatchWebBuiltEvent>
 {
@@ -42,7 +42,7 @@ public:
 	*
 	* @param mw Match web.
 	*/
-	MatchWebBuiltEvent( AnimationSearchSystem* system, MatchWeb* mw );
+	MatchWebBuiltEvent( AnimationDatabaseSystem* system, MatchWeb* mw );
 
 	/**
 	* Gets the match web that has been built.
@@ -65,7 +65,7 @@ public:
 	*
 	* @param match Animation search match.
 	*/
-	MatchFoundEvent( AnimationSearchSystem* system, MatchGraph::Node* match );
+	MatchFoundEvent( AnimationDatabaseSystem* system, MatchGraph::Node* match );
 
 	/**
 	* Gets the animation search match that has been found.
@@ -80,4 +80,4 @@ protected:
 
 }
 
-#endif // __zhAnimationSearchEvents_h__
+#endif // __zhAnimationDatabaseEvents_h__

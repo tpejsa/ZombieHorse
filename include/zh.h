@@ -63,7 +63,7 @@ SOFTWARE.
 #include "zhAnimationIndexManager.h"
 #include "zhAnimationIndex.h"
 #include "zhAnimationSpaceBuilder.h"
-#include "zhAnimationSearchSystem.h"
+#include "zhAnimationDatabaseSystem.h"
 #include "zhDenseSamplingParamBuilder.h"
 #include "zhPlantConstrDetector.h"
 #include "zhAnnotationMatchMaker.h"

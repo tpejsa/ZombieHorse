@@ -179,7 +179,7 @@ Quat Quat::log() const
 
 		if( fabs(sin_a) >= 0.005f )
 		{
-			float c = a / sin_a;
+			float c = a/sin_a;
 			q.x *= c;
 			q.y *= c;
 			q.z *= c;

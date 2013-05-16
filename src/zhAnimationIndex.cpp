@@ -21,7 +21,7 @@ SOFTWARE.
 ******************************************************************************/
 
 #include "zhAnimationIndex.h"
-#include "zhAnimationSearchSystem.h"
+#include "zhAnimationDatabaseSystem.h"
 #include "zhAnimation.h"
 #include "rapidxml.hpp"
 #include "rapidxml_print.hpp"
@@ -118,7 +118,7 @@ void AnimationIndex::buildIndex( unsigned int resampleFactor,
 			mMatchWebs[mwi] = mw;
 
 			// notify listeners
-			MatchWebBuiltEvent evt( zhAnimationSearchSystem, mw );
+			MatchWebBuiltEvent evt( zhAnimationDatabaseSystem, mw );
 			evt.emit();
 		}
 	}
@@ -304,7 +304,7 @@ MatchGraph* AnimationIndex::search( const AnimationSegment& animSeg, float maxOv
 					node_segs[ new_node->getHandle() ] = segi;
 
 					// notify listeners
-					MatchFoundEvent evt( zhAnimationSearchSystem, new_node );
+					MatchFoundEvent evt( zhAnimationDatabaseSystem, new_node );
 					evt.emit();
 				}
 

@@ -534,8 +534,8 @@ void ProjectViewWindow::OnMenu_AnimSpaceDefineParam( wxCommandEvent& evt )
 		anim_space->deleteParametrization();
 
 	// build parametrization over the animation space
-	zhAnimationSearchSystem->setMaxExtrapolation( dlg.getMaxExtrapolation() );
-	zhAnimationSearchSystem->setMinSampleDistance( dlg.getMinSampleDistance() );
+	zhAnimationDatabaseSystem->setMaxExtrapolation( dlg.getMaxExtrapolation() );
+	zhAnimationDatabaseSystem->setMinSampleDistance( dlg.getMinSampleDistance() );
 	std::vector<AnimationParamSpec> pspecs;
 	pspecs.push_back( AnimationParamSpec( "posX", anim_space->getBaseAnimation(0),
 		0.82f, mdl->getSkeleton()->getBone("Bip01 L Hand")->getId(),
@@ -552,7 +552,7 @@ void ProjectViewWindow::OnMenu_AnimSpaceDefineParam( wxCommandEvent& evt )
 		mdl->getSkeleton()->getBone("Bip01")->getId(),
 		AnimationParamSpec::TransfType_Translation, AnimationParamSpec::Axis_z )
 		);
-	zhAnimationSearchSystem->parametrizeAnimSpace( skel, anim_space, dlg.getParamSpecs() );
+	zhAnimationDatabaseSystem->parametrizeAnimSpace( skel, anim_space, dlg.getParamSpecs() );
 
 	// TODO: anim. set modified
 }
@@ -564,7 +564,7 @@ void ProjectViewWindow::OnMenu_AnimSpaceMatchAnnots( wxCommandEvent& evt )
 		);
 	
 	zh::AnimationSpace* anim_space = panim_data->getAnimationSpace();
-	zhAnimationSearchSystem->computeAnnotMatches(anim_space);
+	zhAnimationDatabaseSystem->computeAnnotMatches(anim_space);
 
 	zhAssert( anim_space->getAnimationSet()->getPath() != "" );
 	// TODO: anim. set modified

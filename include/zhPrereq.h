@@ -48,6 +48,7 @@ SOFTWARE.
 // that may be blended with the same frame of another animation
 #define zhDTW_KernelSize 15 // size of the kernel used for dynamic timewarping;
 // greater kernel size yields a better time alignment at the expense of performance
+#define zhARFSS_NumClusters 20//2000 // number of clusters for adaptive representative frame set selection (ARFSS)
 
 // compilers
 #define zhCompiler_MSVC 1
