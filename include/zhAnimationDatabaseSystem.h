@@ -87,8 +87,8 @@ public:
 	bool init( const std::string& cfgPath = "config.xml" );
 
 	/**
-	* Select a representative subset of frames from the current animation
-	* dabatase for training priors.
+	* Select a representative subset of frames from the current motion
+	* database for training priors.
 	*
 	* @remark kd-clustering is used to select a representative frame set from
 	* all the currently loaded animations. Warning: this process takes a LONG time.
@@ -99,6 +99,12 @@ public:
 	* Get a pointer to the current training set of animation frames.
 	*/
 	AnimationFrameSet* getTrainSet() const;
+
+	/**
+	* Train the Gaussian Process models using the representative set of frames from
+	* the current motion database.
+	*/
+	void trainGPLVM();
 
 	/**
 	* Gets a pointer to the animation index manager instance.

@@ -215,12 +215,16 @@ void AnimationDatabaseSystem::buildTrainSet()
 		}
 	}
 	ofs.close();
-	// TODO
 }
 
 AnimationFrameSet* AnimationDatabaseSystem::getTrainSet() const
 {
 	return mTrainSet;
+}
+
+void AnimationDatabaseSystem::trainGPLVM()
+{
+	// TODO
 }
 
 AnimationIndexPtr AnimationDatabaseSystem::buildIndex( unsigned long id, const std::string& name, Skeleton* skel,
