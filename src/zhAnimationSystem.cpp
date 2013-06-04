@@ -32,6 +32,7 @@ SOFTWARE.
 #include "zhRootIKSolver.h"
 #include "zhPostureIKSolver.h"
 #include "zhLimbIKSolver.h"
+#include "zhGPLVMIKSolver.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -54,26 +55,27 @@ bool AnimationSystem::init( const std::string& cfgPath )
 		"Initializing AnimationSystem. Using configuration file %s.",
 		cfgPath.c_str() );
 
-	// create instances of various singletons
+	// Create instances of various singletons
 	MemoryPool::Instance();
 	AnimationManager::Instance();
 	
-	// register resource loaders and serializers
+	// Register resource loaders and serializers
 	zhRegister_ResourceLoader( getAnimationManager(), ZHALoader );
 	zhRegister_ResourceSerializer( getAnimationManager(), ZHASerializer );
 	zhRegister_ResourceLoader( getAnimationManager(), BVHLoader );
 
-	// register animation nodes
+	// Register animation nodes
 	zhRegister_AnimationNode(AnimationSampleNode);
 	zhRegister_AnimationNode(AnimationBlendNode);
 	zhRegister_AnimationNode(AnimationQueueNode);
 
-	// register IK solvers
+	// Register IK solvers
 	zhRegister_IKSolver(RootIKSolver);
 	zhRegister_IKSolver(PostureIKSolver);
 	zhRegister_IKSolver(LimbIKSolver);
+	zhRegister_IKSolver(GPLVMIKSolver);
 
-	// load config.xml (configuration settings, res. dirs, plugin dir, plugins)
+	// Load config.xml (configuration settings, res. dirs, plugin dir, plugins)
 	// TODO
 
 	// Create the environment "skeleton"
@@ -163,8 +165,12 @@ Skeleton* AnimationSystem::createIKSolversOnSkeleton( const std::string& name )
 		"Creating default IK solvers on skeleton %s.", name.c_str() );
 
 	Skeleton* skel = getSkeleton(name);
+
+	// Create root solver
 	if( skel->hasBoneWithTag(BT_Root) )
 		skel->createIKSolver( RootIKSolver::ClassId(), 0, "RootIK", BT_Root, BT_Root );
+
+	// Create posture solver
 	if( skel->hasBoneWithTag(BT_Root) && skel->hasBoneWithTag(BT_Chest) )
 	{
 		IKSolver* solver = skel->createIKSolver( PostureIKSolver::ClassId(), 1, "PostureIK", BT_Root, BT_Chest );
@@ -177,6 +183,8 @@ Skeleton* AnimationSystem::createIKSolversOnSkeleton( const std::string& name )
 		if( skel->hasBoneWithTag(BT_RHipJoint) )
 			solver->pushBone( skel->getBoneByTag(BT_RHipJoint) );
 	}
+
+	// Create limb solvers
 	if( skel->hasBoneWithTag(BT_LShoulder) && skel->hasBoneWithTag(BT_LWrist) )
 		skel->createIKSolver( LimbIKSolver::ClassId(), 2, "LArmIK", BT_LShoulder, BT_LWrist );
 	if( skel->hasBoneWithTag(BT_RShoulder) && skel->hasBoneWithTag(BT_RWrist) )
@@ -185,6 +193,10 @@ Skeleton* AnimationSystem::createIKSolversOnSkeleton( const std::string& name )
 		skel->createIKSolver( LimbIKSolver::ClassId(), 4, "LLegIK", BT_LHip, BT_LAnkle );
 	if( skel->hasBoneWithTag(BT_RHip) && skel->hasBoneWithTag(BT_RAnkle) )
 		skel->createIKSolver( LimbIKSolver::ClassId(), 5, "RLegIK", BT_RHip, BT_RAnkle );
+
+	// Create data-driven solvers
+	if( skel->hasBoneWithTag(BT_Root) )
+		skel->createIKSolver( GPLVMIKSolver::ClassId(), 6, "GPLVMIK", BT_Root, BT_Root );
 	
 	return skel;
 }
@@ -222,7 +234,7 @@ AnimationSetPtr AnimationSystem::loadAnimationSet( const std::string& path, cons
 	}
 
 	// Determine animation set ID
-	unsigned int animset_id = 0;
+	unsigned int animset_id = 100;
 	while( anim_mgr->hasResource(animset_id) ) ++animset_id;
 	
 	// Create and load animation set

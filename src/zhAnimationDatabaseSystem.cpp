@@ -67,17 +67,17 @@ bool AnimationDatabaseSystem::init( const std::string& cfgPath )
 		"Initializing animation search system. Using configuration file %s.",
 		cfgPath.c_str() );
 
-	// create instances of various singletons
+	// Create instances of various singletons
 	AnimationIndexManager::Instance();
 	
-	// register resource loaders and serializers
+	// Register resource loaders and serializers
 	zhRegister_ResourceLoader( getAnimationIndexManager(), ZHILoader );
 	zhRegister_ResourceSerializer( getAnimationIndexManager(), ZHISerializer );
 
-	// load config.xml
+	// Load config.xml
 	// TODO
 
-	zhSetErrorCode( AnimDatabaseSystemError_None );
+	zhSetErrorCode(ADSE_None);
 	return true;
 }
 
@@ -142,7 +142,7 @@ void AnimationDatabaseSystem::buildTrainSet()
 		return;
 
 	// Write out the representative frame set to a file
-	std::ofstream ofs("TrainSet.csv");
+	/*std::ofstream ofs("TrainSet.csv");
 	// Write out header
 	ofs << "p0x,";
 	ofs << "p0y,";
@@ -181,11 +181,11 @@ void AnimationDatabaseSystem::buildTrainSet()
 				ofs << std::endl;
 		}
 	}
-	ofs.close();
+	ofs.close();*/
 
 	// Write out training data
 	Skeleton* skel = zhAnimationSystem->getSkeletonConstIterator().next();
-	ofs = std::ofstream("TrainSet.svml");
+	std::ofstream ofs = std::ofstream("TrainSet.svml");
 	mTrainSet->extractTargetPositions(skel);
 	for( unsigned int fri = 0; fri < mTrainSet->getNumFrames(); ++fri )
 	{
@@ -217,14 +217,80 @@ void AnimationDatabaseSystem::buildTrainSet()
 	ofs.close();
 }
 
+bool AnimationDatabaseSystem::loadTrainSet()
+{
+	// TODO
+
+	return true;
+}
+
 AnimationFrameSet* AnimationDatabaseSystem::getTrainSet() const
 {
 	return mTrainSet;
 }
 
-void AnimationDatabaseSystem::trainGPLVM()
+AnimationSetPtr AnimationDatabaseSystem::initTrainPoses()
 {
-	// TODO
+	// Get/create animation set for training poses
+	AnimationManager* anim_mgr = zhAnimationSystem->getAnimationManager();
+	AnimationSetPtr as_trainset = AnimationSetPtr::DynamicCast<zh::Resource>(
+		!anim_mgr->hasResource("TrainSet") ?
+		anim_mgr->createResource(0,"TrainSet") : anim_mgr->getResource("TrainSet") );
+	as_trainset->deleteAllAnimations();
+	
+	// Build train set for currently loaded animations
+	AnimationFrameSet* trainset = zhAnimationDatabaseSystem->getTrainSet();
+	for( unsigned int fri = 0; fri < trainset->getNumFrames(); ++fri )
+	{
+		const AnimationFrame& fr = trainset->getFrame(fri);
+		zh::Animation* anim = as_trainset->createAnimation(1000+fri, "RFrame"+toString<unsigned int>(fri));
+		zh::Skeleton* skel = zhAnimationSystem->getOutputSkeleton();
+		if( skel == NULL )
+			continue;
+
+		for( unsigned int tri = 0; tri < skel->getNumBones(); ++tri )
+		{
+			zh::BoneAnimationTrack* btr = anim->createBoneTrack(tri);
+			zh::TransformKeyFrame* tkf = static_cast<zh::TransformKeyFrame*>( btr->createKeyFrame(0) );
+			if( tri == 0 )
+			{
+				tkf->setTranslation(fr.rootPosition);
+				tkf->setRotation( fr.rootOrientation.exp() );
+			}
+			else
+				tkf->setRotation( fr.orientations[tri-1].exp() );
+			zh::TransformKeyFrame* tkf1 = static_cast<zh::TransformKeyFrame*>( btr->createKeyFrame(1) );
+			tkf1->setTranslation( tkf->getTranslation() );
+			tkf1->setRotation( tkf->getRotation() );
+		}
+
+		// Add animation node to tree
+		AnimationTree* anim_tree = zhAnimationSystem->getAnimationTree();
+		std::string node_name = anim->getFullName();
+		AnimationSampleNode* node = static_cast<AnimationSampleNode*>(
+			anim_tree->createNode( AnimationSampleNode::ClassId(), anim_tree->getNumNodes(), node_name )
+			);
+		node->setAnimation( anim->getAnimationSet(), anim->getId() );
+		node->createAdaptor(skel);
+		anim_tree->getNode("Root")->addChild(node);
+	}
+
+	return as_trainset;
+}
+
+bool AnimationDatabaseSystem::trainGPLVM( const std::string& modelFile, unsigned int numLatentVars )
+{
+	// Train the model
+	std::string cmd = "gplvm -L true -x " + toString<int>(numLatentVars) + 
+		" TrainSet.svml " + modelFile;
+	if( system( cmd.c_str() ) != 0 )
+	{
+		zhSetErrorCode(ADSE_ModelTrainingFailed);
+		return false;
+	}
+
+	zhSetErrorCode(ADSE_None);
+	return true;
 }
 
 AnimationIndexPtr AnimationDatabaseSystem::buildIndex( unsigned long id, const std::string& name, Skeleton* skel,

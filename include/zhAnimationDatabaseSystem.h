@@ -37,10 +37,11 @@ SOFTWARE.
 namespace zh
 {
 
-enum SearchSystemError
+enum AnimDatabaseSystemError
 {
-	AnimDatabaseSystemError_None,
-	AnimDatabaseSystemError_FileNotFound
+	ADSE_None,
+	ADSE_FileNotFound,
+	ADSE_ModelTrainingFailed
 };
 
 /**
@@ -81,14 +82,14 @@ public:
 	* @param cfgPath Configuration file path.
 	* @return true if initialization has been successful, false otherwise.
 	* Sets error codes:
-	* - AnimDatabaseSystemError_None - no errors
-	* - AnimDatabaseSystemError_FileNotFound - config. file not found or invalid
+	* - ADSE_None - no errors
+	* - ADSE_FileNotFound - config. file not found or invalid
 	*/
 	bool init( const std::string& cfgPath = "config.xml" );
 
 	/**
 	* Select a representative subset of frames from the current motion
-	* database for training priors.
+	* database for training GPLVM priors. Output is written to the file TrainSet.svml
 	*
 	* @remark kd-clustering is used to select a representative frame set from
 	* all the currently loaded animations. Warning: this process takes a LONG time.
@@ -96,15 +97,34 @@ public:
 	void buildTrainSet();
 
 	/**
+	* Load the current train set for GPLVM priors from the file TrainSet.svml
+	*
+	* @return true if the train set was successfully loaded, false otherwise.
+	*/
+	bool loadTrainSet();
+
+	/**
 	* Get a pointer to the current training set of animation frames.
 	*/
 	AnimationFrameSet* getTrainSet() const;
 
 	/**
+	* Create animation clips for each pose in the training set, enabling
+	* them to be applied to character figures and reviewed.
+	*
+	* @return Pointer to the animation set containing the training poses.
+	*/
+	AnimationSetPtr initTrainPoses();
+
+	/**
 	* Train the Gaussian Process models using the representative set of frames from
 	* the current motion database.
+	*
+	* @param modelFile Model file name.
+	* @param numLatentVars Dimensionality of the latent space.
+	* @return true if training has been successfull, false if there has been an error.
 	*/
-	void trainGPLVM();
+	bool trainGPLVM( const std::string& modelFile, unsigned int numLatentVars );
 
 	/**
 	* Gets a pointer to the animation index manager instance.

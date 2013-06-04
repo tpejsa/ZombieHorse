@@ -48,7 +48,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\include;$(BOOST_HOME);$(ANNHOME)\include;..\src\KMlocal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include;$(BOOST_HOME);$(ANNHOME)\include;..\src\KMlocal;..\liblbfgs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;WIN32;zhNonClientBuild;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -60,9 +60,9 @@
       <DisableSpecificWarnings>4251;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>libboost_date_time-vc100-mt-gd-1_46_1.lib;libboost_thread-vc100-mt-gd-1_46_1.lib;ANN.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libboost_date_time-vc100-mt-gd-1_46_1.lib;libboost_thread-vc100-mt-gd-1_46_1.lib;ANN.lib;lbfgs.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>..\bin\debug\zh_d.dll</OutputFile>
-      <AdditionalLibraryDirectories>$(BOOST_HOME)\lib;$(ANNHOME)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(BOOST_HOME)\lib;$(ANNHOME)\lib;..\liblbfgs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Debug\zh_d.pdb</ProgramDatabaseFile>
       <LinkTimeCodeGeneration>
@@ -83,7 +83,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\include;$(BOOST_HOME);$(ANNHOME)\include;..\src\KMlocal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include;$(BOOST_HOME);$(ANNHOME)\include;..\src\KMlocal;..\liblbfgs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;zhNonClientBuild;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -96,7 +96,7 @@
     <Link>
       <AdditionalDependencies>libboost_date_time-vc100-mt-1_46_1.lib;libboost_thread-vc100-mt-1_46_1.lib;ANN.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>..\bin\release\zh.dll</OutputFile>
-      <AdditionalLibraryDirectories>$(BOOST_HOME)\lib;$(ANNHOME)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(BOOST_HOME)\lib;$(ANNHOME)\lib;..\liblbfgs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ProfileGuidedDatabase>
       </ProfileGuidedDatabase>
@@ -105,6 +105,7 @@
       </DataExecutionPrevention>
       <ImportLibrary>..\lib\release\zh.lib</ImportLibrary>
       <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreAllDefaultLibraries>lbfgs.lib</IgnoreAllDefaultLibraries>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -117,6 +118,7 @@
     <ClInclude Include="..\include\zhAnimationDatabaseSystem.h" />
     <ClInclude Include="..\include\zhAnimationFrame.h" />
     <ClInclude Include="..\include\zhEnvironment.h" />
+    <ClInclude Include="..\include\zhGPLVMIKSolver.h" />
     <ClInclude Include="..\include\zhIKSolver.h" />
     <ClInclude Include="..\include\rapidxml.hpp" />
     <ClInclude Include="..\include\rapidxml_print.hpp" />
@@ -213,6 +215,7 @@
     <ClCompile Include="..\src\zhAnimationDatabaseEvents.cpp" />
     <ClCompile Include="..\src\zhAnimationDatabaseSystem.cpp" />
     <ClCompile Include="..\src\zhAnimationFrame.cpp" />
+    <ClCompile Include="..\src\zhGPLVMIKSolver.cpp" />
     <ClCompile Include="..\src\zhIKSolver.cpp" />
     <ClCompile Include="..\src\zhAnimation.cpp" />
     <ClCompile Include="..\src\zhAnimationAnnotation.cpp" />

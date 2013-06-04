@@ -563,46 +563,6 @@ bool AnimationStudioApp::init( wxWindow* wnd )
 	mFrmMain->getOgreWindow()->setRenderSkeleton(skel);
 	mParamSkelEditor->init(skel);
 
-	// TODO: remove this
-	// Build train set for currently loaded animations
-	zhAnimationDatabaseSystem->buildTrainSet();
-	AnimationFrameSet* trainset = zhAnimationDatabaseSystem->getTrainSet();
-	for( unsigned int fri = 0; fri < trainset->getNumFrames(); ++fri )
-	{
-		const AnimationFrame& fr = trainset->getFrame(fri);
-		zh::Animation* anim = zhAnimationSystem->getAnimationSet("144_22")->createAnimation(1000+fri, "RFrame"+toString<unsigned int>(fri));
-		zh::Animation* anim0 = zhAnimationSystem->getAnimationSet("144_22")->getAnimation("144_22");
-
-		for( unsigned int tri = 0; tri < anim0->getNumBoneTracks(); ++tri )
-		{
-			zh::BoneAnimationTrack* btr = anim->createBoneTrack(tri);
-			zh::TransformKeyFrame* tkf = static_cast<zh::TransformKeyFrame*>( btr->createKeyFrame(0) );
-			if( tri == 0 )
-			{
-				tkf->setTranslation(fr.rootPosition);
-				tkf->setRotation( fr.rootOrientation.exp() );
-			}
-			else
-				tkf->setRotation( fr.orientations[tri-1].exp() );
-			zh::TransformKeyFrame* tkf1 = static_cast<zh::TransformKeyFrame*>( btr->createKeyFrame(1) );
-			tkf1->setTranslation( tkf->getTranslation() );
-			tkf1->setRotation( tkf->getRotation() );
-		}
-
-		// Add animation node to tree
-		AnimationTree* anim_tree = zhAnimationSystem->getAnimationTree();
-		std::string node_name = "144_22::" + anim->getName();
-		AnimationSampleNode* node = static_cast<AnimationSampleNode*>(
-			anim_tree->createNode( AnimationSampleNode::ClassId(), anim_tree->getNumNodes(), node_name )
-			);
-		node->setAnimation( anim->getAnimationSet(), anim->getId() );
-		zh::Skeleton* skel = zhAnimationSystem->getSkeleton("144_22");
-		if( skel != NULL )
-			node->createAdaptor(skel);
-		anim_tree->getNode("Root")->addChild(node);
-	}
-	//
-
 	// Update window contents
 	mFrmMain->refresh();
 

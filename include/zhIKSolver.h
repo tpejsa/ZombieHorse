@@ -35,6 +35,8 @@ SOFTWARE.
 #define zhPostureIKSolver_ClassName "PostureIKSolver"
 #define zhLimbIKSolver_ClassId 3
 #define zhLimbIKSolver_ClassName "LimbIKSolver"
+#define zhGPLVMIKSolver_ClassId 4
+#define zhGPLVMIKSolver_ClassName "GPLVMIKSolver"
 
 #define zhDeclare_IKSolver( IKS, classId, className ) \
 	zhDeclare_Class( IKSolver, IKS, classId, className, unsigned short )

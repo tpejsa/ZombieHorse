@@ -57,6 +57,7 @@ SOFTWARE.
 #include "zhRootIKSolver.h"
 #include "zhPostureIKSolver.h"
 #include "zhLimbIKSolver.h"
+#include "zhGPLVMIKSolver.h"
 #include "zhAnimationDistanceGrid.h"
 #include "zhMatchGraph.h"
 #include "zhMatchWeb.h"
