@@ -2,7 +2,12 @@
 ZombieHorse Animation System
 ****************************
 
-ZombieHorse is an animation system and testbed written in C++.
+ZombieHorse is a data-driven animation system and testbed written in C++. ZombieHorse implements features such as:
+- Loading and editing motion capture data (BVH format currently supported)
+- Motion playback and blending
+- Automatic discovery and parametrization of blendable motion clips in a motion dataset
+- Automatic discovery of smooth transitions between motion clips
+- ... all that and more!
 
 OBTAINING AND COMPILING THE SYSTEM
 
